@@ -19,38 +19,44 @@
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-22)
 #     original creation
+#     update to fix auto download (2021-07-25)
 
 acquire_neon_data <- function(site_name,start_date,end_date,file_name) {
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
-                                               package="expanded")
+                                               package="expanded",
+                                               check.size = F)
 
 
   site_temp <- neonUtilities::loadByProduct(dpID="DP1.00041.001",
                                             site=site_name,
                                             startdate=start_date,
                                             enddate=end_date,
-                                            package="expanded")
+                                            package="expanded",
+                                            check.size = F)
 
 
   site_swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001",
                                            site=site_name,
                                            startdate=start_date,
                                            enddate=end_date,
-                                           package="expanded")
+                                           package="expanded",
+                                           check.size = F)
 
   site_press <- neonUtilities::loadByProduct(dpID="DP1.00004.001",
                                              site=site_name,
                                              startdate=start_date,
                                              enddate=end_date,
-                                             package="expanded")
+                                             package="expanded",
+                                             check.size = F)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
-                                             site=site_name,
-                                             startdate=start_date,
-                                             enddate=end_date,
-                                             package="expanded")
+                                           site=site_name,
+                                           startdate=start_date,
+                                           enddate=end_date,
+                                           package="expanded",
+                                           check.size = F)
 
   # Save the files
   save(site_co2,site_press,site_swc,site_temp,site_megapit,

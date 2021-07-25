@@ -148,11 +148,14 @@ compute_neon_flux <- function(input_file_name) {
     unnest(cols=c(data))
 
   #7) Compute the fluxes
-  out_dates <- tibble(startDateTime = seq(site_final_interp$startDateTime[1],tail(site_final_interp$startDateTime,n=1),by="30 min"))
+  out_dates <- tibble(startDateTime = seq(min(site_final_interp$startDateTime),max(site_final_interp$startDateTime),by="30 min"))
 
   # Fill in where there is no flux measurement
   out_fluxes <- neon_site_flux(site_final_interp,site_co2_positions) %>%
-    right_join(out_dates,by="startDateTime")
+    group_by(horizontalPosition) %>%
+    nest() %>% # Need to nest the data so that we have the horizontal positions correct
+    mutate(data = map(.x=data,.f=~right_join(.x,out_dates,by="startDateTime") %>% arrange(startDateTime))) %>%  # Join the dates to each horizontal position, arrange by date
+    unnest(cols=c(data))
 
 
 
