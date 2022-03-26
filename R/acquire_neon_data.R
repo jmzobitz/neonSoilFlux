@@ -21,7 +21,7 @@
 #     original creation
 #     update to fix auto download (2021-07-25)
 
-acquire_neon_data <- function(site_name,start_date,end_date,file_name) {
+acquire_neon_data <- function(site_name,start_date,end_date,file_name,env_file_name = NULL) {
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
@@ -58,9 +58,28 @@ acquire_neon_data <- function(site_name,start_date,end_date,file_name) {
                                            package="expanded",
                                            check.size = F)
 
-  # Save the files
+  # Save the files (we need all of these for the flux calculations)
   save(site_co2,site_press,site_swc,site_temp,site_megapit,
        file=file_name)
+
+  # Save the env measurements
+  if(!is.null(env_file_name)) {
+
+    co2 <- site_co2$SCO2C_30_minute %>%
+      select(horizontalPosition,verticalPosition,startDateTime,soilCO2concentrationMean)
+
+    temperature <- site_temp$ST_30_minute %>%
+      select(horizontalPosition,verticalPosition,startDateTime,soilTempMean)
+
+    swc <- site_swc$SWS_30_minute %>%
+      select(horizontalPosition,verticalPosition,startDateTime,VSWCMean)
+
+    env_measurements <- temperature %>%
+      inner_join(swc,by=c("horizontalPosition","verticalPosition","startDateTime")) %>%
+      inner_join(co2,by=c("horizontalPosition","verticalPosition","startDateTime"))
+
+    save(env_measurements,file=env_file_name)
+  }
 
 
 

@@ -4,7 +4,13 @@
 \alias{acquire_neon_data}
 \title{Acquire NEON data for processing}
 \usage{
-acquire_neon_data(site_name, start_date, end_date, file_name)
+acquire_neon_data(
+  site_name,
+  start_date,
+  end_date,
+  file_name,
+  env_file_name = NULL
+)
 }
 \arguments{
 \item{site_name}{Required. NEON code for a particular site (a string)}
