@@ -4,3 +4,4 @@
 .Ruserdata
 ^data-neon$
 ^process-files$
+^flux-results$

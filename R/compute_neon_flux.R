@@ -67,7 +67,7 @@ compute_neon_flux <- function(input_file_name) {
   ################
   # 3) Merges air pressure data into this data frame
   # Next we need to join the pressure data - this is just one measurement by time
-  pressure <- site_press$BP_30min %>%
+  pressure <- site_press$BP_30min %>%   # This is where we get the different time periods
     select(startDateTime,staPresMean,staPresFinalQF) %>%
     mutate(measurement = "pressure") %>%
     rename(value = staPresMean,
@@ -83,7 +83,7 @@ compute_neon_flux <- function(input_file_name) {
     group_by(startDateTime,zOffset,horizontalPosition) %>%
     nest() %>%
     inner_join(pressure,by=c("startDateTime")) %>%
-    mutate(data = map2(.x=data.x,.y=data.y,~(rbind(.x,.y))))
+    mutate(data = map2(.x=data.x,.y=data.y,~(bind_rows(.x,.y))))
 
   # Remove the data
   site_interp_press <- site_press_nest %>%
@@ -100,14 +100,14 @@ compute_neon_flux <- function(input_file_name) {
 
   # Make sure we have the final QF and all 4 measurements at that time point
   site_finalQF_interp <- site_date_nest %>%
-    mutate(finalQF = map(.x=data,.f=~(sum(is.na(.x$value)))),
-           finalMeasurement = map(.x=data,.f=~(n_distinct(.x$measurement)) ),
-           finalQF = as.numeric(finalQF),
-           finalMeasurement = as.numeric(finalMeasurement)) %>%
-    filter(finalQF == 0, finalMeasurement == 4) %>%
-    unnest(cols=c(data)) %>%
-    ungroup() %>%
-    select(-finalQF,-finalMeasurement)
+    # mutate(finalQF = map(.x=data,.f=~(sum(is.na(.x$value)))),
+    #        finalMeasurement = map(.x=data,.f=~(n_distinct(.x$measurement)) ),
+    #        finalQF = as.numeric(finalQF),
+    #        finalMeasurement = as.numeric(finalMeasurement)) %>%
+    # filter(finalQF == 0, finalMeasurement == 4) %>%
+     unnest(cols=c(data)) %>%
+     ungroup() #%>%
+    # select(-finalQF,-finalMeasurement)
 
   ################
 
