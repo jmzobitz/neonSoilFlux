@@ -61,105 +61,95 @@ compute_neon_flux <- function(input_file_name) {
 
   ################
   # 2) Interpolates across the measurements
-  # Interpolate all the measurements together in one nested function
-  site_interp <- depth_interpolate(site)
 
-  ################
-  # 3) Merges air pressure data into this data frame
-  # Next we need to join the pressure data - this is just one measurement by time
-  pressure <- site_press$BP_30min %>%   # This is where we get the different time periods
-    select(startDateTime,staPresMean,staPresFinalQF) %>%
-    mutate(measurement = "pressure") %>%
-    rename(value = staPresMean,
-           finalQF = staPresFinalQF) %>%
-    filter(finalQF == 0) %>%
-    select(-finalQF) %>%
-    group_by(startDateTime) %>%
-    nest()
+  # Filters out measurements that don't have enough QF flags
+  site_filtered <- measurement_detect(site)
 
-  # Then we will want to join the times where the pressure is - for ease of use it will be at all the depths
+  if(nrow(site_filtered) > 0) {
 
-  site_press_nest <- site_interp %>%
-    group_by(startDateTime,zOffset,horizontalPosition) %>%
-    nest() %>%
-    inner_join(pressure,by=c("startDateTime")) %>%
-    mutate(data = map2(.x=data.x,.y=data.y,~(bind_rows(.x,.y))))
+    # Interpolate all the measurements together in one nested function
+    site_interp <- depth_interpolate(site_filtered)
 
-  # Remove the data
-  site_interp_press <- site_press_nest %>%
-    select(-data.x,-data.y)
-  ################
+    ################
+    # 3) Merges air pressure data into this data frame
+    # Next we need to join the pressure data - this is just one measurement by time
+    pressure <- site_press$BP_30min %>%   # This is where we get the different time periods
+      select(startDateTime,staPresMean,staPresFinalQF) %>%
+      mutate(measurement = "pressure") %>%
+      rename(value = staPresMean,
+             finalQF = staPresFinalQF) %>%
+      filter(finalQF == 0) %>%
+      select(-finalQF) %>%
+      group_by(startDateTime) %>%
+      nest()
 
-  ################
-  # 4) Does a final QF check so we should have only timeperiods where all measurements exist
-  # Unnest and nest by date only pull out timeperiods where we have
-  site_date_nest <- site_interp_press %>%
-    unnest(cols=c(data)) %>%
-    group_by(horizontalPosition,startDateTime) %>%
-    nest()
+    # Then we will want to join the times where the pressure is - for ease of use it will be at all the depths using some of the joining and pivoting skills here.
 
-  # Make sure we have the final QF and all 4 measurements at that time point
-  site_finalQF_interp <- site_date_nest %>%
-    # mutate(finalQF = map(.x=data,.f=~(sum(is.na(.x$value)))),
-    #        finalMeasurement = map(.x=data,.f=~(n_distinct(.x$measurement)) ),
-    #        finalQF = as.numeric(finalQF),
-    #        finalMeasurement = as.numeric(finalMeasurement)) %>%
-    # filter(finalQF == 0, finalMeasurement == 4) %>%
-     unnest(cols=c(data)) %>%
-     ungroup() #%>%
-    # select(-finalQF,-finalMeasurement)
-
-  ################
-
-  ################
-  # 5) Adds in the megapit data so we have bulk density, porosity measurements at the interpolated depth.
-  # Now we group by depth to pull in the megapit data:
-  site_depth_nest <- site_finalQF_interp %>%
-    group_by(zOffset) %>%
-    nest()
+    site_depth_nest <- site_interp %>% pivot_wider(names_from = "measurement",values_from = "value") %>%
+      inner_join(pressure,b=c("startDateTime")) %>%
+      unnest(cols=c("data")) %>%
+      select(-measurement) %>%
+      rename(pressure=value) %>%
+      pivot_longer(cols=c("pressure","co2","temperature","soil_water"),
+                   names_to = "measurement", values_to = "value") %>%
+      group_by(zOffset) %>%
+      nest()
 
 
-  # Pull in the megapit data
 
-  # Merge the soil properties into a single data frame
-  biogeo_sample <- site_megapit$mgp_perbiogeosample %>%
-    inner_join(site_megapit$mgp_perbulksample , by=c("horizonID", "pitID", "domainID", "siteID", "pitNamedLocation", "horizonName",  "laboratoryName", "labProjID", "setDate", "collectDate")) %>%
-    select(c("horizonID", "pitID",
-             "coarseFrag2To5","coarseFrag5To20","biogeoTopDepth", "bulkDensExclCoarseFrag","biogeoBottomDepth",
-             "biogeoCenterDepth")) %>%
-    mutate(across(.cols=matches("biogeo"),~-.x/100)) %>%
-    drop_na()
+    ################
 
-  # Now we should go across the nested depths and have the horizon
-  # Kicking it old school with the double loop
-  for(i in seq_along(site_depth_nest$zOffset)) {
-    for(j in 1:dim(biogeo_sample)[1]) {
-      if(between(site_depth_nest$zOffset[i],biogeo_sample$biogeoBottomDepth[j],biogeo_sample$biogeoTopDepth[j])) {
-        site_depth_nest$data[[i]] <- site_depth_nest$data[[i]] %>% mutate(biogeo_sample[j,])
+    ################
+    # 5) Adds in the megapit data so we have bulk density, porosity measurements at the interpolated depth.
+
+    # Pull in the megapit data
+
+    # Merge the soil properties into a single data frame
+    biogeo_sample <- site_megapit$mgp_perbiogeosample %>%
+      inner_join(site_megapit$mgp_perbulksample , by=c("horizonID", "pitID", "domainID", "siteID", "pitNamedLocation", "horizonName",  "laboratoryName", "labProjID", "setDate", "collectDate")) %>%
+      select(c("horizonID", "pitID",
+               "coarseFrag2To5","coarseFrag5To20","biogeoTopDepth", "bulkDensExclCoarseFrag","biogeoBottomDepth",
+               "biogeoCenterDepth")) %>%
+      mutate(across(.cols=matches("biogeo"),~-.x/100)) %>%
+      drop_na()
+
+    # Now we should go across the nested depths and have the horizon
+    # Kicking it old school with the double loop (the indices are small, so that is ok.)
+    for(i in seq_along(site_depth_nest$zOffset)) {
+      for(j in 1:dim(biogeo_sample)[1]) {
+        if(between(site_depth_nest$zOffset[i],biogeo_sample$biogeoBottomDepth[j],biogeo_sample$biogeoTopDepth[j])) {
+          site_depth_nest$data[[i]] <- site_depth_nest$data[[i]] %>% mutate(biogeo_sample[j,])
+        }
       }
     }
+
+    ################
+
+    ################
+    # 6) Saves the data
+    site_final_interp <- site_depth_nest %>%
+      unnest(cols=c(data))
+
+    #7) Compute the fluxes
+    out_dates <- tibble(startDateTime = seq(min(site_final_interp$startDateTime),max(site_final_interp$startDateTime),by="30 min"))
+
+    # Fill in where there is no flux measurement
+    out_fluxes <- neon_site_flux(site_final_interp,site_co2_positions) %>%
+      group_by(horizontalPosition) %>%
+      nest() %>% # Need to nest the data so that we have the horizontal positions correct
+      mutate(data = map(.x=data,.f=~right_join(.x,out_dates,by="startDateTime") %>% arrange(startDateTime))) %>%  # Join the dates to each horizontal position, arrange by date
+      unnest(cols=c(data))
+
+
+
+    return(out_fluxes)
+
+  } else {
+
+    out_fluxes <- NA
+    return(NA)
   }
 
-  ################
-
-  ################
-  # 6) Saves the data
-  site_final_interp <- site_depth_nest %>%
-    unnest(cols=c(data))
-
-  #7) Compute the fluxes
-  out_dates <- tibble(startDateTime = seq(min(site_final_interp$startDateTime),max(site_final_interp$startDateTime),by="30 min"))
-
-  # Fill in where there is no flux measurement
-  out_fluxes <- neon_site_flux(site_final_interp,site_co2_positions) %>%
-    group_by(horizontalPosition) %>%
-    nest() %>% # Need to nest the data so that we have the horizontal positions correct
-    mutate(data = map(.x=data,.f=~right_join(.x,out_dates,by="startDateTime") %>% arrange(startDateTime))) %>%  # Join the dates to each horizontal position, arrange by date
-    unnest(cols=c(data))
-
-
-
-  return(out_fluxes)
 
   ################
 

@@ -20,6 +20,7 @@
 #   John Zobitz (2021-07-22)
 #     original creation
 #     update to fix auto download (2021-07-25)
+#     2022-06-10: update to correct flags on swc
 
 acquire_neon_data <- function(site_name,start_date,end_date,file_name,env_file_name = NULL) {
 
@@ -43,6 +44,8 @@ acquire_neon_data <- function(site_name,start_date,end_date,file_name,env_file_n
                                            enddate=end_date,
                                            package="expanded",
                                            check.size = F)
+  # Then correct the swc
+  site_swc <- swc_correct(site_swc,site_name)
 
   site_press <- neonUtilities::loadByProduct(dpID="DP1.00004.001",
                                              site=site_name,

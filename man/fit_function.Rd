@@ -4,18 +4,21 @@
 \alias{fit_function}
 \title{Interpolate a soil measurement to different depths}
 \usage{
-fit_function(input_data, indep_name, dep_name, interp_values)
+fit_function(input_data, co2_values)
 }
 \arguments{
-\item{input_data}{Required. Vector of NEON data and measurements from the soil}
+\item{input_data}{Required. Vector of NEON data and measurements from the soil (soil temperature and soil water)}
 
-\item{col_name}{Required. Names of column we are interpolating. Currently only does one column at a time.}
+\item{interp_values}{Depths of the soil co2 sensors}
 }
 \value{
-A data frame of the depth and the measured column
+A data frame of the depth and the measured column for the measurements
 }
 \description{
 Definition function. Linearly interpolate a measurement across the different measurement depths
+}
+\examples{
+TBD
 }
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
