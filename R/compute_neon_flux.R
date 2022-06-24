@@ -50,39 +50,6 @@ compute_neon_flux <- function(input_file_name) {
     mutate(measurement = "co2") %>%
     rename(value = soilCO2concentrationMean)
 
-  #adding co2 gradient
-  positions <- co2 %>% select(horizontalPosition, verticalPosition) %>% distinct() #grabbing unique plot/sensor combinations
-  valid_co2 <- list()
-
-  for(k in 1:length(unique(positions$horizontalPosition))){
-    #grabbing individual plots to loop over
-    plot_co2 <- dplyr::filter(co2, horizontalPosition == unique(positions$horizontalPosition[k])) #filtering by plot
-    for(j in 1:length(unique(plot_co2$startDateTime))){
-      date_values <- dplyr::filter(plot_co2, startDateTime == unique(plot_co2$startDateTime[j])) #filtering for unique startDateTime
-      date_values <- date_values[order(date_values$value),] #sorting co2 cont in ascending order
-      if(date_values$verticalPosition[1] < date_values$verticalPosition[3] & date_values$verticalPosition[2] < date_values$verticalPosition[3]){
-        date_values = date_values #if sensors are in the correct order no changes needed
-      }else{
-        #can calculate efflux with 2 valid sensor measurements, so checking to see if any sensors are valid and returning NA if not
-        #a valid sensor measurement is considered to be any sensors that follow the expected soil gradient with largest co2 cont at the deepest sensor and the smallest co2 cont at the shallowest sensor
-        date_values$value <- c(NA,NA,NA)
-      }
-      #merge changes back into single plot df
-      for(w in 1:dim(date_values)[1]){
-        plot_co2$value[plot_co2$startDateTime == date_values$startDateTime[w] & plot_co2$verticalPosition == date_values$verticalPosition[w]] <- date_values$value[w]
-      }
-    }
-    #add individual plot df to list for combination with co2 df
-    valid_co2[[k]] <- plot_co2
-
-  }
-  #merge all plots back into one df
-  valid_co2 <- dplyr::bind_rows(valid_co2)
-  #merge corrected co2 values back into main df
-  co2 <- co2 %>% left_join(valid_co2, by = c("domainID", "siteID", "horizontalPosition", "verticalPosition", "startDateTime", "endDateTime", "finalQF", "zOffset", "measurement"))
-  co2$value.x <- NULL
-  colnames(co2[10]) <- c("value")
-  write.csv(co2, "~/HF REU 2022/validation/co2conc.csv")
 
   # Bind these all up together
   site <- rbind(soil_water,temperature,co2)
@@ -116,14 +83,14 @@ compute_neon_flux <- function(input_file_name) {
              finalQF = staPresFinalQF) %>%
       filter(finalQF == 0) %>%
       select(-finalQF) %>%
-      group_by(startDateTime) %>%
-      nest()
+      group_by(startDateTime)# %>%
+#      nest()
 
     # Then we will want to join the times where the pressure is - for ease of use it will be at all the depths using some of the joining and pivoting skills here.
 
     site_depth_nest <- site_interp %>% pivot_wider(names_from = "measurement",values_from = "value") %>%
       inner_join(pressure,b=c("startDateTime")) %>%
-      unnest(cols=c("data")) %>%
+      #unnest(cols=c("data")) %>%
       select(-measurement) %>%
       rename(pressure=value) %>%
       pivot_longer(cols=c("pressure","co2","temperature","soil_water"),
