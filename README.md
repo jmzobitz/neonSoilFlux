@@ -1,5 +1,7 @@
 # NEONSoils
-NEONSoils is a repository hosting packages and code to analyze and process soil respiration fluxes at NEON sites.
+NEONSoils is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method.
+
+An online applet for visualization at select NEON sites is found [here](https://jmzobitz.shinyapps.io/NEON-soil-fluxes/)
 
 ## Installation 
 Installation in R is done through the devtools package:
@@ -21,7 +23,14 @@ To analyze fluxes once the package is installed requires a two step process:
 If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
 
 ## Credits & Acknowledgements
-This is a project solely funded by the National Science Foundation. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
+This is a project solely funded by the National Science Foundation, NSF# 2017829. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
+
+### Code Contributions / Changelog:
+- (pre-2021): Initial code developed by Edward Ayres \email{eayres@battelleecology.org}
+- 2021: Initial package development and testing by Zobitz and undergraduate researchers Lajntxiag Lee and Kathleen O'Rourke (both Augsburg University)
+- 2022: Ongoing refinement and testing by undergraduate researchers at the following institutions:
+  * Ridwan Abdi, Kebba Janeh, Nevin Lor, Diana Ortiz Alvarracin, Dijone Mehmeti, Ali Musa, Barbara Sabino Pina, Ly Xiong, Xeng Yang (Augsburg University)
+  * Courtney Leung (Northwestern University
 
 ## License
 GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
