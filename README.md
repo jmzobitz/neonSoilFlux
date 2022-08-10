@@ -1,5 +1,7 @@
 # NEONSoils
-NEONSoils is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method.
+NEONSoils is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method. 
+
+**This is an early prototype package and should not be used for research purposes until scientifically validated.**
 
 An online applet for visualization at select NEON sites is found [here](https://jmzobitz.shinyapps.io/NEON-soil-fluxes/)
 
