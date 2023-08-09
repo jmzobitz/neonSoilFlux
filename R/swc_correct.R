@@ -23,6 +23,7 @@
 #' The second issue is that most of the soil moisture data were calculated using the manufacturers default calibration, rather than a soil-specific calibration, which causes the final quality flag to be raised. The fix to this issue is more complex depending on the option that you prefer. This issue is mentioned in the middle of the Abstract section of the webpage, which also includes a potential solution:
 #'
 #' The final quality flag for soil water content data is raised (i.e., VSWCFinalQF = 1) if it was calculated using the sensor manufacturer’s default calibration rather than a soil-specific calibration. However, for many use cases the default calibration is sufficient. To identify data that were solely flagged because they were generated using the default calibration, download the “Expanded” data package and identify rows where VSWCFinalQF = 1, VSWCAlphaQM < 10, VSWCBetaQM < 20, (VSWCFinalQFSciRvw = 0 or NA), and tempFailQM = 0.
+#' (Added 07-17-2023) Prior to RELEASE-2023, the final quality flag for soil water content data was raised (i.e., VSWCFinalQF = 1) when soil water content was calculated using the sensor manufacturer’s default calibration (calDefaultQM > 0) rather than a soil-specific calibration (calNEONQM > 0) . However, for many use cases the default calibration is sufficient. To identify data that were solely flagged because they were generated using the default calibration, download the “Expanded” data download package and identify rows where VSWCFinalQF = 1, VSWCAlphaQM < 10, VSWCBetaQM < 20, (VSWCFinalQFSciRvw = 0 or NA), and tempFailQM = 0. As of RELEASE-2023 (issued in January 2023), the final quality flag is no longer raised when the manufacturer's default calibration is used. The quality metrics indicating which calibration was used (calDefaultQM and calNEONQM) continue to be published in the expanded download package as informational metrics. (from the data documentation page for this product) - in this case we commented out the correction.
 
 #' @import tidyr
 
@@ -50,25 +51,26 @@ swc_correct <- function(input_swc,curr_site) {
       relocate(zOffset,.after="yOffset")
 
   # Next update the swc flags for both 30 and 1 minutes:
+    # As of 07-17-2023 this is commented out - see the informational notes
 
-
-    input_swc$SWS_30_minute <- input_swc$SWS_30_minute %>%
-      rowwise() %>%
-      mutate(VSWCFinalQF = if_else(
-        VSWCFinalQF == 1 &
-          VSWCAlphaQM < 10 &
-          VSWCBetaQM < 20 &
-          tempFailQM == 0,0,VSWCFinalQF
-      ) )
-
-    input_swc$SWS_1_minute <- input_swc$SWS_1_minute %>%
-      rowwise() %>%
-      mutate(newQF = if_else(
-        VSWCFinalQF == 1 &
-          VSWCAlphaQM < 10 &
-          VSWCBetaQM < 20 &
-          tempFailQM == 0,0,VSWCFinalQF
-      ) )
+#
+#     input_swc$SWS_30_minute <- input_swc$SWS_30_minute %>%
+#       rowwise() %>%
+#       mutate(VSWCFinalQF = if_else(
+#         VSWCFinalQF == 1 &
+#           VSWCAlphaQM < 10 &
+#           VSWCBetaQM < 20 &
+#           tempFailQM == 0,0,VSWCFinalQF
+#       ) )
+#
+#     input_swc$SWS_1_minute <- input_swc$SWS_1_minute %>%
+#       rowwise() %>%
+#       mutate(newQF = if_else(
+#         VSWCFinalQF == 1 &
+#           VSWCAlphaQM < 10 &
+#           VSWCBetaQM < 20 &
+#           tempFailQM == 0,0,VSWCFinalQF
+#       ) )
 
     return(input_swc)
 

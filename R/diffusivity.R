@@ -9,10 +9,12 @@
 
 #' @param temperature Required. Soil temperature (degrees C)
 #' @param soil_water Required. Soil water content
-#' @param pressure Required. Barometric air pressure ?
-#' @param coarseFrag2To5 Required. Coarse fragmentation of rocks
-#' @param coarseFrag5To20 Required. More coarse fragmentation of rocks
-#' @param bulkDensExclCoarseFrag Required. Bulk density of horizon excluding the coarse fragmented
+#' @param pressure Required. Barometric air pressure (kilopascal)
+#' @param temperature_err Required. Reported Soil temperature error (degrees C)
+#' @param soil_water_err Required. Reported Soil water content error
+#' @param pressure_err Required. Reported Barometric air pressure error (kilopascal)
+#' @param zOffset Required. Measurement level in cm.
+#' @param porVol2To20 Required. Porosity of the 0-20 mm fraction (cm3 cm-3). Assumes no pores within rocks.
 #'
 #' @return A value of the computed diffusivity
 
@@ -32,7 +34,7 @@
 #   John Zobitz (2021-07-21)
 #     original creation
 
-diffusivity <- function(temperature,soil_water,pressure,coarseFrag2To5,coarseFrag5To20,bulkDensExclCoarseFrag) {
+diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_water_err,pressure_err,zOffset,porVol2To20) {
 
   # Assign values to constants
   R <- 0.008314472 # Ideal gas constant = 0.008314472 m3 kPa °K-1 mol-1
@@ -51,13 +53,13 @@ diffusivity <- function(temperature,soil_water,pressure,coarseFrag2To5,coarseFra
   ###############################
 
   # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density.
-  rockVol <- ((coarseFrag2To5 + coarseFrag5To20) / 1000) / 2.65
+  #rockVol <- ((coarseFrag2To5 + coarseFrag5To20) / 1000) / 2.65
 
   # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3.
-  porosSub2mm <- 1 - bulkDensExclCoarseFrag/2.65
+  #porosSub2mm <- 1 - bulkDensExclCoarseFrag/2.65
 
   # Calculate porosity of the 0-20 mm fraction (cm3 cm-3). Assume no pores within rocks.
-  porVol2To20 <- porosSub2mm * (1 - rockVol)
+  #porVol2To20 <- porosSub2mm * (1 - rockVol)
 
 
 
@@ -67,13 +69,29 @@ diffusivity <- function(temperature,soil_water,pressure,coarseFrag2To5,coarseFra
     # Calculate gas tortuosity factor based on Millington and Quirk 1961
     tort <- (porVol2To20AirFilled^(10/3)) / (porVol2To20^2)
 
+
     # Calculate CO2 diffusivity in free air (m2 s-1).
     diffuFreeAir <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (pressure / 101.3)
 
     # Calculate CO2 diffusivity (m2 s-1).
     diffusivity <- tort * diffuFreeAir
 
-    return(diffusivity)
+    # Compute the partial derivative of the measurements
+    temp_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^.75 * (pressure / 101.3)*1.75 *tort
+
+    soil_water_pd <- 10/3*(porVol2To20AirFilled^(7/3)) / (porVol2To20^2) * diffuFreeAir
+
+    pressure_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (1 / 101.3) *tort
+
+
+
+    measurement_pd <- c(temp_pd,soil_water_pd,pressure_pd)
+    errs <- c(temperature_err,soil_water_err,pressure_err)
+
+    calc_err <- quadrature_error(measurement_pd,errs)
+
+    out_tibble <- tibble(zOffset,diffusivity = diffusivity,diffusExpUncert = calc_err)
+    return(out_tibble)
 
 
 

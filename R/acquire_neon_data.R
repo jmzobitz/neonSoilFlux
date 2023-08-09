@@ -8,7 +8,10 @@
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param start_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string)
 #' @param end_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)
-#' @param file_name Required. Path of location for the save file. Must end in .Rda (a string)
+#' @param data_file_name Required. Path of location for the file of environmental measurements (includes megapit data and nested data). Must end in .Rda (a string)
+#' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
+#' @param column_selectors Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
+
 #'
 #' @example acquire_neon_data("SJER","2020-05","2020-08","my-file.Rda")
 #'
@@ -22,7 +25,13 @@
 #     update to fix auto download (2021-07-25)
 #     2022-06-10: update to correct flags on swc
 
-acquire_neon_data <- function(site_name,start_date,end_date,file_name,env_file_name = NULL) {
+acquire_neon_data <- function(site_name,
+                              start_date,
+                              end_date,
+                              data_file_name,
+                              time_frequency = "30_minute",
+                              column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
+                              ) {
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
@@ -61,29 +70,72 @@ acquire_neon_data <- function(site_name,start_date,end_date,file_name,env_file_n
                                            package="expanded",
                                            check.size = F)
 
-  # Save the files (we need all of these for the flux calculations)
-  save(site_co2,site_press,site_swc,site_temp,site_megapit,
-       file=file_name)
 
-  # Save the env measurements
-  if(!is.null(env_file_name)) {
 
-    co2 <- site_co2$SCO2C_30_minute %>%
-      select(horizontalPosition,verticalPosition,startDateTime,soilCO2concentrationMean)
+  # Process each site measurement
+    co2 <- site_co2 |>
+      pluck(paste0("SCO2C_",time_frequency)) |>
+      select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("soilCO2concentration",column_selectors)),finalQF) |>
+      rename(soilCO2concentrationFinalQF = finalQF)
 
-    temperature <- site_temp$ST_30_minute %>%
-      select(horizontalPosition,verticalPosition,startDateTime,soilTempMean)
 
-    swc <- site_swc$SWS_30_minute %>%
-      select(horizontalPosition,verticalPosition,startDateTime,VSWCMean)
+    # Determine a data frame of the different horizontal and vertical positions
+    co2_positions <- site_co2 |>
+      pluck(paste0("sensor_positions_","00095")) %>%
+      separate(HOR.VER,into=c("HOR","VER")) %>%
+      select(siteID,HOR,VER,zOffset)
 
-    env_measurements <- temperature %>%
-      inner_join(swc,by=c("horizontalPosition","verticalPosition","startDateTime")) %>%
-      inner_join(co2,by=c("horizontalPosition","verticalPosition","startDateTime"))
 
-    save(env_measurements,file=env_file_name)
-  }
+    temperature <- site_temp %>%
+      pluck(paste0("ST_",time_frequency)) |>
+      select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("soilTemp",column_selectors)),finalQF)  |>
+      rename(soilTempFinalQF = finalQF)
 
+
+
+
+    # Determine a data frame of the different horizontal and vertical positions
+    temperature_positions <- site_temp |>
+      pluck(paste0("sensor_positions_","00041")) %>%
+      separate(HOR.VER,into=c("HOR","VER")) %>%
+      select(siteID,HOR,VER,zOffset)
+
+
+    swc <- site_swc %>%
+      pluck(paste0("SWS_",time_frequency)) |>
+      select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("VSWC",column_selectors)),VSWCFinalQF)
+
+
+    # Determine a data frame of the different horizontal and vertical positions
+
+    swc_positions <- site_swc |>
+      pluck(paste0("sensor_positions_","00094")) %>%
+      separate(HOR.VER,into=c("HOR","VER")) %>%
+      select(siteID,HOR,VER,zOffset)
+
+    time_frequency_bp <- if_else(time_frequency == "30_minute","30min","1min")
+
+    pressure <- site_press |>
+      pluck(paste0("BP_",time_frequency_bp)) |>
+      select(domainID,siteID,startDateTime,matches(str_c("staPres",column_selectors)),staPresFinalQF)
+
+    pressure_positions <- site_press |>
+      pluck(paste0("sensor_positions_","00004")) %>%
+      separate(HOR.VER,into=c("HOR","VER")) %>%
+      select(siteID,HOR,VER,zOffset)
+
+
+
+
+    # Put everything in a nested data frame
+    site_data <- tibble(
+      data = list(co2,swc,temperature,pressure),
+      positions=list(co2_positions,swc_positions,temperature_positions,pressure_positions),
+      measurement=c("soilCO2concentration","VSWC","soilTemp","staPres")) |>
+      mutate(data = map(.x=data,.f=~(.x |> mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
+
+
+    save(site_data,site_megapit,file=data_file_name)
 
 
 }

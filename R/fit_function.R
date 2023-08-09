@@ -8,10 +8,13 @@
 #' Definition function. Linearly interpolate a measurement across the different measurement depths
 
 
-#' @param input_data Required. Vector of NEON data and measurements from the soil (soil temperature and soil water)
-#' @param interp_values Depths of the soil co2 sensors
+#' @param input_depth Required. Vector of measurement depths.
+#' @param input_value Required. Vector of measured values (i.e. soil temperature and soil water) measured at depths input_depth
+#' @param input_value_err Required. Vector or reported measurement errors. Used to compute prediction error (via quadrature) when linear interpolation is used.
+#' @param interp_values Depths of the sensors required for interpolation
+#' @param measurement_special Flag if we want to just do linear interpolation for a given measurement
 
-#' @return A data frame of the depth and the measured column for the measurements
+#' @return A data frame of the depth and the measured column for the measurements and reported error
 
 #' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
@@ -29,64 +32,99 @@
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-15)
 #     original creation
-#   2022-06-11: revision to include spline fits of temperature and water,
-# better functionality
+#   2022-06-11: revision to include spline fits of temperature and water, better functionality
+#   2023-07-23: revision to includes prediction error for linear interpolation - for splines (n measurements > 3) this is done by estimating the prediction error by quadrature using formulas for simple linear regression.  Also included is the addition of measurement_special, a flag to just do linear interpolation and any other positivity measures.
 ##############################################################################################
 
 
-fit_function <- function(input_data,co2_values) {
+fit_function <- function(input_depth,input_value,input_value_err,interp_depth,measurement_special) {
 
-  # Data is a data frame of soil h20 and soil temperature, interp values from from co2
- interp_values <- co2_values$zOffset
-  # Define top layer for interpolation
-  if(max(input_data$zOffset) > -0.05){
-    from_depth <- 0 # Extrapolate to soil surface is sensor is less than 5 cm from soil surface
-  }else{
-    from_depth <- round(max(input_data$zOffset), digits=2)
-  }
+  # The default value if we have nothing
+  out_value <- tibble(zOffset = interp_depth, value = NA, ExpUncert = NA)
+
+  # do a quick NA filtering on the measurement
+  test_data <- tibble(
+    depth = input_depth,
+    value = input_value,
+    err = input_value_err
+  ) |>
+    drop_na()
+
+  if (nrow(test_data) > 2) {
+    input_depth <- test_data |> pull(depth)
+    input_value <- test_data |> pull(value)
+    input_value_err <- test_data |> pull(err)
+    # Define top layer for interpolation
+    if (max(input_depth) > -0.05) {
+      from_depth <- 0 # Extrapolate to soil surface is sensor is less than 5 cm from soil surface
+    } else {
+      from_depth <- round(max(input_depth), digits = 2)
+    }
 
 
-  # Define bottom layer for interpolation
-  if(min(input_data$zOffset) < -0.2){
-    to_depth <- floor(min(input_data$zOffset)*10) / 10 # Extrapolate to nearest 10 cm increment below deepest sensor if that sensor is below 20 cm (i.e., not experiencing very high diurnal variability)
-  }else{
-    to_depth <- round(min(input_data$zOffset), digits=2)
-  }
+    # Define bottom layer for interpolation
+    if (min(input_depth) < -0.2) {
+      to_depth <- floor(min(input_depth) * 10) / 10 # Extrapolate to nearest 10 cm increment below deepest sensor if that sensor is below 20 cm (i.e., not experiencing very high diurnal variability)
+    } else {
+      to_depth <- round(min(input_depth), digits = 2)
+    }
 
-  # Create sequence of depths in 1 cm intervals up to the depth of the deepest sensor producing good data
-  depths <- seq(from=from_depth, to=to_depth, by=-0.01)
-
-  independent_data <- input_data$zOffset
-  dependent_data <- input_data$value
+    # Create sequence of depths in 1 cm intervals up to the depth of the deepest sensor producing good data
+    depths <- seq(from = from_depth, to = to_depth, by = -0.01)
 
 
-  # Make sure there are more than two data points to interpolate
-  if(length(independent_data) >3) {
+    # Make sure there are more than two data points to interpolate
+    if (length(input_depth) > 3 & !measurement_special) {
+      measurement_spline <- smooth.spline(x = input_depth, y = input_value)
 
-    measurement_spline <- smooth.spline(x = independent_data,y= dependent_data)
-    # Predict
-    measurement_interp <- predict(measurement_spline, x=interp_values) %>%
-      as_tibble() %>%
+
+      xbar <- mean(input_depth)
+      n <- length(input_depth)
+      pd_yi <- 1/n -(input_depth-xbar)*(1-1/n)/sum((input_depth-xbar)^2)
+
+      predict_err<-quadrature_error(pd_yi,input_value_err)
+
+      # Predict
+     out_value <- predict(measurement_spline, x = interp_depth) |>
+       as_tibble() |>
       rename(zOffset = x,
-             value = y )
+               value = y) |>
+       mutate(ExpUncert = predict_err)
 
-  } else {
 
 
-    # Just use linear interpolation here
-    measurement_interp <- approx(x=independent_data, y=dependent_data, xout = interp_values, rule=2) %>%
-      as_tibble() %>%
-      rename(zOffset = x,
-             value = y )
+
+
+    } else if(between(nrow(test_data),2,3) | measurement_special) {
+
+      # Just use linear interpolation here and compute the error by quadrature using the first two data points
+      input_depth <- test_data |> pull(depth)
+      input_value <- test_data |> pull(value)
+      input_value_err <- test_data |> pull(err)
+
+      xbar <- mean(input_depth)
+      n <- length(input_depth)
+      pd_yi <- 1/n -(input_depth-xbar)*(1-1/n)/sum((input_depth-xbar)^2)
+
+      predict_err<-quadrature_error(pd_yi,input_value_err)
+
+
+      out_value <- approx(x = input_depth,y=input_value,xout= interp_depth,rule = 2) |>
+        as_tibble() |>
+        rename(zOffset = x,
+               value = y) |>
+        mutate(ExpUncert = predict_err)
+
+      if(measurement_special & any(out_value$value < 0)) {
+        out_value$value = NA
+        out_value$ExpUncert = NA
+      }
+    }
+
 
   }
 
 
-  # Define the output data frame, do a join so this makes sense:
-  measurement_out <- co2_values %>%
-    select(-value) %>%
-    inner_join(measurement_interp,by="zOffset")
-
-  return(measurement_out)
+  return(out_value)
 }
 
