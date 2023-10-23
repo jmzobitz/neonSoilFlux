@@ -24,6 +24,9 @@
 # changelog and author contributions / copyrights
 #   John Zobitz (2022-06-11)
 #     original creation
+#   John Zobitz (2023-10-23)
+#     modified to apply drop_na rather in map rather than doing a filter.
+#     drop_na() checks for complete rows.
 
 
 
@@ -33,8 +36,8 @@ measurement_detect <- function(input_data) {
   # Do a single pass across each of the measurements to see if we have all of the measurements (FinalQF) and if there are no NA values for interpolation
 
   input_data_rev <- input_data |>
-    mutate(data = map(.x=data,.f=~filter(.x,if_any(ends_with("FinalQF"), ~ (.x  == 0))))) |>
-    mutate(data = map(.x=data,.f=~filter(.x,if_any(!matches(c("domainID","siteID","horizontalPosition","verticalPosition")) | !ends_with("FinalQF"), ~ (!is.na(.x))))))
+    mutate(data = map(.x=data,.f=~filter(.x,if_any(ends_with("FinalQF"), ~ (.x  == 0))) |>
+                        drop_na()))
 
 # Each column selector, time, and horizontal position needs at least three measurements, then we should also do the same for the pressure measurements by time point
     # filter out co2 data with more than 3 measurements at a given timepoint

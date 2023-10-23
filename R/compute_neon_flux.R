@@ -32,6 +32,7 @@
 #   John Zobitz (2021-07-22)
 #     original creation
 #     2023-07-16: Update to take advantage of nested structures to improve / decrease computational time, allowing for multiple measurements to compute the flux.
+#     2023-10-23: Update to exit computing a flux if there are no half-hourly measurements.
 
 
 
@@ -55,6 +56,14 @@ compute_neon_flux <- function(input_file_name,
 
   # Filters out measurements that don't have enough QF flags
   site_filtered <- measurement_detect(site_data)
+
+  # Exit gracefully if no values get returned
+  if(any(input_data_interp_ready$n_obs ==0)) {
+    msg = paste0("No valid environmental timeperiod measurements for ", input_file_name)
+    stop(msg)
+  }
+
+
 
     # Interpolate all the measurements together in one nested function
     # We *need* to interpolate the errors - assume the errors interpolate as well?
