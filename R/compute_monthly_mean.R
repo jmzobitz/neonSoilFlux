@@ -73,9 +73,9 @@ compute_monthly_mean <- function(NEON_data,position_columns = c("horizontalPosit
 
       if (length(unique(input_data$day)) >= 15) {
         col_names <- names(input_data)
-        tsY <- pull(input_data,var=which(str_detect(col_names,"[^StdEr]Mean")) )  # 30-min means
-        uc <- pull(input_data,var=which(str_detect(col_names,'ExpUncert') ) )/2 # expanded measurement uncertainty at 95% confidence
-        uNAT <-  pull(input_data,var=which(str_detect(col_names,"StdErMean")) )
+        tsY <- pull(input_data,var=which(str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
+        uc <- pull(input_data,var=which(str_detect(col_names,'ExpUncert$') ) )/2 # expanded measurement uncertainty at 95% confidence
+        uNAT <-  pull(input_data,var=which(str_detect(col_names,"StdErMean$")) )
 
         ub.sq <- (uc^2) - (uNAT^2)
         ub.sq[which(ub.sq < 0)] <- .0001 # negative values from rounded uncertainties...
