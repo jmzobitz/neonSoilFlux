@@ -35,11 +35,11 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   mean_names <- names(monthly_mean)
 
 
-  var_mean <- pull(joined_data,var=which(str_detect(col_names,"[^StdEr]Mean")) )  # 30-min means
+  var_mean <- pull(joined_data,var=which(str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
   monthly_mean <- pull(joined_data,comp_mean)
   monthly_uncert <- pull(joined_data,comp_sd)
-  var_uncert <- pull(joined_data,var=which(str_detect(col_names,'ExpUncert') ) ) # expanded measurement uncertainty at 95% confidence
-  var_QF <-  pull(joined_data,var=which(str_detect(col_names,"FinalQF")) )
+  var_uncert <- pull(joined_data,var=which(str_detect(col_names,'ExpUncert$') ) ) # expanded measurement uncertainty at 95% confidence
+  var_QF <-  pull(joined_data,var=which(str_detect(col_names,"FinalQF$")) )
 
   smoothed_data <- tibble(var_mean,var_uncert,monthly_mean,monthly_uncert,var_QF) |>
     mutate(var_mean = if_else(var_QF ==0,var_mean,monthly_mean),
@@ -52,9 +52,11 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   # meanQF = 2 --> NA flag, so we can't use measurement
 
   out_data <- joined_data |>
-    mutate(across(.cols=contains("[^StdEr]Mean"),.fns=~pull(smoothed_data,var_mean)),
-           across(.cols=contains('ExpUncert'),.fns=~pull(smoothed_data,var_uncert)),
-           mean_QF = pull(smoothed_data,mean_QF)) |>
+    mutate(across(.cols=contains("[^StdEr]Mean$"),.fns=~pull(smoothed_data,var_mean)),
+           across(.cols=contains('ExpUncert$'),.fns=~pull(smoothed_data,var_uncert)) ) |>
+    ungroup() |>
+    mutate(mean_QF = pull(smoothed_data,mean_QF)) |>
+
     select(-comp_mean,-comp_sd,-simple_mean,-simple_sd)
 
   # rename final QF frame
@@ -63,4 +65,5 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   return(out_data)
 
 }
+
 
