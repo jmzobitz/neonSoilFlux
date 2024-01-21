@@ -46,16 +46,34 @@ determine_position <- function(input_positions,input_measurement) {
     mutate(measurement_interval = lubridate::interval(positionStartDateTime,positionEndDateTime)) |>
     separate_wider_delim(cols=HOR.VER,names=c("horizontalPosition","verticalPosition"),delim=".") |>
     group_by(horizontalPosition,verticalPosition) |>
-    nest()
+    nest() |>
+    rename(position_info = data) |>
+    mutate(n_levels = map_dbl(.x=position_info,.f=~nrow(.x)))  # Test to see if we have multiple measurement levels - then we need to check
 
 
   out_measurement <- input_measurement |>
+    group_by(horizontalPosition,verticalPosition,startDateTime) |>
+    nest() |>
+    rename(measurement_info=data) |>
     inner_join(position_data,by=c("horizontalPosition","verticalPosition")) |>
-    mutate(data = map2(.x=startDateTime,.y=data,.f=~(.y |> mutate(which_interval = .x %within% measurement_interval) |>
-                                                       filter(which_interval)))) |>
-    mutate(zOffset = map_dbl(.x=data,.f=~pluck(.x,"zOffset"))) |>
-    select(-data)
+    mutate(position_info = pmap(.l=list(n_levels,startDateTime,position_info),
+                                .f=function(levels,startDateTime,position_info) (
 
+
+                                  if(levels ==1) {
+                                    return(position_info)
+                                  } else {
+                                    new_info <- position_info |>
+                                      filter(startDateTime %within% measurement_interval)
+
+                                    return(new_info)
+                                  }
+                                )
+    )
+    )  |>
+    mutate(zOffset = map_dbl(.x=position_info,.f=~pluck(.x,"zOffset"))) |>
+    select(-n_levels,-position_info) |>
+    unnest(cols=c(measurement_info))
 
   return(out_measurement)
 

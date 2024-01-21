@@ -58,7 +58,7 @@
 
 compute_monthly_mean <- function(NEON_data,position_columns = c("horizontalPosition","verticalPosition")) {
 
-  yoop <- NEON_data |>
+  out_mean <- NEON_data |>
     filter(if_any(ends_with("FinalQF"), ~ (.x  == 0))) |>
     drop_na() |>
     mutate(day = lubridate::day(startDateTime)) |>
@@ -118,6 +118,7 @@ compute_monthly_mean <- function(NEON_data,position_columns = c("horizontalPosit
     unnest(cols=c(month_stats)) |>
     ungroup()
 
+  return(out_mean)
 
 
 }
