@@ -4,13 +4,24 @@
 \alias{compute_neon_flux}
 \title{Compute NEON fluxes at a site}
 \usage{
-compute_neon_flux(input_file_name)
+compute_neon_flux(
+  input_file_name,
+  out_flux_file_name,
+  time_frequency = "30_minute",
+  input_column_selectors = c("Mean", "ExpUncert")
+)
 }
 \arguments{
-\item{file_name}{Required. Path of location for the save file from acquire_neon_data. Must end in .Rda (a string)}
+\item{input_file_name}{Required. Path of location for the save file from acquire_neon_data. Must end in .Rda (a string)}
+
+\item{out_flux_file_name}{Required. Path of location where you will save file for fluxes}
+
+\item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
+
+\item{input_column_selectors}{Optional. List of measurements from which fluxes will be computed typically c("Mean","Minimum","Maximum","ExpUncert","StdErMean") (the more used increases computational time)}
 }
 \value{
-Data frame of fluxes from the timeperiod
+Data frame of fluxes and gradient from the timeperiod
 }
 \description{
 Given a site filename (from acquire_neon_data), process and compute fluxes.

@@ -11,6 +11,7 @@
 #' @param input_depth Required. Vector of measurement depths.
 #' @param input_value Required. Vector of measured values (i.e. soil temperature and soil water) measured at depths input_depth
 #' @param input_value_err Required. Vector or reported measurement errors. Used to compute prediction error (via quadrature) when linear interpolation is used.
+#' @param input_value_qf Required. Vector of qf values from the smoothing 0 = no smoothing, 1 = mean value used (smoothing), 2 = NA value
 #' @param interp_values Depths of the sensors required for interpolation
 #' @param measurement_special Flag if we want to just do linear interpolation for a given measurement
 
@@ -34,10 +35,11 @@
 #     original creation
 #   2022-06-11: revision to include spline fits of temperature and water, better functionality
 #   2023-07-23: revision to includes prediction error for linear interpolation - for splines (n measurements > 3) this is done by estimating the prediction error by quadrature using formulas for simple linear regression.  Also included is the addition of measurement_special, a flag to just do linear interpolation and any other positivity measures.
+#   2024-01-19: revision to include the qf flags
 ##############################################################################################
 
 
-fit_function <- function(input_depth,input_value,input_value_err,interp_depth,measurement_special) {
+fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,interp_depth,measurement_special) {
 
   # The default value if we have nothing
   out_value <- tibble(zOffset = interp_depth, value = NA, ExpUncert = NA)
@@ -46,9 +48,11 @@ fit_function <- function(input_depth,input_value,input_value_err,interp_depth,me
   test_data <- tibble(
     depth = input_depth,
     value = input_value,
-    err = input_value_err
+    err = input_value_err,
+    qf = input_value_qf
   ) |>
-    drop_na()
+    drop_na() |>
+    filter(qf !=2)  # Can use mean qf values
 
   if (nrow(test_data) > 2) {
     input_depth <- test_data |> pull(depth)

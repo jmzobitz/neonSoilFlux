@@ -8,8 +8,9 @@ acquire_neon_data(
   site_name,
   start_date,
   end_date,
-  file_name,
-  env_file_name = NULL
+  data_file_name,
+  time_frequency = "30_minute",
+  column_selectors = c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 )
 }
 \arguments{
@@ -19,7 +20,11 @@ acquire_neon_data(
 
 \item{end_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)}
 
-\item{file_name}{Required. Path of location for the save file. Must end in .Rda (a string)}
+\item{data_file_name}{Required. Path of location for the file of environmental measurements (includes megapit data and nested data). Must end in .Rda (a string)}
+
+\item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
+
+\item{column_selectors}{Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
 }
 \value{
 Nothing is returned - the file is saved to the location provided

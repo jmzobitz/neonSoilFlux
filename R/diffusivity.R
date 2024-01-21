@@ -33,8 +33,16 @@
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-21)
 #     original creation
+#   John Zobitz (2024-01-20)
+#     modified to account if soil water > porosity - just set to 0
+
 
 diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_water_err,pressure_err,zOffset,porVol2To20) {
+
+  # Since pressure is a single value, make it equal to all the other lengths
+  pressure <- rep(pressure,length(temperature))
+  pressure_err <- rep(pressure_err,length(temperature_err))
+
 
   # Assign values to constants
   R <- 0.008314472 # Ideal gas constant = 0.008314472 m3 kPa °K-1 mol-1
@@ -63,37 +71,38 @@ diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_wat
 
 
 
-    # Calculate the air filled porosity
-    porVol2To20AirFilled <- porVol2To20 - soil_water
+  # Calculate the air filled porosity - if the soil water is larger, then set it to 0
+  porVol2To20AirFilled <- pmax(porVol2To20 - soil_water,0)
 
-    # Calculate gas tortuosity factor based on Millington and Quirk 1961
-    tort <- (porVol2To20AirFilled^(10/3)) / (porVol2To20^2)
-
-
-    # Calculate CO2 diffusivity in free air (m2 s-1).
-    diffuFreeAir <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (pressure / 101.3)
-
-    # Calculate CO2 diffusivity (m2 s-1).
-    diffusivity <- tort * diffuFreeAir
-
-    # Compute the partial derivative of the measurements
-    temp_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^.75 * (pressure / 101.3)*1.75 *tort
-
-    soil_water_pd <- 10/3*(porVol2To20AirFilled^(7/3)) / (porVol2To20^2) * diffuFreeAir
-
-    pressure_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (1 / 101.3) *tort
+  # Calculate gas tortuosity factor based on Millington and Quirk 1961
+  tort <- (porVol2To20AirFilled^(10/3)) / (porVol2To20^2)
 
 
+  # Calculate CO2 diffusivity in free air (m2 s-1).
+  diffuFreeAir <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (pressure / 101.3)
 
-    measurement_pd <- c(temp_pd,soil_water_pd,pressure_pd)
-    errs <- c(temperature_err,soil_water_err,pressure_err)
+  # Calculate CO2 diffusivity (m2 s-1).
+  diffusivity <- tort * diffuFreeAir
 
-    calc_err <- quadrature_error(measurement_pd,errs)
+  # Compute the partial derivative of the measurements
+  temp_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^.75 * (pressure / 101.3)*1.75 *tort
 
-    out_tibble <- tibble(zOffset,diffusivity = diffusivity,diffusExpUncert = calc_err)
-    return(out_tibble)
+  soil_water_pd <- 10/3*(porVol2To20AirFilled^(7/3)) / (porVol2To20^2) * diffuFreeAir
+
+  pressure_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (1 / 101.3) *tort
+
+
+
+  measurement_pd <- c(temp_pd,soil_water_pd,pressure_pd)
+  errs <- c(temperature_err,soil_water_err,pressure_err)
+
+  calc_err <- quadrature_error(measurement_pd,errs)
+
+  out_tibble <- tibble(zOffset,diffusivity = diffusivity,diffusExpUncert = calc_err)
+  return(out_tibble)
 
 
 
 
 }
+

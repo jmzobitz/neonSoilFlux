@@ -37,6 +37,7 @@
 
 
 
+
 compute_neon_flux <- function(input_file_name,
                               out_flux_file_name,
                               time_frequency = "30_minute",
@@ -49,215 +50,158 @@ compute_neon_flux <- function(input_file_name,
 
   load(input_file_name)
 
-    ################
+  ################
 
   ################
   # 2) Interpolates across the measurements
+  site_data2 <- site_data |>
+    mutate(data = pmap(.l=list(data,monthly_mean,measurement),.f=~insert_mean(..1,..2,..3)))
 
   # Filters out measurements that don't have enough QF flags
-  site_filtered <- measurement_detect(site_data)
+  site_filtered <- measurement_detect(site_data2)
 
   # Exit gracefully if no values get returned
-  if(any(input_data_interp_ready$n_obs ==0)) {
+  if(any(site_filtered$n_obs ==0)) {
     msg = paste0("No valid environmental timeperiod measurements for ", input_file_name)
     stop(msg)
   }
 
 
 
-    # Interpolate all the measurements together in one nested function
-    # We *need* to interpolate the errors - assume the errors interpolate as well?
+  # Interpolate all the measurements together in one nested function
+  # We *need* to interpolate the errors - assume the errors interpolate as well?
 
-    site_interp <- depth_interpolate(
-      input_measurements = site_filtered,
-      measurement_name = c("VSWC","soilTemp"),  # Measurements we are interpolating
-      measurement_interpolate = "soilCO2concentration",  # We always want to interpolate to this depth
-      column_selectors = input_column_selectors)
+  site_interp <- depth_interpolate(
+    input_measurements = site_filtered,
+    measurement_name = c("VSWC","soilTemp"),  # Measurements we are interpolating
+    measurement_interpolate = "soilCO2concentration")  # We always want to interpolate to this depth
+
+  # Add in the pressure measurements
+  pressure_measurement <- site_filtered |>
+    filter(measurement =="staPres") |>
+    select(-monthly_mean) |>
+    unnest(cols=c("data")) |>
+    group_by(startDateTime) |>
+    nest() |>
+    rename(press_data = data)
 
 
-    ### Then take each of the measurements to associate them with errors
-    site_interp2 <- site_interp |>
-      mutate(data = map2(.x=data,.y=measurement,.f=~(
+  ### Then take each of the measurements to associate them with errors
+  all_measures <- site_interp |>
+    inner_join(pressure_measurement, by=c("startDateTime")) |>
+    mutate(staPresMeanQF = map_int(.x=press_data,.f=~pull(.x,staPresFinalQF)))
 
-        if(.y !="staPres") {
-          .x |> select(horizontalPosition,startDateTime,siteID,verticalPosition,matches(str_c(.y,input_column_selectors)))
-        } else {
-          .x |> select(startDateTime,siteID,matches(str_c(.y,input_column_selectors)))
+
+  # Yay!  We solved the joining problem!
+
+  ################
+
+
+  ################
+  # 3) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
+
+  # Ingest the megapit soil physical properties pit, horizon, and biogeo data
+  mgp.pit <- site_megapit$mgp_permegapit
+  mgp.hzon <- site_megapit$mgp_perhorizon
+  mgp.bgeo <- site_megapit$mgp_perbiogeosample
+  mgp.bden <- site_megapit$mgp_perbulksample
+
+
+  # Merge the soil properties into a single data frame
+
+  mgp.hzon.bgeo <- inner_join(mgp.hzon, mgp.bgeo, by=c("horizonID", "pitID", "domainID", "siteID", "horizonName","pitNamedLocation"))
+  mgp.hzon.bgeo.bden <- inner_join(mgp.hzon.bgeo, mgp.bden, by=c("horizonID", "pitID", "domainID", "siteID", "horizonName", "labProjID", "laboratoryName","pitNamedLocation"))
+  mgp <- inner_join(mgp.hzon.bgeo.bden, mgp.pit, by=c("pitID", "domainID", "siteID", "pitNamedLocation", "nrcsDescriptionID"))
+
+  ###############################
+  # Future development: Estimate particle density of <2 mm fraction based on Ruhlmann et al. 2006 Geoderma 130,
+  # 272-283. Assumes C content of organic matter is 55%. Constants 1.127, 0.373, 2.684 come
+  # from Ruhlman et al. 2006 (2.684 = particle density of the mineral fraction, "(1.127 +
+  # 0.373*(dfBGChem$Estimated.organic.C..../55))" = particle density of organic matter).
+  ###############################
+
+  # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density.
+  rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
+
+  # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3.
+  porosSub2mm <- 1 - mgp$bulkDensExclCoarseFrag/2.65
+
+  # Calculate porosity of the 0-20 mm fraction (cm3 cm-3). Assume no pores within rocks.
+  mgp$porVol2To20 <- porosSub2mm * (1 - rockVol)
+
+  ### Now go through the environmental data and add the correct porVol2To20 at each of the zOffsets -- a double map :-)
+
+  all_measures2 <- all_measures |>
+    mutate(env_data = map(.x=env_data,.f=function(x) {
+
+      porVol2To20 <- map_dbl(.x=x$zOffset,.f=function(x) {
+        horizon <- intersect(which(abs(x) >= mgp$horizonTopDepth/100), which(abs(x) <= mgp$horizonBottomDepth/100))
+
+        if(length(horizon)>1){
+          horizon <- horizon[which.min(mgp$horizonTopDepth[horizon])]
         }
+        return( mgp$porVol2To20[horizon])
 
-                                                     )))
+      })
+      return(mutate(x,porVol2To20))
 
-    # Now we want to find a common dataset where the different times can be merged together
-    # Because the pressure measurements are at a single point (not at a depth, we need to consider them separately from the temperature, co2, and SWC, which are all at depth)
+    }))
 
-
-    # Pivot measured data
-    all_measures_pre <- site_interp2 |>
-      mutate(data = map2(.x = data, .y= measurement,.f = ~ (.x |>
-                                                 pivot_longer(cols = matches(str_c(.y,input_column_selectors))) |>
-                                                 mutate(type = str_extract(name,pattern = paste0(input_column_selectors,collapse = "|")))
-                                                 ) ) )
-
-    # Separate out temperature, swc, and co2 concentration.
-    # Group them at each value
-    env_measures <- all_measures_pre |>
-      filter(measurement != "staPres") |>
-      select(measurement,data) |>
-      unnest(cols=c("data")) |>
-      select(measurement,horizontalPosition,verticalPosition,startDateTime,type,value) |>
-      pivot_wider(names_from = "type") |>
-      pivot_longer(cols=c("Mean","ExpUncert")) |>
-      unite(col="measurement",measurement,name,sep="") |>
-      pivot_wider(names_from="measurement") |>
-      group_by(horizontalPosition,verticalPosition,startDateTime) |>
-      nest() |>
-      rename(env_data = data)
-
-    # Create a grouped data frame from the pressure
-    press_measures <- all_measures_pre |>
-      filter(measurement == "staPres") |>
-      select(measurement,data) |>
-      unnest(cols=c("data")) |>
-      select(measurement,startDateTime,type,value) |>
-      unite(col="measurement",measurement,type,sep="") |>
-      pivot_wider(names_from="measurement") |>
-      group_by(startDateTime) |>
-      nest() |>
-      rename(press_data = data)
-
-    # Now join them up. We only do the mean and the expanded measurement uncertainty
-    all_measures <- env_measures |>
-      inner_join(press_measures,by=c("startDateTime")) |>
-      mutate(new_data = map2(.x=env_data,.y=press_data,.f=~cbind(.x,.y))) |>
-      select(-env_data,-press_data) |>
-      unnest(cols=c("new_data")) |>
-      ungroup() |>
-      group_by(horizontalPosition,verticalPosition,startDateTime) |>
-      nest()
-
-    # Yay!  We solved the joining problem!
-
-    ################
+  ################
 
 
-    ################
-    # 3) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
-
-    # Ingest the megapit soil physical properties pit, horizon, and biogeo data
-    mgp.pit <- site_megapit$mgp_permegapit
-    mgp.hzon <- site_megapit$mgp_perhorizon
-    mgp.bgeo <- site_megapit$mgp_perbiogeosample
-    mgp.bden <- site_megapit$mgp_perbulksample
-
-
-    # Merge the soil properties into a single data frame
-
-    mgp.hzon.bgeo <- inner_join(mgp.hzon, mgp.bgeo, by=c("horizonID", "pitID", "domainID", "siteID", "horizonName"))
-    mgp.hzon.bgeo.bden <- inner_join(mgp.hzon.bgeo, mgp.bden, by=c("horizonID", "pitID", "domainID", "siteID", "horizonName", "labProjID", "laboratoryName"))
-    mgp <- inner_join(mgp.hzon.bgeo.bden, mgp.pit, by=c("pitID", "domainID", "siteID", "pitNamedLocation", "nrcsDescriptionID"))
-
-    ###############################
-    # Future development: Estimate particle density of <2 mm fraction based on Ruhlmann et al. 2006 Geoderma 130,
-    # 272-283. Assumes C content of organic matter is 55%. Constants 1.127, 0.373, 2.684 come
-    # from Ruhlman et al. 2006 (2.684 = particle density of the mineral fraction, "(1.127 +
-    # 0.373*(dfBGChem$Estimated.organic.C..../55))" = particle density of organic matter).
-    ###############################
-
-    # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density.
-    rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
-
-    # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3.
-    porosSub2mm <- 1 - mgp$bulkDensExclCoarseFrag/2.65
-
-    # Calculate porosity of the 0-20 mm fraction (cm3 cm-3). Assume no pores within rocks.
-    mgp$porVol2To20 <- porosSub2mm * (1 - rockVol)
-
-    # The position data should all be the same (since we harmonized it earlier)
-    vertical_positions <- site_interp$positions[[1]]
-    mgp_info <- vector(mode = "list", length = nrow(vertical_positions))
-
-    # Now we should go across the nested depths and have the horizon
-    # Kicking it old school with the double loop (the indices are small, so that is ok.)
-
-    for(i in seq_along(vertical_positions$zOffset)) {
-
-      horizon <- intersect(which(abs(vertical_positions$zOffset[i]) >= mgp$horizonTopDepth/100), which(abs(vertical_positions$zOffset[i]) <= mgp$horizonBottomDepth/100))
-
-      if(length(horizon)>1){
-        horizon <- horizon[which.min(mgp$horizonTopDepth[horizon])]
-      }
-
-      mgp_info[[i]] <- mgp$porVol2To20[horizon]
-
-
-    }
-
-    # make the list a tibble and bind to the vertical positions data frame
-
-    mgp_list <- tibble(porVol2To20 = mgp_info) |>
-      unnest(cols=c("porVol2To20"))
-
-    mgp_measures <- cbind(vertical_positions,mgp_list) |>
-      group_by(HOR,VER) |> nest() |>
-      rename(mgp_data = data)
-
-    # now join to all the data together
-    all_measures2 <- all_measures |>
-      inner_join(mgp_measures,by=c("horizontalPosition"="HOR","verticalPosition" = "VER")) |>
-      unnest(cols = c("mgp_data")) |>
-      unnest(cols=c("data")) |>
-      ungroup() |>
-      drop_na() |>
-      group_by(horizontalPosition,startDateTime) |>
-      nest()
-    ################
-
-
-    ################
-    # 4) It's flux computation time - first we do the diffusivity at different depths and then the conversion of co2 to umol, followed by the fluxes
-
-
-    flux_out <- all_measures2 |>
-      mutate(flux_compute = map(.x=data, .f=function(.x) {c <- co2_to_umol(
-        .x$soilTempMean,
-        .x$staPresMean,
-        .x$soilCO2concentrationMean,
-        .x$soilTempExpUncert,
-        .x$staPresExpUncert,
-        .x$soilCO2concentrationExpUncert, .x$zOffset
-      );
+  ################
+  # 4) It's flux computation time - first we do the diffusivity at different depths and then the conversion of co2 to umol, followed by the fluxes
 
 
 
-      d <- diffusivity(temperature = .x$soilTempMean,
-                       soil_water = .x$VSWCMean,
-                       pressure = .x$staPresMean,
-                       temperature_err = .x$soilTempExpUncert,
-                       soil_water_err = .x$VSWCExpUncert,
-                       pressure_err = .x$staPresExpUncert,
-                       zOffset = .x$zOffset,
-                       porVol2To20 = .x$porVol2To20);
 
-      new_data <- inner_join(c,d,by="zOffset");
-
-      return(compute_surface_flux(new_data)) }) ) |>
-      select(horizontalPosition,startDateTime,flux_compute) |>
-      unnest(cols=c("flux_compute")) |>
-      rename(fluxExpUncert = ExpUncert)
+  flux_out <- all_measures2 |>  # first filter out any bad measurements
+    mutate(flux_compute = map2(.x=env_data,.y=press_data, .f=function(.x,.y) {c <- co2_to_umol(
+      .x$soilTempMean,
+      .y$staPresMean,
+      .x$soilCO2concentrationMean,
+      .x$soilTempExpUncert,
+      .y$staPresExpUncert,
+      .x$soilCO2concentrationExpUncert,
+      .x$zOffset
+    );
 
 
 
-    ################
+    d <- diffusivity(temperature = .x$soilTempMean,
+                     soil_water = .x$VSWCMean,
+                     pressure = .y$staPresMean,
+                     temperature_err = .x$soilTempExpUncert,
+                     soil_water_err = .x$VSWCExpUncert,
+                     pressure_err = .y$staPresExpUncert,
+                     zOffset = .x$zOffset,
+                     porVol2To20 = .x$porVol2To20);
 
-    # 5) Compute the fluxes and join to a continuous timeperiod based on the input frequency, saving the final result
-    seq_time_freq <- if_else(time_frequency == "30_minute","30 min","1 min")
-    out_dates <- tibble(startDateTime = seq(min(flux_out$startDateTime),max(flux_out$startDateTime),by=seq_time_freq))
 
-    # Join the time vector to the data and save
-    out_fluxes <- out_dates |>
-      inner_join(flux_out,by="startDateTime")
+    new_data <- inner_join(c,d,by="zOffset");
 
-    save(out_fluxes,file=out_flux_file_name)
+
+    return(compute_surface_flux(new_data)) }) ) |>
+    select(horizontalPosition,startDateTime,flux_compute)
+
+
+
+  ################
+
+  # 5) Compute the fluxes and join to a continuous timeperiod based on the input frequency, saving the final result
+  seq_time_freq <- if_else(time_frequency == "30_minute","30 min","1 min")
+  out_dates <- tibble(startDateTime = seq(min(flux_out$startDateTime),max(flux_out$startDateTime),by=seq_time_freq))
+
+  # Join the time vector to the data and the QF flags and save
+  measurement_flags <- all_measures |>
+    select(-env_data,-press_data)
+
+  out_fluxes <- out_dates |>
+    inner_join(flux_out,by="startDateTime") |>
+    inner_join(measurement_flags,by=c("horizontalPosition","startDateTime"))
+
+  save(out_fluxes,file=out_flux_file_name)
 
 
 

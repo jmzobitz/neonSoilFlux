@@ -4,14 +4,24 @@
 \alias{co2_to_umol}
 \title{Convert co2 concentration from ppm to µmol m-3 units}
 \usage{
-co2_to_umol(temperature, pressure, co2)
+co2_to_umol(
+  temperature,
+  pressure,
+  co2,
+  temperature_err,
+  pressure_err,
+  co2_err,
+  zOffset
+)
 }
 \arguments{
 \item{temperature}{Required. Soil temperature (degrees C)}
 
-\item{pressure}{Required. Barometric air pressure ?}
+\item{pressure}{Required. Reported Barometric air pressure error (kilopascal)}
 
 \item{co2}{Carbon dioxide in ppm}
+
+\item{temperature_err}{Required. Reported Soil temperature error (degrees C)}
 }
 \value{
 A value of the converted co2
@@ -25,9 +35,6 @@ TBD
 }
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-}
-\seealso{
-
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

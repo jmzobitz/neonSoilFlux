@@ -36,6 +36,10 @@
 
 co2_to_umol <- function(temperature,pressure,co2,temperature_err,pressure_err,co2_err,zOffset) {
 
+  # Since pressure is a single value, make it equal to all the other lengths
+  pressure <- rep(pressure,length(temperature))
+  pressure_err <- rep(pressure_err,length(temperature_err))
+
   # Assign values to constants
   R <- 0.008314472 # Ideal gas constant = 0.008314472 m3 kPa °K-1 mol-1
   absZero <- -273.15 # Absolute zero (-273.15 °C; 0 °K)

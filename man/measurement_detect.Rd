@@ -7,7 +7,7 @@
 measurement_detect(input_data)
 }
 \arguments{
-\item{input_data}{Required. Data frame of merged soil water, temperature, and co2 across different NEON locations and depths}
+\item{input_data}{Required. Nested data frame of merged soil water, temperature, co2, and pressure across different NEON locations and depths}
 }
 \value{
 Data frame of fluxes from the timeperiod

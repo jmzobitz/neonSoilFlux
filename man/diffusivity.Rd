@@ -8,9 +8,11 @@ diffusivity(
   temperature,
   soil_water,
   pressure,
-  coarseFrag2To5,
-  coarseFrag5To20,
-  bulkDensExclCoarseFrag
+  temperature_err,
+  soil_water_err,
+  pressure_err,
+  zOffset,
+  porVol2To20
 )
 }
 \arguments{
@@ -18,13 +20,17 @@ diffusivity(
 
 \item{soil_water}{Required. Soil water content}
 
-\item{pressure}{Required. Barometric air pressure ?}
+\item{pressure}{Required. Barometric air pressure (kilopascal)}
 
-\item{coarseFrag2To5}{Required. Coarse fragmentation of rocks}
+\item{temperature_err}{Required. Reported Soil temperature error (degrees C)}
 
-\item{coarseFrag5To20}{Required. More coarse fragmentation of rocks}
+\item{soil_water_err}{Required. Reported Soil water content error}
 
-\item{bulkDensExclCoarseFrag}{Required. Bulk density of horizon excluding the coarse fragmented}
+\item{pressure_err}{Required. Reported Barometric air pressure error (kilopascal)}
+
+\item{zOffset}{Required. Measurement level in cm.}
+
+\item{porVol2To20}{Required. Porosity of the 0-20 mm fraction (cm3 cm-3). Assumes no pores within rocks.}
 }
 \value{
 A value of the computed diffusivity
@@ -38,9 +44,6 @@ TBD
 }
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-}
-\seealso{
-
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

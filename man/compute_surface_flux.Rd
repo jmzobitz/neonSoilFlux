@@ -7,7 +7,7 @@
 compute_surface_flux(input_data)
 }
 \arguments{
-\item{input_data}{Required. A data frame containing zOffsets, diffusivity, and co2 (umol mol-1)}
+\item{input_data}{Required. A data frame containing zOffsets, diffusivity, and co2 (umol mol-1) and their associated errors}
 }
 \value{
 A value of the surface CO2 flux (umol m-2 s-1)

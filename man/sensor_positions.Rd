@@ -25,9 +25,6 @@ sensor_positions(sjer_co2,"SCO2C","00095")
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
-\seealso{
-
-}
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }

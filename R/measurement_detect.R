@@ -33,10 +33,16 @@
 measurement_detect <- function(input_data) {
 
 
-  # Do a single pass across each of the measurements to see if we have all of the measurements (FinalQF) and if there are no NA values for interpolation
+  # Do a single pass across each of the measurements to see if we have all of the measurements (MeanQF) and if there are no NA values for interpolation
+
+  # if the monthly mean is a NA, then we use a 2
+  # meanQF = 0 --> no smoothed mean
+  # meanQF = 1 --> smoothed mean used
+  # meanQF = 2 --> NA flag, so we can't use measurement
+
 
   input_data_rev <- input_data |>
-    mutate(data = map(.x=data,.f=~filter(.x,if_any(ends_with("FinalQF"), ~ (.x  == 0))) |>
+    mutate(data = map(.x=data,.f=~filter(.x,if_any(ends_with("FinalQF"), ~ (.x  != 2))) |>
                         drop_na()))
 
 # Each column selector, time, and horizontal position needs at least three measurements, then we should also do the same for the pressure measurements by time point

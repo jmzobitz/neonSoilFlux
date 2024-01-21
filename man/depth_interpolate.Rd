@@ -4,24 +4,30 @@
 \alias{depth_interpolate}
 \title{Interpolate different depth measurements}
 \usage{
-depth_interpolate(input_measurements)
+depth_interpolate(
+  input_measurements,
+  measurement_name,
+  measurement_interpolate,
+  column_selectors
+)
 }
 \arguments{
-\item{input_data}{Required. Vector of NEON data and measurements from the soil}
+\item{input_measurements}{Required. Nested data frame (tibble of a months worth of data of co2, temperature, swc, pressure)}
 
-\item{col_name}{Required. Names of column we are interpolating. Currently only does one column at a time.}
+\item{measurement_name}{Required. Names of measurements we are interpolating. Currently only does one column at a time.}
+
+\item{measurement_interpolate}{Required. Names of measurement whose depth is used to interpolate (typically co2)}
+
+\item{column_selectors}{Required. Names of columns (e.g column_selectors = c("Mean","ExpUncert")) that are used in the interpolation. These are matched for each NEON measurement, i.e SWC is VSWCMean for the Mean SWC.}
 }
 \value{
-A data frame of the depth and the measured column
+A nested data frame with interpolated measurements.
 }
 \description{
 Definition function. Linearly interpolate a measurement across the different measurement depths
 }
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-}
-\seealso{
-
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

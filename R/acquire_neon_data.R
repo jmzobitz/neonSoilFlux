@@ -56,6 +56,8 @@ acquire_neon_data <- function(site_name,
   # Then correct the swc
   site_swc <- swc_correct(site_swc,site_name)
 
+
+
   site_press <- neonUtilities::loadByProduct(dpID="DP1.00004.001",
                                              site=site_name,
                                              startdate=start_date,
@@ -81,25 +83,30 @@ acquire_neon_data <- function(site_name,
 
     # Determine a data frame of the different horizontal and vertical positions
     co2_positions <- site_co2 |>
-      pluck(paste0("sensor_positions_","00095")) %>%
-      separate(HOR.VER,into=c("HOR","VER")) %>%
-      select(siteID,HOR,VER,zOffset)
+      pluck(paste0("sensor_positions_","00095"))
 
+    # Add on the positions for co2
+    co2 <- determine_position(co2_positions,co2)
+
+    # Apply monthly means
+    co2_monthly_mean <- compute_monthly_mean(co2)
 
     temperature <- site_temp %>%
       pluck(paste0("ST_",time_frequency)) |>
       select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("soilTemp",column_selectors)),finalQF)  |>
       rename(soilTempFinalQF = finalQF)
 
-
-
-
     # Determine a data frame of the different horizontal and vertical positions
     temperature_positions <- site_temp |>
-      pluck(paste0("sensor_positions_","00041")) %>%
-      separate(HOR.VER,into=c("HOR","VER")) %>%
-      select(siteID,HOR,VER,zOffset)
+      pluck(paste0("sensor_positions_","00041"))
 
+
+    # Add on the positions for temperature
+    temperature <- determine_position(temperature_positions,temperature)
+
+
+    # Apply monthly means
+    temperature_monthly_mean <- compute_monthly_mean(temperature)
 
     swc <- site_swc %>%
       pluck(paste0("SWS_",time_frequency)) |>
@@ -109,28 +116,38 @@ acquire_neon_data <- function(site_name,
     # Determine a data frame of the different horizontal and vertical positions
 
     swc_positions <- site_swc |>
-      pluck(paste0("sensor_positions_","00094")) %>%
-      separate(HOR.VER,into=c("HOR","VER")) %>%
-      select(siteID,HOR,VER,zOffset)
+      pluck(paste0("sensor_positions_","00094"))
+
+    # Add on the positions for swc
+    swc <- determine_position(swc_positions,swc)
+
+
+
+
+    # Apply monthly means
+    swc_monthly_mean <- compute_monthly_mean(swc)
 
     time_frequency_bp <- if_else(time_frequency == "30_minute","30min","1min")
 
     pressure <- site_press |>
       pluck(paste0("BP_",time_frequency_bp)) |>
-      select(domainID,siteID,startDateTime,matches(str_c("staPres",column_selectors)),staPresFinalQF)
+      select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("staPres",column_selectors)),staPresFinalQF)
 
     pressure_positions <- site_press |>
-      pluck(paste0("sensor_positions_","00004")) %>%
-      separate(HOR.VER,into=c("HOR","VER")) %>%
-      select(siteID,HOR,VER,zOffset)
+      pluck(paste0("sensor_positions_","00004"))
 
 
+    # Add on the positions for pressure
+    pressure <- determine_position(pressure_positions,pressure)
+
+    # Apply monthly means
+    pressure_monthly_mean <- compute_monthly_mean(pressure)
 
 
     # Put everything in a nested data frame
     site_data <- tibble(
       data = list(co2,swc,temperature,pressure),
-      positions=list(co2_positions,swc_positions,temperature_positions,pressure_positions),
+      monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean),
       measurement=c("soilCO2concentration","VSWC","soilTemp","staPres")) |>
       mutate(data = map(.x=data,.f=~(.x |> mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
 
