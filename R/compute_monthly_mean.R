@@ -73,6 +73,10 @@ compute_monthly_mean <- function(NEON_data,position_columns = c("horizontalPosit
 
       if (length(unique(input_data$day)) >= 15) {
         col_names <- names(input_data)
+        print(col_names)
+        print(str_detect(col_names,"[^StdEr]Mean$"))
+        print(str_detect(col_names,'ExpUncert$'))
+        print(str_detect(col_names,"StdErMean$"))
         tsY <- pull(input_data,var=which(str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
         uc <- pull(input_data,var=which(str_detect(col_names,'ExpUncert$') ) )/2 # expanded measurement uncertainty at 95% confidence
         uNAT <-  pull(input_data,var=which(str_detect(col_names,"StdErMean$")) )
