@@ -14,13 +14,14 @@ Installation in R is done through the devtools package:
 To analyze fluxes once the package is installed requires a two step process:
 
 1. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
-` acquire_neon_data(site_name ="SJER",
+` acquire_neon_data(site_name ="SJER",`
                   start_date = "2020-06",
                   end_date = "2020-06",
-                  file_name = "my-file-2020-06.Rda") `
+                  data_file_name = "my-file-2020-06.Rda") `
 
 2. Then process and compute fluxes.
-` out_fluxes_jan <- compute_neon_flux("my-file-2020-06.Rda") `
+` out_fluxes_jan <- compute_neon_flux(input_file_name = "my-file-2020-06.Rda",
+                                      out_flux_file_name = "my-file-flux-2020-06.Rda") `
 
 If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
 
