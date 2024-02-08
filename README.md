@@ -20,7 +20,7 @@ To analyze fluxes once the package is installed requires a two step process:
                   data_file_name = "my-file-2020-06.Rda") `
 
 2. Then process and compute fluxes.
-` out_fluxes_jan <- compute_neon_flux(input_file_name = "my-file-2020-06.Rda",
+` compute_neon_flux(input_file_name = "my-file-2020-06.Rda",
                                       out_flux_file_name = "my-file-flux-2020-06.Rda") `
 
 If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
