@@ -40,7 +40,7 @@ start_time <- Sys.time()
 acquire_neon_data(site_name =my_sites$sites[[1]],
                   start_date = my_sites$start_dates[[1]],
                   end_date = my_sites$end_dates[[1]],
-                  file_name = "data-neon/test.Rda")
+                  data_file_name = "data-neon/test.Rda")
 
 # Then process and compute the fluxes from that data file.
 out_fluxes <- compute_neon_flux("data-neon/test.Rda")
@@ -55,7 +55,7 @@ end_time <- Sys.time()
 acquire_neon_data(site_name ="SJER",
                   start_date = "2020-02",
                   end_date = "2020-02",
-                  file_name = "flux-jan-june/flux-feb.Rda")
+                  data_file_name = "flux-jan-june/flux-feb.Rda")
 
 # Then process and compute the fluxes from that data file.
 out_fluxes_feb <- compute_neon_flux("flux-jan-june/flux-feb.Rda")

@@ -58,7 +58,7 @@ try(
  { acquire_neon_data(site_name =curr_site_name,
                     start_date = curr_month,
                     end_date = curr_month,
-                    file_name = acquire_name,
+                    data_file_name = acquire_name,
                     env_file_name = env_name)
 
   # Then process and compute the fluxes from that data file.

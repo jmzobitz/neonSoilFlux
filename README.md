@@ -17,7 +17,7 @@ To analyze fluxes once the package is installed requires a two step process:
 ` acquire_neon_data(site_name ="SJER",
                   start_date = "2020-06",
                   end_date = "2020-06",
-                  file_name = "my-file-2020-06.Rda") `
+                  data_file_name = "my-file-2020-06.Rda") `
 
 2. Then process and compute fluxes.
 ` out_fluxes_jan <- compute_neon_flux("my-file-2020-06.Rda") `

@@ -14,7 +14,7 @@ devtools::install_github("jmzobitz/NEONSoils", build = TRUE, build_opts = c("--n
 acquire_neon_data(site_name ="SJER",
                   start_date = "2020-05",
                   end_date = "2020-05",
-                  file_name = "process-files/my-file.Rda")
+                  data_file_name = "process-files/my-file.Rda")
 
 # Then process and compute the fluxes from that data file.
 out_fluxes <- compute_neon_flux("process-files/my-file.Rda")

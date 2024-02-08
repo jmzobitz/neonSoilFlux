@@ -24,7 +24,7 @@ for(i in seq_along(site_date_combine)) {
   acquire_neon_data(site_name =curr_site,
                         start_date = curr_date,
                         end_date = curr_date,
-                        file_name = acquire_name,
+                        data_file_name = acquire_name,
                         env_file_name = env_name)
 
    # out_fluxes <- compute_neon_flux("data/curr-flux.Rda")
