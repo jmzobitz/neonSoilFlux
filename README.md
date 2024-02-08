@@ -13,13 +13,15 @@ Installation in R is done through the devtools package:
 ## Usage
 To analyze fluxes once the package is installed requires a two step process:
 
-1. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
+1. Load up the tidyverse and lubridate libraries (`library(tidyverse)` and `library(lubridate)`.  We are heavily making use of `dplyr` and `purrr`, so this should get you covered.
+
+2. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
 ` acquire_neon_data(site_name ="SJER",`
                   start_date = "2020-06",
                   end_date = "2020-06",
                   data_file_name = "my-file-2020-06.Rda") `
 
-2. Then process and compute fluxes.
+3. Then process and compute fluxes.
 ` compute_neon_flux(input_file_name = "my-file-2020-06.Rda",
                                       out_flux_file_name = "my-file-flux-2020-06.Rda") `
 
@@ -34,6 +36,8 @@ This is a project solely funded by the National Science Foundation, NSF# 2017829
 - 2022: Ongoing refinement and testing by undergraduate researchers at the following institutions:
   * Ridwan Abdi, Kebba Janeh, Nevin Lor, Diana Ortiz Alvarracin, Dijone Mehmeti, Ali Musa, Barbara Sabino Pina, Ly Xiong, Xeng Yang (Augsburg University)
   * Courtney Leung (Northwestern University)
+ - 2024: Refinement to include a gapfilling routine from Zoey Werbin at Boston University as well as additional calculations of the soil flux via different approaches in Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July): 78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+
 
 ## License
 GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
