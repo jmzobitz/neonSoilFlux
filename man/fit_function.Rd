@@ -8,6 +8,7 @@ fit_function(
   input_depth,
   input_value,
   input_value_err,
+  input_value_qf,
   interp_depth,
   measurement_special
 )
@@ -18,6 +19,8 @@ fit_function(
 \item{input_value}{Required. Vector of measured values (i.e. soil temperature and soil water) measured at depths input_depth}
 
 \item{input_value_err}{Required. Vector or reported measurement errors. Used to compute prediction error (via quadrature) when linear interpolation is used.}
+
+\item{input_value_qf}{Required. Vector of qf values from the smoothing 0 = no smoothing, 1 = mean value used (smoothing), 2 = NA value}
 
 \item{measurement_special}{Flag if we want to just do linear interpolation for a given measurement}
 

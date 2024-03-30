@@ -50,46 +50,9 @@ compute_neon_flux <- function(input_file_name,
 
   load(input_file_name)
 
-  ################
-
-  ################
-  # 2) Interpolates across the measurements
-  site_data2 <- site_data |>
-    mutate(data = pmap(.l=list(data,monthly_mean,measurement),.f=~insert_mean(..1,..2,..3)))
-
-  # Filters out measurements that don't have enough QF flags
-  site_filtered <- measurement_detect(site_data2)
-
-  # Exit gracefully if no values get returned
-  if(any(site_filtered$n_obs ==0)) {
-    msg = paste0("No valid environmental timeperiod measurements for ", input_file_name)
-    stop(msg)
-  }
-
-
-
-  # Interpolate all the measurements together in one nested function
-  # We *need* to interpolate the errors - assume the errors interpolate as well?
-
-  site_interp <- depth_interpolate(
-    input_measurements = site_filtered,
-    measurement_name = c("VSWC","soilTemp"),  # Measurements we are interpolating
-    measurement_interpolate = "soilCO2concentration")  # We always want to interpolate to this depth
-
-  # Add in the pressure measurements
-  pressure_measurement <- site_filtered |>
-    filter(measurement =="staPres") |>
-    select(-monthly_mean) |>
-    unnest(cols=c("data")) |>
-    group_by(startDateTime) |>
-    nest() |>
-    rename(press_data = data)
-
 
   ### Then take each of the measurements to associate them with errors
-  all_measures <- site_interp |>
-    inner_join(pressure_measurement, by=c("startDateTime")) |>
-    mutate(staPresMeanQF = map_int(.x=press_data,.f=~pull(.x,staPresFinalQF)))
+  all_measures <- extract_env_data(input_file_name)
 
 
   # Yay!  We solved the joining problem!
@@ -155,9 +118,8 @@ compute_neon_flux <- function(input_file_name,
 
 
 
-
   flux_out <- all_measures2 |>  # first filter out any bad measurements
-    mutate(flux_compute = map2(.x=env_data,.y=press_data, .f=function(.x,.y) {c <- co2_to_umol(
+    mutate(flux_intro = map2(.x=env_data,.y=press_data, .f=function(.x,.y) {c <- co2_to_umol(
       .x$soilTempMean,
       .y$staPresMean,
       .x$soilCO2concentrationMean,
@@ -182,8 +144,15 @@ compute_neon_flux <- function(input_file_name,
     new_data <- inner_join(c,d,by="zOffset");
 
 
-    return(compute_surface_flux(new_data)) }) ) |>
-    select(horizontalPosition,startDateTime,flux_compute)
+    return(new_data) }) ) |>
+    mutate(flux_compute = map(flux_intro,compute_surface_flux),
+           diffusivity = map(.x=flux_intro,.f=~(.x |>
+                                                  slice_max(order_by=zOffset) |>
+                                                  select(zOffset,diffusivity,diffusExpUncert)
+           )
+           )
+    ) |>
+    select(horizontalPosition,startDateTime,flux_compute,diffusivity)
 
 
 

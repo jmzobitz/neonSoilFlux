@@ -7,8 +7,7 @@
 depth_interpolate(
   input_measurements,
   measurement_name,
-  measurement_interpolate,
-  column_selectors
+  measurement_interpolate
 )
 }
 \arguments{
@@ -17,8 +16,6 @@ depth_interpolate(
 \item{measurement_name}{Required. Names of measurements we are interpolating. Currently only does one column at a time.}
 
 \item{measurement_interpolate}{Required. Names of measurement whose depth is used to interpolate (typically co2)}
-
-\item{column_selectors}{Required. Names of columns (e.g column_selectors = c("Mean","ExpUncert")) that are used in the interpolation. These are matched for each NEON measurement, i.e SWC is VSWCMean for the Mean SWC.}
 }
 \value{
 A nested data frame with interpolated measurements.

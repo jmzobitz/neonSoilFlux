@@ -2,18 +2,23 @@
 % Please edit documentation in R/compute_monthly_mean.R
 \name{compute_monthly_mean}
 \alias{compute_monthly_mean}
-\title{Function to compute monthly means to smooth the data. Based off code from Zoey Werbin.}
+\title{Function to compute monthly means to smooth the data.}
 \usage{
-compute_monthly_mean(NEON_data)
+compute_monthly_mean(
+  NEON_data,
+  position_columns = c("horizontalPosition", "verticalPosition")
+)
 }
 \arguments{
 \item{NEON_data}{Required. Input vector of neon measurements for a month}
+
+\item{position_columns}{Optional. Do we group by horiztonalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
 }
 \value{
 A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
 }
 \description{
-Given a NEON measurement data frame (from )
+Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 }
 \examples{
 # Download the NEON data - here this would be soil moisture
