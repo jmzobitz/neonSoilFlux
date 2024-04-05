@@ -20,7 +20,7 @@ acquire_neon_data(
 
 \item{end_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)}
 
-\item{data_file_name}{Required. Path of location for the file of environmental measurements (includes megapit data and nested data). Must end in .Rda (a string)}
+\item{data_file_name}{Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)}
 
 \item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
 

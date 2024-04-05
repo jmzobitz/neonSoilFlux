@@ -14,15 +14,15 @@
 #' 5) Adds in the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 #' 6) Saves the data
 
-#' @param input_file_name Required. Path of location for the save file from acquire_neon_data. Must end in .Rda (a string)
-#' @param out_flux_file_name Required. Path of location where you will save file for fluxes
+#' @param input_file_name Required. Path of location for the save file from acquire_neon_data. Must end in .Rda (a string), otherwise exits gracefully
+#' @param out_flux_file_name Required. Path of location where you will save file for fluxes.  Must end in .Rda or .csv - otherwise exits gracefully.
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
 #' @param input_column_selectors Optional. List of measurements from which fluxes will be computed typically c("Mean","Minimum","Maximum","ExpUncert","StdErMean") (the more used increases computational time)
 #'
 #' @example acquire_neon_data("SJER","my-out-file.Rda")
 #'
 #' # Then process and compute the fluxes from that data file.
-#'  compute_neon_flux(""my-file.Rda","flux-file.Rda)
+#'  compute_neon_flux("my-out-file.Rda","flux-file.Rda")
 #'
 #' @import dplyr
 
@@ -42,6 +42,18 @@ compute_neon_flux <- function(input_file_name,
                               out_flux_file_name,
                               time_frequency = "30_minute",
                               input_column_selectors = c("Mean","ExpUncert")) {
+
+
+  # Get the save file extension and do a quick check
+  extension_name <- str_extract(out_flux_file_name,pattern="(?<=\\.).{3}$")
+  if (!(extension_name %in% c("csv","Rda","rda"))) {
+    stop("Save file name extension must be a Rdata file (Rda) or comma separated file (csv). Please revise.")
+  }
+
+  input_extension_name <- str_extract(input_file_name,pattern="(?<=\\.).{3}$")
+  if (!(input_extension_name %in% c("Rda","rda"))) {
+    stop("Input file name extension must be a Rdata file (Rda). Please revise.")
+  }
 
   ################
   # 1) Load up the data (this may take a while)  Will be two data frames:
@@ -170,7 +182,20 @@ compute_neon_flux <- function(input_file_name,
     inner_join(flux_out,by="startDateTime") |>
     inner_join(measurement_flags,by=c("horizontalPosition","startDateTime"))
 
-  save(out_fluxes,file=out_flux_file_name)
+  # Now start saving
+  if(extension_name == "csv") {
+    out_flux_full <- out_fluxes |>
+      unnest(cols=everything())
+
+    write_csv(out_flux_full,file = out_flux_file_name)
+
+  } else{
+
+    save(out_fluxes,file=out_flux_file_name)
+
+  }
+
+
 
 
 

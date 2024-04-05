@@ -8,7 +8,7 @@
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param start_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string)
 #' @param end_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)
-#' @param data_file_name Required. Path of location for the file of environmental measurements (includes megapit data and nested data). Must end in .Rda (a string)
+#' @param data_file_name Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
 #' @param column_selectors Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
 
@@ -32,6 +32,13 @@ acquire_neon_data <- function(site_name,
                               time_frequency = "30_minute",
                               column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
                               ) {
+
+
+  # Get the save file extension and do a quick check
+  extension_name <- str_extract(data_file_name,pattern="(?<=\\.).{3}$")
+  if (!(extension_name %in% c("csv","Rda","rda"))) {
+    stop("Save file name extension must be a Rdata file (Rda) or comma separated file (csv). Please revise.")
+  }
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
@@ -152,7 +159,27 @@ acquire_neon_data <- function(site_name,
       mutate(data = map(.x=data,.f=~(.x |> mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
 
 
-    save(site_data,site_megapit,file=data_file_name)
+    # Now start saving
+    location_name <- str_extract(data_file_name,pattern=".+(?=\\..{3}$)")
+    if(extension_name == "csv") {
+      site_env_data <- site_data |>
+        select(-monthly_mean) |>
+        unnest(cols=everything())
+
+      # Write the environmental data
+      write_csv(site_env_data,file = data_file_name)
+
+      # Save the monthly mean data as a separate file
+      site_mm <- site_data |>
+        select(-data) |>
+        unnest(cols=everything())
+
+      write_csv(site_mm,file = paste0(location_name,"-monthly_mean.",extension_name))
+
+    } else{
+      save(site_data,site_megapit,file=data_file_name)
+    }
+
 
 
 }
