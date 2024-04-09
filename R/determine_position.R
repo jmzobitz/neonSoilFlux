@@ -11,21 +11,9 @@
 
 #' @return A data frame that reports the measurement depth for and associated environmental measurement.
 
-#' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-#' @keywords Currently none
 
-#' @examples
-#' # Currently none
-
-
-#' @import dplyr
-#' @import purrr
-#' @import lubridate
-
-
-#' @seealso
 
 #' @export
 
@@ -35,46 +23,45 @@
 
 
 
-determine_position <- function(input_positions,input_measurement) {
-
+determine_position <- function(input_positions, input_measurement) {
   position_data <- input_positions |>
-    mutate(across(.cols=positionStartDateTime:positionEndDateTime,.fns = ~as.POSIXct(.x,
-                                                                                     format="%Y-%m-%dT%H:%M:%S", #format time
-                                                                                     tz = "UTC"
+    dplyr::mutate(dplyr::across(.cols = positionStartDateTime:positionEndDateTime, .fns = ~ as.POSIXct(.x,
+      format = "%Y-%m-%dT%H:%M:%S", # format time
+      tz = "UTC"
     ))) |>
-    mutate(across(.cols=positionStartDateTime:positionEndDateTime,.fns=~if_else(is.na(.x),Sys.time(),.x))) |>
-    mutate(measurement_interval = lubridate::interval(positionStartDateTime,positionEndDateTime)) |>
-    separate_wider_delim(cols=HOR.VER,names=c("horizontalPosition","verticalPosition"),delim=".") |>
-    group_by(horizontalPosition,verticalPosition) |>
-    nest() |>
-    rename(position_info = data) |>
-    mutate(n_levels = map_dbl(.x=position_info,.f=~nrow(.x)))  # Test to see if we have multiple measurement levels - then we need to check
+    dplyr::mutate(dplyr::across(.cols = positionStartDateTime:positionEndDateTime, .fns = ~ dplyr::if_else(is.na(.x), Sys.time(), .x))) |>
+    dplyr::mutate(measurement_interval = lubridate::interval(positionStartDateTime, positionEndDateTime)) |>
+    tidyr::separate_wider_delim(cols = HOR.VER, names = c("horizontalPosition", "verticalPosition"), delim = ".") |>
+    dplyr::group_by(horizontalPosition, verticalPosition) |>
+    tidyr::nest() |>
+    dplyr::rename(position_info = data) |>
+    dplyr::mutate(n_levels = map_dbl(.x = position_info, .f = ~ nrow(.x))) # Test to see if we have multiple measurement levels - then we need to check
 
 
   out_measurement <- input_measurement |>
-    group_by(horizontalPosition,verticalPosition,startDateTime) |>
-    nest() |>
-    rename(measurement_info=data) |>
-    inner_join(position_data,by=c("horizontalPosition","verticalPosition")) |>
-    mutate(position_info = pmap(.l=list(n_levels,startDateTime,position_info),
-                                .f=function(levels,startDateTime,position_info) (
+    dplyr::group_by(horizontalPosition, verticalPosition, startDateTime) |>
+    tidyr::nest() |>
+    dplyr::rename(measurement_info = data) |>
+    dplyr::inner_join(position_data, by = c("horizontalPosition", "verticalPosition")) |>
+    dplyr::mutate(position_info = purrr::pmap(
+      .l = list(n_levels, startDateTime, position_info),
+      .f = function(levels, startDateTime, position_info) {
+        (
 
 
-                                  if(levels ==1) {
-                                    return(position_info)
-                                  } else {
-                                    new_info <- position_info |>
-                                      filter(startDateTime %within% measurement_interval)
+          if (levels == 1) {
+            return(position_info)
+          } else {
+            new_info <- position_info |>
+              dplyr::filter(startDateTime %within% measurement_interval)
 
-                                    return(new_info)
-                                  }
-                                )
-    )
-    )  |>
-    mutate(zOffset = map_dbl(.x=position_info,.f=~pluck(.x,"zOffset"))) |>
-    select(-n_levels,-position_info) |>
-    unnest(cols=c(measurement_info))
+            return(new_info)
+          })
+      }
+    )) |>
+    dplyr::mutate(zOffset = purrr::map_dbl(.x = position_info, .f = ~ purrr::pluck(.x, "zOffset"))) |>
+    dplyr::select(-n_levels, -position_info) |>
+    tidyr::unnest(cols = c(measurement_info))
 
   return(out_measurement)
-
 }

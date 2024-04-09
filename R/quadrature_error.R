@@ -14,12 +14,6 @@
 #' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-#' @keywords Currently none
-
-#' @examples TBD
-#'
-
-#' @seealso
 
 #' @export
 

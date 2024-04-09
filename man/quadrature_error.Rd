@@ -17,15 +17,9 @@ A value of quadrature error
 \description{
 Given a vector (x) and its errors (x_err), compute the quadrature error
 }
-\examples{
-TBD
-
-}
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }
-\keyword{Currently}
-\keyword{none}

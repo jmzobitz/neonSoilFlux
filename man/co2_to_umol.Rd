@@ -29,15 +29,9 @@ A value of the converted co2
 \description{
 Given a measurement of co2, convert it from ppm to umol m-3 based on temperature and pressure
 }
-\examples{
-TBD
-
-}
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }
-\keyword{Currently}
-\keyword{none}

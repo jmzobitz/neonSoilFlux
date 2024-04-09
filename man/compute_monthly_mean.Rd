@@ -22,23 +22,25 @@ Given a NEON measurement data frame calculate the monthly mean values across all
 }
 \examples{
 # Download the NEON data - here this would be soil moisture
-NEON_moist_30m_orig <-  neonUtilities::loadByProduct(dpID="DP1.00094.001",
-site="WREF",
-startdate="2022-06",
-enddate="2022-06",
-package="expanded",
-check.size = F)
+NEON_moist_30m_orig <- neonUtilities::loadByProduct(
+  dpID = "DP1.00094.001",
+  site = "WREF",
+  startdate = "2022-06",
+  enddate = "2022-06",
+  package = "expanded",
+  check.size = F
+)
 
 # Then correct the swc
-site_swc <- swc_correct(NEON_moist_30m_orig,"WREF")
+site_swc <- swc_correct(NEON_moist_30m_orig, "WREF")
 
 # Select the columns and the time frequency
-time_frequency = "30_minute"
-column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
+time_frequency <- "30_minute"
+column_selectors <- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 
 swc <- site_swc |>
-pluck(paste0("SWS_",time_frequency)) |>
-select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("VSWC",column_selectors)),VSWCFinalQF)
+  pluck(paste0("SWS_", time_frequency)) |>
+  select(domainID, siteID, horizontalPosition, verticalPosition, startDateTime, matches(str_c("VSWC", column_selectors)), VSWCFinalQF)
 
 # Now apply the monthly mean:
 swc_monthly_mean <- compute_monthly_mean(swc)

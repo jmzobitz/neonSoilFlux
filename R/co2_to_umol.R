@@ -19,46 +19,36 @@
 #' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-#' @keywords Currently none
-
-#' @examples TBD
-#'
-
-#' @seealso
-
 #' @export
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-21)
 #     original creation
 #   2023-07-18: Included experimental uncertainty in the mix.
+#     2024-04-08: update to get namespaces correct
 
 
-co2_to_umol <- function(temperature,pressure,co2,temperature_err,pressure_err,co2_err,zOffset) {
-
+co2_to_umol <- function(temperature, pressure, co2, temperature_err, pressure_err, co2_err, zOffset) {
   # Since pressure is a single value, make it equal to all the other lengths
-  pressure <- rep(pressure,length(temperature))
-  pressure_err <- rep(pressure_err,length(temperature_err))
+  pressure <- rep(pressure, length(temperature))
+  pressure_err <- rep(pressure_err, length(temperature_err))
 
   # Assign values to constants
   R <- 0.008314472 # Ideal gas constant = 0.008314472 m3 kPa °K-1 mol-1
   absZero <- -273.15 # Absolute zero (-273.15 °C; 0 °K)
 
 
-  co2_convert <- (co2 * pressure) / (R * (temperature - absZero) )
+  co2_convert <- (co2 * pressure) / (R * (temperature - absZero))
 
   # Vector of partial derivatives (temp, pressure, co2)
-  pd_errs <- c( -(co2 * pressure) / (R * (temperature - absZero)^2 ), (pressure) / (R * (temperature - absZero) ), (pressure) / (R * (temperature - absZero) ) )
+  pd_errs <- c(-(co2 * pressure) / (R * (temperature - absZero)^2), (pressure) / (R * (temperature - absZero)), (pressure) / (R * (temperature - absZero)))
 
-  errs <- c(temperature_err,pressure_err,co2_err)
+  errs <- c(temperature_err, pressure_err, co2_err)
 
-  calc_err <- quadrature_error(pd_errs,errs)
+  calc_err <- quadrature_error(pd_errs, errs)
 
-  out_tibble <- tibble(zOffset = zOffset,co2_umol = co2_convert,co2ExpUncert = calc_err)
+  out_tibble <- tibble::tibble(zOffset = zOffset,
+                               co2_umol = co2_convert,
+                               co2ExpUncert = calc_err)
   return(out_tibble)
-
-
-
-
 }
-

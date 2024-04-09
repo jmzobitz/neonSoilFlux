@@ -18,18 +18,13 @@
 #' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-#' @keywords Currently none
-
-#' @examples
-#' @import dplyr
-
-#' @seealso
-
 #' @export
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-19)
 #     original creation
+#     2024-04-08: update to get namespaces correct
+
 ##############################################################################################
 
 measurement_merge <- function(neon_data,data_code,data_product_id,measurement_name,qf_name) {
@@ -39,18 +34,18 @@ measurement_merge <- function(neon_data,data_code,data_product_id,measurement_na
 
   # Determine a data frame of the different horizontal and vertial positions
   positions_name <- paste0("sensor_positions_",data_product_id)
-  positions <- neon_data[[positions_name]] %>%
-    separate(HOR.VER,into=c("HOR","VER")) %>%
-    select(siteID,HOR,VER,zOffset)
+  positions <- neon_data[[positions_name]] |>
+    tidyr::separate(HOR.VER,into=c("HOR","VER")) |>
+    dplyr::select(siteID,HOR,VER,zOffset)
 
 
   # Identify good (i.e., unflagged) soil temperature data, join the positions, and group by and nest
 
   data_name <- paste0(data_code,"_30_minute")
 
-  good_data <- neon_data[[data_name]] %>%
-    select(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","endDateTime") | matches(paste0("^",measurement_name,"$")) | matches(paste0("^",qf_name,"$")) ) %>%
-    left_join(positions,by=c("siteID"="siteID","horizontalPosition"="HOR","verticalPosition"="VER")) %>%
+  good_data <- neon_data[[data_name]] |>
+    dplyr::select(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","endDateTime") | tidyselect::matches(paste0("^",measurement_name,"$")) | tidyselect::matches(paste0("^",qf_name,"$")) ) |>
+    dplyr::left_join(positions,by=c("siteID"="siteID","horizontalPosition"="HOR","verticalPosition"="VER"))
 
   return(good_data)
 

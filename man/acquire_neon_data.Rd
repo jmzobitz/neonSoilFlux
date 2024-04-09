@@ -32,6 +32,9 @@ Nothing is returned - the file is saved to the location provided
 \description{
 Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 }
+\references{
+License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+}
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }

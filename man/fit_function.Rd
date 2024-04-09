@@ -22,18 +22,15 @@ fit_function(
 
 \item{input_value_qf}{Required. Vector of qf values from the smoothing 0 = no smoothing, 1 = mean value used (smoothing), 2 = NA value}
 
-\item{measurement_special}{Flag if we want to just do linear interpolation for a given measurement}
+\item{interp_depth}{Depths of the sensors required for interpolation}
 
-\item{interp_values}{Depths of the sensors required for interpolation}
+\item{measurement_special}{Flag if we want to just do linear interpolation for a given measurement}
 }
 \value{
 A data frame of the depth and the measured column for the measurements and reported error
 }
 \description{
 Definition function. Linearly interpolate a measurement across the different measurement depths
-}
-\examples{
-TBD
 }
 \references{
 License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
@@ -42,5 +39,3 @@ License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 John Zobitz \email{zobitz@augsburg.edu}
 based on code developed by Edward Ayres \email{eayres@battelleecology.org}
 }
-\keyword{Currently}
-\keyword{none}

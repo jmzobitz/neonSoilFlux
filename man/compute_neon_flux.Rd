@@ -33,6 +33,16 @@ This file takes a saved data file from acquire:
 5) Adds in the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 6) Saves the data
 }
+\examples{
+acquire_neon_data("SJER","my-out-file.Rda")
+
+# Then process and compute the fluxes from that data file.
+ compute_neon_flux("my-out-file.Rda","flux-file.Rda")
+
+}
+\references{
+License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+}
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 based on code developed by Edward Ayres \email{eayres@battelleecology.org}

@@ -30,5 +30,3 @@ License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 John Zobitz \email{zobitz@augsburg.edu}
 based on code developed by Edward Ayres \email{eayres@battelleecology.org}
 }
-\keyword{Currently}
-\keyword{none}

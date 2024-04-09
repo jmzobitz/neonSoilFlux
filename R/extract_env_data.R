@@ -21,13 +21,12 @@
 #' @example extract_env_data(input_file_name = "my-file.Rda",save_file = TRUE,output_file_name = "env-my-file.Rda")
 #'
 
-#'
-#' @import dplyr
 
-#' @return Data frame of fluxes and gradient from the timeperiod
+#' @return Data frame of environmental measurements for flux computation
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-03-30)
+#     2024-04-08: update to get namespaces correct
 
 
 
@@ -44,7 +43,7 @@ extract_env_data <- function(input_file_name,
   ################
   # 2) Interpolates across the measurements
   site_data2 <- site_data |>
-    mutate(data = purrr::pmap(.l=list(data,monthly_mean,measurement),.f=~insert_mean(..1,..2,..3)))
+    dplyr::mutate(data = purrr::pmap(.l=list(data,monthly_mean,measurement),.f=~insert_mean(..1,..2,..3)))
 
   # Filters out measurements that don't have enough QF flags
   site_filtered <- measurement_detect(site_data2)
@@ -67,19 +66,19 @@ extract_env_data <- function(input_file_name,
 
   # Add in the pressure measurements
   pressure_measurement <- site_filtered |>
-    filter(measurement =="staPres") |>
-    select(-monthly_mean) |>
-    unnest(cols=c("data")) |>
-    group_by(startDateTime) |>
-    nest() |>
-    rename(press_data = data)
+    dplyr::filter(measurement =="staPres") |>
+    dplyr::select(-monthly_mean) |>
+    tidyr::unnest(cols=c("data")) |>
+    dplyr::group_by(startDateTime) |>
+    tidyr::nest() |>
+    dplyr::rename(press_data = data)
 
 
   ### Then take each of the measurements to associate them with errors
   all_measures <- site_interp |>
-    inner_join(pressure_measurement, by=c("startDateTime")) |>
-    mutate(staPresMeanQF = map_int(.x=press_data,.f=~pull(.x,staPresFinalQF))) |>
-    relocate(press_data,.after="env_data")
+    dplyr::inner_join(pressure_measurement, by=c("startDateTime")) |>
+    dplyr::mutate(staPresMeanQF = purrr::map_int(.x=press_data,.f=~dplyr::pull(.x,staPresFinalQF))) |>
+    dplyr::relocate(press_data,.after="env_data")
 
   if(save_file) {
     save(all_measures,file=output_file_name)

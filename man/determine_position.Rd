@@ -13,18 +13,11 @@ determine_position(input_positions, input_measurement)
 }
 \value{
 A data frame that reports the measurement depth for and associated environmental measurement.
+License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \description{
 Given a NEON measurement data frame and measurement depth, pull out the measurement depth for a measurement - because it may vary in time based on if a sensor is replaced.
 }
-\examples{
-# Currently none
-}
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-}
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }
-\keyword{Currently}
-\keyword{none}

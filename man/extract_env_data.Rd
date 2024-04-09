@@ -14,7 +14,7 @@ extract_env_data(input_file_name, save_file = FALSE, output_file_name = NULL)
 \item{output_file_name}{Optional. Path of location for file to save when save_file is TRUE. Must end in .Rda (a string)}
 }
 \value{
-Data frame of fluxes and gradient from the timeperiod
+Data frame of environmental measurements for flux computation
 }
 \description{
 Given a site filename (from acquire_neon_data), process and compute fluxes.

@@ -15,6 +15,9 @@ A value of the surface CO2 flux (umol m-2 s-1)
 \description{
 Computation function. Given a measurement of the co2 and diffusive flux at different levels, return the surface flux
 }
+\references{
+License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+}
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
 }

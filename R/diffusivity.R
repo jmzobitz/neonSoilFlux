@@ -21,12 +21,6 @@
 #' @references
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-#' @keywords Currently none
-
-#' @examples TBD
-#'
-
-#' @seealso
 
 #' @export
 
@@ -37,11 +31,10 @@
 #     modified to account if soil water > porosity - just set to 0
 
 
-diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_water_err,pressure_err,zOffset,porVol2To20) {
-
+diffusivity <- function(temperature, soil_water, pressure, temperature_err, soil_water_err, pressure_err, zOffset, porVol2To20) {
   # Since pressure is a single value, make it equal to all the other lengths
-  pressure <- rep(pressure,length(temperature))
-  pressure_err <- rep(pressure_err,length(temperature_err))
+  pressure <- rep(pressure, length(temperature))
+  pressure_err <- rep(pressure_err, length(temperature_err))
 
 
   # Assign values to constants
@@ -61,21 +54,21 @@ diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_wat
   ###############################
 
   # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density.
-  #rockVol <- ((coarseFrag2To5 + coarseFrag5To20) / 1000) / 2.65
+  # rockVol <- ((coarseFrag2To5 + coarseFrag5To20) / 1000) / 2.65
 
   # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3.
-  #porosSub2mm <- 1 - bulkDensExclCoarseFrag/2.65
+  # porosSub2mm <- 1 - bulkDensExclCoarseFrag/2.65
 
   # Calculate porosity of the 0-20 mm fraction (cm3 cm-3). Assume no pores within rocks.
-  #porVol2To20 <- porosSub2mm * (1 - rockVol)
+  # porVol2To20 <- porosSub2mm * (1 - rockVol)
 
 
 
   # Calculate the air filled porosity - if the soil water is larger, then set it to 0
-  porVol2To20AirFilled <- pmax(porVol2To20 - soil_water,0)
+  porVol2To20AirFilled <- pmax(porVol2To20 - soil_water, 0)
 
   # Calculate gas tortuosity factor based on Millington and Quirk 1961
-  tort <- (porVol2To20AirFilled^(10/3)) / (porVol2To20^2)
+  tort <- (porVol2To20AirFilled^(10 / 3)) / (porVol2To20^2)
 
 
   # Calculate CO2 diffusivity in free air (m2 s-1).
@@ -85,24 +78,19 @@ diffusivity <- function(temperature,soil_water,pressure,temperature_err,soil_wat
   diffusivity <- tort * diffuFreeAir
 
   # Compute the partial derivative of the measurements
-  temp_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^.75 * (pressure / 101.3)*1.75 *tort
+  temp_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^.75 * (pressure / 101.3) * 1.75 * tort
 
-  soil_water_pd <- 10/3*(porVol2To20AirFilled^(7/3)) / (porVol2To20^2) * diffuFreeAir
+  soil_water_pd <- 10 / 3 * (porVol2To20AirFilled^(7 / 3)) / (porVol2To20^2) * diffuFreeAir
 
-  pressure_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (1 / 101.3) *tort
+  pressure_pd <- 0.0000147 * ((temperature - absZero) / (20 - absZero))^1.75 * (1 / 101.3) * tort
 
 
 
-  measurement_pd <- c(temp_pd,soil_water_pd,pressure_pd)
-  errs <- c(temperature_err,soil_water_err,pressure_err)
+  measurement_pd <- c(temp_pd, soil_water_pd, pressure_pd)
+  errs <- c(temperature_err, soil_water_err, pressure_err)
 
-  calc_err <- quadrature_error(measurement_pd,errs)
+  calc_err <- quadrature_error(measurement_pd, errs)
 
-  out_tibble <- tibble(zOffset,diffusivity = diffusivity,diffusExpUncert = calc_err)
+  out_tibble <- tibble::tibble(zOffset, diffusivity = diffusivity, diffusExpUncert = calc_err)
   return(out_tibble)
-
-
-
-
 }
-
