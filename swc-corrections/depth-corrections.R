@@ -7,8 +7,8 @@ library(devtools)
 #'
 #' The second
 
-swc_corrections <- read_csv('swc-corrections/swc_depths.csv') %>%
-  unite(col=HOR.VER,horizontalPosition.HOR,verticalPosition.VER,sep=".") %>%
+swc_corrections <- read_csv('swc-corrections/swc_depths.csv') |>
+  unite(col=HOR.VER,horizontalPosition.HOR,verticalPosition.VER,sep=".") |>
   select(siteID,HOR.VER,sensorDepth)
 
 
