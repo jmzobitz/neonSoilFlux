@@ -9,6 +9,7 @@
 
 #' @param input_swc Required. input soil water content data from acquire_neon_data (as a list)
 #' @param curr_site Current site we are working with
+#' @param reference_time Current month we are working with
 
 #' @return A revised list
 
@@ -30,20 +31,35 @@
 #   John Zobitz (2022-06-10)
 #     original creation
 #     2024-04-08: update to get namespaces correct
+#     2024-04-10: update to account for more correct soil depths
 
-swc_correct <- function(input_swc,curr_site) {
+
+swc_correct <- function(input_swc,curr_site,reference_time) {
 
    ### Determine which of the sites we are working with:
   swc_corrections_site <- swc_corrections |>
     dplyr::filter(siteID == curr_site) |>
-    dplyr::select(-siteID)   # Remove this so it doesn't get weird
+    dplyr::mutate(interval = purrr::map2_lgl(.x=startDateTime,
+                                             .y=endDateTime,
+                                             .f=~inside_interval(.x,.y,reference_time)
+    )
+    ) |>
+    dplyr::filter(interval)
 
     # Update the depths of the soil water sensors
     input_swc$sensor_positions_00094 <- input_swc$sensor_positions_00094 |>
-      dplyr::left_join(swc_corrections_site,by="HOR.VER") |>
-      dplyr::select(-zOffset) |>
-      dplyr::rename(zOffset = sensorDepth) |>
-      dplyr::relocate(zOffset,.after="yOffset")
+      dplyr::group_by(siteID,HOR.VER) |>
+      tidyr::nest() |>
+      dplyr::left_join(swc_corrections_site,by=c("siteID","HOR.VER")) |>
+      dplyr::mutate(data = purrr::map(data,dplyr::slice_head), # Get one variable
+                    data = purrr::map2(.x=data,
+                                      .y=sensorDepth,
+                                      .f=~(.x |> dplyr::mutate(zOffset = .y) )
+                    )
+      ) |>
+      dplyr::select(siteID,HOR.VER,data) |>
+      tidyr::unnest(cols=c("data"))
+    ###
 
   # Next update the swc flags for both 30 and 1 minutes:
     # As of 07-17-2023 this is commented out - see the informational notes

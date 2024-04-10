@@ -28,6 +28,7 @@
 #     update to fix auto download (2021-07-25)
 #     2022-06-10: update to correct flags on swc
 #     2024-04-08: update to get namespaces correct
+#     2024-04-10: update to get the swc depths corrected
 
 acquire_neon_data <- function(site_name,
                               start_date,
@@ -65,7 +66,7 @@ acquire_neon_data <- function(site_name,
                                            package="expanded",
                                            check.size = F)
   # Then correct the swc
-  site_swc <- swc_correct(site_swc,site_name)
+  site_swc <- swc_correct(site_swc,site_name,start_date)
 
 
 
