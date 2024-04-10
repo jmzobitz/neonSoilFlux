@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-^data-neon$
-^process-files$
-^flux-results$
-^data$
+^data-neon/$
+^process-files/$
+^flux-results/$
+^data/$
+^NEON-prev/$
 
