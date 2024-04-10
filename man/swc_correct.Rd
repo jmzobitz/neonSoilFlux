@@ -4,12 +4,14 @@
 \alias{swc_correct}
 \title{Convert co2 concentration from ppm to µmol m-3 units}
 \usage{
-swc_correct(input_swc, curr_site)
+swc_correct(input_swc, curr_site, reference_time)
 }
 \arguments{
 \item{input_swc}{Required. input soil water content data from acquire_neon_data (as a list)}
 
 \item{curr_site}{Current site we are working with}
+
+\item{reference_time}{Current month we are working with}
 }
 \value{
 A revised list

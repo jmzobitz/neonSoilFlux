@@ -143,7 +143,7 @@ depth_interpolate <- function(input_measurements,
     dplyr::mutate(
       env_data = purrr::map(.x = data, .f = ~ (.x$out_interp[[1]] |> dplyr::inner_join(.x$out_interp[[2]], by = "zOffset") |>
         dplyr::inner_join(.x$interp_data[[1]], by = "zOffset"))),
-      qf_flags = purrr::map(.x = data, .f = ~ (.x |> dplyr::select(-out_interp) |> dplyr::pivot_wider(names_from = "measurement", values_from = "out_qf")))
+      qf_flags = purrr::map(.x = data, .f = ~ (.x |> dplyr::select(-out_interp) |> tidyr::pivot_wider(names_from = "measurement", values_from = "out_qf")))
     )
 
   # Almost there!
