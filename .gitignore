@@ -7,4 +7,6 @@
 ^flux-results/$
 ^data/$
 ^NEON-prev/$
+^NEON-update/$
+^msb-files/$
 
