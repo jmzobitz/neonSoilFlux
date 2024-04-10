@@ -1,7 +1,3 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^data-neon$
-^process-files$
-^data-neon-process$
-^flux-results$
-^swc-corrections$
+^archive-files$
