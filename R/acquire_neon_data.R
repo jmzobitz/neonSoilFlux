@@ -72,7 +72,7 @@ acquire_neon_data <- function(site_name,
                                            package="expanded",
                                            check.size = F)
   # Then correct the swc
-  site_swc <- swc_correct(site_swc,site_name,start_date)
+  site_swc <- swc_correct(site_swc,site_name,download_date)
 
 
 
