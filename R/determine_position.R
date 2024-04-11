@@ -35,7 +35,7 @@ determine_position <- function(input_positions, input_measurement) {
     dplyr::group_by(horizontalPosition, verticalPosition) |>
     tidyr::nest() |>
     dplyr::rename(position_info = data) |>
-    dplyr::mutate(n_levels = map_dbl(.x = position_info, .f = ~ nrow(.x))) # Test to see if we have multiple measurement levels - then we need to check
+    dplyr::mutate(n_levels = purrr::map_dbl(.x = position_info, .f = ~ nrow(.x))) # Test to see if we have multiple measurement levels - then we need to check
 
 
   out_measurement <- input_measurement |>
