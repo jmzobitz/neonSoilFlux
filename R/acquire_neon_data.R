@@ -89,7 +89,7 @@ acquire_neon_data <- function(site_name,
   # Process each site measurement
     co2 <- site_co2 |>
       purrr::pluck(paste0("SCO2C_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(str_c("soilCO2concentration",column_selectors)),finalQF) |>
+      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(stringr::str_c("soilCO2concentration",column_selectors)),finalQF) |>
       dplyr::rename(soilCO2concentrationFinalQF = finalQF)
 
 
@@ -105,7 +105,7 @@ acquire_neon_data <- function(site_name,
 
     temperature <- site_temp |>
       purrr::pluck(paste0("ST_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(str_c("soilTemp",column_selectors)),finalQF)  |>
+      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(stringr::str_c("soilTemp",column_selectors)),finalQF)  |>
       dplyr::rename(soilTempFinalQF = finalQF)
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -122,7 +122,7 @@ acquire_neon_data <- function(site_name,
 
     swc <- site_swc |>
       purrr::pluck(paste0("SWS_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("VSWC",column_selectors)),VSWCFinalQF)
+      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(stringr::str_c("VSWC",column_selectors)),VSWCFinalQF)
 
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -143,7 +143,7 @@ acquire_neon_data <- function(site_name,
 
     pressure <- site_press |>
       purrr::pluck(paste0("BP_",time_frequency_bp)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(str_c("staPres",column_selectors)),staPresFinalQF)
+      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(stringr::str_c("staPres",column_selectors)),staPresFinalQF)
 
     pressure_positions <- site_press |>
       purrr::pluck(paste0("sensor_positions_","00004"))
