@@ -48,7 +48,7 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   # meanQF = 2 --> NA flag, so we can't use measurement
 
   out_data <- joined_data |>
-    dplyr::mutate(dplyr::across(.cols=tidyselect::contains("[^StdEr]Mean$"),.fns=~pull(smoothed_data,var_mean)),
+    dplyr::mutate(dplyr::across(.cols=tidyselect::contains("[^StdEr]Mean$"),.fns=~dplyr::pull(smoothed_data,var_mean)),
            dplyr::across(.cols=tidyselect::contains('ExpUncert$'),.fns=~dplyr::pull(smoothed_data,var_uncert)) ) |>
     dplyr::ungroup() |>
     dplyr::mutate(mean_QF = dplyr::pull(smoothed_data,mean_QF)) |>
