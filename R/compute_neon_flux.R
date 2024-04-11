@@ -117,7 +117,7 @@ compute_neon_flux <- function(input_file_name,
         }
         return(mgp$porVol2To20[horizon])
       })
-      return(mutate(x, porVol2To20))
+      return(dplyr::mutate(x, porVol2To20))
     }))
 
   ################

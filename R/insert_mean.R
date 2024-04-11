@@ -38,7 +38,7 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   var_QF <-  dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,"FinalQF$")) )
 
   smoothed_data <- tibble::tibble(var_mean,var_uncert,monthly_mean,monthly_uncert,var_QF) |>
-    mutate(var_mean = dplyr::if_else(var_QF ==0,var_mean,monthly_mean),
+    dplyr::mutate(var_mean = dplyr::if_else(var_QF ==0,var_mean,monthly_mean),
            var_uncert = dplyr::if_else(var_QF ==0,var_uncert,monthly_uncert),
            mean_QF =dplyr::if_else(var_QF ==0,0,1),
            mean_QF = dplyr::if_else(is.na(monthly_mean) | is.na(monthly_uncert),2,mean_QF))

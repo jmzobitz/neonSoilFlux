@@ -84,7 +84,7 @@ measurement_detect <- function(input_data) {
       } else { ## For the column with pressure, we just want a starting time.
         .x |> dplyr::semi_join(have_three_measurement, by = c("startDateTime"))
       }))) |>
-    mutate(n_obs = purrr::map2_dbl(.x = data, .y = measurement, .f = ~ (
+    dplyr::mutate(n_obs = purrr::map2_dbl(.x = data, .y = measurement, .f = ~ (
       if (.y != "staPres") {
         .x |>
           dplyr::group_by(horizontalPosition, startDateTime) |>
