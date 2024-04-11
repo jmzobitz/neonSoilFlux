@@ -16,8 +16,8 @@ inside_interval <- function(start,end,reference_time) {
 
   new_reference <- as.POSIXct(lubridate::ym(reference_time))
 
-  new_start <- dplyr::if_else(!is.na(start),as.POSIXct(start),lubridate::today() )
-  new_end <- dplyr::if_else(!is.na(end),as.POSIXct(end),lubridate::today() )
+  new_start <- dplyr::if_else(!is.na(start),as.POSIXct(start),as.POSIXct(lubridate::today()) )
+  new_end <- dplyr::if_else(!is.na(end),as.POSIXct(end),as.POSIXct(lubridate::today()) )
 
   out_val <- dplyr::between(new_reference,new_start,new_end)
   return(out_val)
