@@ -31,7 +31,7 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   mean_names <- names(monthly_mean)
 
 
-  var_mean <- dplyr::pull(joined_data,var=which(str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
+  var_mean <- dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
   monthly_mean <- dplyr::pull(joined_data,comp_mean)
   monthly_uncert <- dplyr::pull(joined_data,comp_sd)
   var_uncert <- dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,'ExpUncert$') ) ) # expanded measurement uncertainty at 95% confidence
