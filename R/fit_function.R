@@ -47,7 +47,7 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
     qf = input_value_qf
   ) |>
     tidyr::drop_na() |>
-    filter(qf !=2)  # Can use mean qf values
+    dplyr::filter(qf !=2)  # Can use mean qf values
 
   if (nrow(test_data) > 2) {
     input_depth <- test_data |> dplyr::pull(depth)
