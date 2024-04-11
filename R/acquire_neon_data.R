@@ -161,7 +161,7 @@ acquire_neon_data <- function(site_name,
       data = list(co2,swc,temperature,pressure),
       monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean),
       measurement=c("soilCO2concentration","VSWC","soilTemp","staPres")) |>
-      mutate(data = purrr::map(.x=data,.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
+      dplyr::mutate(data = purrr::map(.x=data,.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
 
 
     # Now start saving
