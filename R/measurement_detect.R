@@ -56,7 +56,7 @@ measurement_detect <- function(input_data) {
         .x |>
           dplyr::group_by(horizontalPosition, startDateTime) |>
           tidyr::nest() |>
-          dplyr::mutate(tot = map_dbl(data, nrow)) |>
+          dplyr::mutate(tot = purrr::map_dbl(data, nrow)) |>
           dplyr::filter(tot >= 2) |>
           tidyr::unnest(cols = c("data"))
       } else {
