@@ -6,8 +6,7 @@
 \usage{
 acquire_neon_data(
   site_name,
-  start_date,
-  end_date,
+  download_date,
   data_file_name,
   time_frequency = "30_minute",
   column_selectors = c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
@@ -16,13 +15,11 @@ acquire_neon_data(
 \arguments{
 \item{site_name}{Required. NEON code for a particular site (a string)}
 
-\item{start_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string)}
-
-\item{end_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)}
+\item{download_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only}
 
 \item{data_file_name}{Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)}
 
-\item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
+\item{time_frequency}{Required. Will you be using 30 minute ("30") or 1 minute ("1") recorded data? Defaults to 30 minutes.}
 
 \item{column_selectors}{Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
 }

@@ -17,8 +17,7 @@ To analyze fluxes once the package is installed requires a two step process:
 
 2. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
 ` acquire_neon_data(site_name ="SJER",`
-                  start_date = "2020-06",
-                  end_date = "2020-06",
+                  download_date = "2020-06",
                   data_file_name = "my-file-2020-06.Rda") `
 
 3. Then process and compute fluxes.

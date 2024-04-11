@@ -9,6 +9,7 @@
 #' @param input_positions Required. Input vector of measurements depths
 #' @param input_measurement Required. Input vector of measurements.
 
+
 #' @return A data frame that reports the measurement depth for and associated environmental measurement.
 
 #' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
@@ -24,7 +25,11 @@
 
 
 determine_position <- function(input_positions, input_measurement) {
-  position_data <- input_positions |>
+
+  # Define %within% so we can use here
+  `%within%` <- lubridate::`%within%`
+
+    position_data <- input_positions |>
     dplyr::mutate(dplyr::across(.cols = positionStartDateTime:positionEndDateTime, .fns = ~ as.POSIXct(.x,
       format = "%Y-%m-%dT%H:%M:%S", # format time
       tz = "UTC"
@@ -53,7 +58,7 @@ determine_position <- function(input_positions, input_measurement) {
             return(position_info)
           } else {
             new_info <- position_info |>
-              dplyr::filter(startDateTime %within% measurement_interval)
+              dplyr::filter(startDateTime  %within% measurement_interval)
 
             return(new_info)
           })

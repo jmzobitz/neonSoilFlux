@@ -6,17 +6,14 @@
 #' @description
 #' Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 #' @param site_name Required. NEON code for a particular site (a string)
-#' @param start_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string)
-#' @param end_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-08" means it will grab data for the entire 8th month of 2020. (a string)
+#' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
 #' @param data_file_name Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)
-#' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
+#' @param time_frequency Required. Will you be using 30 minute ("30") or 1 minute ("1") recorded data? Defaults to 30 minutes.
 #' @param column_selectors Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
 
 #'
-#' @example acquire_neon_data("SJER","2020-05","2020-08","my-file.Rda")
+#' @example acquire_neon_data("SJER","2020-05","my-file.Rda")
 #'
-#' @import neonUtilities
-
 #' @return Nothing is returned - the file is saved to the location provided
 
 #' @references
@@ -31,13 +28,20 @@
 #     2024-04-10: update to get the swc depths corrected
 
 acquire_neon_data <- function(site_name,
-                              start_date,
-                              end_date,
+                              download_date,
                               data_file_name,
                               time_frequency = "30_minute",
                               column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
                               ) {
 
+
+  # Stop if we don't specify 1 or 30 minutes
+  if (!(time_frequency %in% c("30_minute","1_minute"))) {
+    stop("Time frequency must be 30 minute (`30_minute`)or 1 minute (`1_minute`). Please revise.")
+  }
+
+  # Extract out the download time
+  download_time <- stringr::str_extract(time_frequency,pattern="^[:digit:]+(?=_)")
 
   # Get the save file extension and do a quick check
   extension_name <- stringr::str_extract(data_file_name,pattern="(?<=\\.).{3}$")
@@ -53,16 +57,18 @@ acquire_neon_data <- function(site_name,
 
   site_temp <- neonUtilities::loadByProduct(dpID="DP1.00041.001",
                                             site=site_name,
-                                            startdate=start_date,
-                                            enddate=end_date,
+                                            startdate=download_date,
+                                            enddate=download_date,
+                                            timeIndex = download_time,
                                             package="expanded",
                                             check.size = F)
 
 
   site_swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001",
                                            site=site_name,
-                                           startdate=start_date,
-                                           enddate=end_date,
+                                           startdate=download_date,
+                                           enddate=download_date,
+                                           timeIndex = download_time,
                                            package="expanded",
                                            check.size = F)
   # Then correct the swc
@@ -72,15 +78,17 @@ acquire_neon_data <- function(site_name,
 
   site_press <- neonUtilities::loadByProduct(dpID="DP1.00004.001",
                                              site=site_name,
-                                             startdate=start_date,
-                                             enddate=end_date,
+                                             startdate=download_date,
+                                             enddate=download_date,
+                                             timeIndex = download_time,
                                              package="expanded",
                                              check.size = F)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
                                            site=site_name,
-                                           startdate=start_date,
-                                           enddate=end_date,
+                                           startdate=download_date,
+                                           enddate=download_date,
+                                           timeIndex = download_time,
                                            package="expanded",
                                            check.size = F)
 

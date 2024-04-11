@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom lubridate %within%
 #' @importFrom neonUtilities loadByProduct
 #' @importFrom readr write_csv
 #' @importFrom stats approx
