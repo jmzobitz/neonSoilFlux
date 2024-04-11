@@ -47,7 +47,7 @@ measurement_detect <- function(input_data) {
     dplyr::mutate(data = purrr::map2(.x = data, .y = measurement, .f = ~ (
       if (.y == "soilCO2concentration") {
         .x |>
-          group_by(horizontalPosition, startDateTime) |>
+          dplyr::group_by(horizontalPosition, startDateTime) |>
           tidyr::nest() |>
           dplyr::mutate(tot = purrr::map_dbl(data, nrow)) |>
           dplyr::filter(tot > 2) |>
