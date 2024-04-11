@@ -34,8 +34,8 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
   var_mean <- dplyr::pull(joined_data,var=which(str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
   monthly_mean <- dplyr::pull(joined_data,comp_mean)
   monthly_uncert <- dplyr::pull(joined_data,comp_sd)
-  var_uncert <- dplyr::pull(joined_data,var=which(str_detect(col_names,'ExpUncert$') ) ) # expanded measurement uncertainty at 95% confidence
-  var_QF <-  dplyr::pull(joined_data,var=which(str_detect(col_names,"FinalQF$")) )
+  var_uncert <- dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,'ExpUncert$') ) ) # expanded measurement uncertainty at 95% confidence
+  var_QF <-  dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,"FinalQF$")) )
 
   smoothed_data <- tibble::tibble(var_mean,var_uncert,monthly_mean,monthly_uncert,var_QF) |>
     mutate(var_mean = dplyr::if_else(var_QF ==0,var_mean,monthly_mean),

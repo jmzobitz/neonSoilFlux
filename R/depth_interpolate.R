@@ -79,8 +79,8 @@ depth_interpolate <- function(input_measurements,
           interpolate_depth <- env_data$interp_data[[i]]$zOffset
           col_names <- names(current_data)
 
-          var_mean <- dplyr::pull(current_data, var = which(str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
-          var_uncert <- dplyr::pull(current_data, var = which(str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence
+          var_mean <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
+          var_uncert <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence
           var_qf <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "FinalQF$")))
 
 
