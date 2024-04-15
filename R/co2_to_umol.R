@@ -26,6 +26,7 @@
 #     original creation
 #   2023-07-18: Included experimental uncertainty in the mix.
 #     2024-04-08: update to get namespaces correct
+#   2024-04-15: update to fix error in calculation of partial derivative of pressure (from Yang song)
 
 
 co2_to_umol <- function(temperature, pressure, co2, temperature_err, pressure_err, co2_err, zOffset) {
@@ -41,7 +42,10 @@ co2_to_umol <- function(temperature, pressure, co2, temperature_err, pressure_er
   co2_convert <- (co2 * pressure) / (R * (temperature - absZero))
 
   # Vector of partial derivatives (temp, pressure, co2)
-  pd_errs <- c(-(co2 * pressure) / (R * (temperature - absZero)^2), (pressure) / (R * (temperature - absZero)), (pressure) / (R * (temperature - absZero)))
+  pd_errs <- c(-(co2 * pressure) / (R * (temperature - absZero)^2),
+               (co2) / (R * (temperature - absZero)),
+               (pressure) / (R * (temperature - absZero))
+               )
 
   errs <- c(temperature_err, pressure_err, co2_err)
 

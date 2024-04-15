@@ -17,12 +17,12 @@ To analyze fluxes once the package is installed requires a two step process:
 
 2. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
 ` acquire_neon_data(site_name ="SJER",`
-                  download_date = "2020-06",
-                  data_file_name = "my-file-2020-06.Rda") `
+                  `download_date = "2020-06",`
+                  `data_file_name = "my-file-2020-06.Rda") `
 
 3. Then process and compute fluxes.
-` compute_neon_flux(input_file_name = "my-file-2020-06.Rda",
-                                      out_flux_file_name = "my-file-flux-2020-06.Rda") `
+` compute_neon_flux(input_file_name = "my-file-2020-06.Rda",`
+                                      `out_flux_file_name = "my-file-flux-2020-06.Rda") `
 
 If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
 
