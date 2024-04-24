@@ -9,6 +9,7 @@ acquire_neon_data(
   download_date,
   data_file_name,
   time_frequency = "30_minute",
+  provisional = FALSE,
   column_selectors = c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 )
 }
@@ -19,9 +20,11 @@ acquire_neon_data(
 
 \item{data_file_name}{Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)}
 
-\item{time_frequency}{Required. Will you be using 30 minute ("30") or 1 minute ("1") recorded data? Defaults to 30 minutes.}
+\item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
 
-\item{column_selectors}{Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
+\item{provisional}{Required. Should you use provisional data in download. Defaults to F. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).}
+
+\item{column_selectors}{Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
 }
 \value{
 Nothing is returned - the file is saved to the location provided

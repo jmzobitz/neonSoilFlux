@@ -8,8 +8,9 @@
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
 #' @param data_file_name Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)
-#' @param time_frequency Required. Will you be using 30 minute ("30") or 1 minute ("1") recorded data? Defaults to 30 minutes.
-#' @param column_selectors Required. Types of measurements we will be computing (typically column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
+#' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
+#' @param provisional Required. Should you use provisional data in download. Defaults to F. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
+#' @param column_selectors Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
 
 #'
 #' @example acquire_neon_data("SJER","2020-05","my-file.Rda")
@@ -26,11 +27,13 @@
 #     2022-06-10: update to correct flags on swc
 #     2024-04-08: update to get namespaces correct
 #     2024-04-10: update to get the swc depths corrected
+#     2024-04-23: update to allow provisional data
 
 acquire_neon_data <- function(site_name,
                               download_date,
                               data_file_name,
                               time_frequency = "30_minute",
+                              provisional = FALSE,
                               column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
                               ) {
 
@@ -52,7 +55,8 @@ acquire_neon_data <- function(site_name,
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
                                                package="expanded",
-                                               check.size = F)
+                                               check.size = F,
+                                               include.provisional = provisional)
 
 
   site_temp <- neonUtilities::loadByProduct(dpID="DP1.00041.001",
@@ -61,7 +65,8 @@ acquire_neon_data <- function(site_name,
                                             enddate=download_date,
                                             timeIndex = download_time,
                                             package="expanded",
-                                            check.size = F)
+                                            check.size = F,
+                                            include.provisional = provisional)
 
 
   site_swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001",
@@ -70,7 +75,8 @@ acquire_neon_data <- function(site_name,
                                            enddate=download_date,
                                            timeIndex = download_time,
                                            package="expanded",
-                                           check.size = F)
+                                           check.size = F,
+                                           include.provisional = provisional)
   # Then correct the swc
   site_swc <- swc_correct(site_swc,site_name,download_date)
 
@@ -82,7 +88,8 @@ acquire_neon_data <- function(site_name,
                                              enddate=download_date,
                                              timeIndex = download_time,
                                              package="expanded",
-                                             check.size = F)
+                                             check.size = F,
+                                             include.provisional = provisional)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
                                            site=site_name,
@@ -90,6 +97,7 @@ acquire_neon_data <- function(site_name,
                                            enddate=download_date,
                                            timeIndex = download_time,
                                            package="expanded",
+                                           include.provisional = provisional,
                                            check.size = F)
 
 
