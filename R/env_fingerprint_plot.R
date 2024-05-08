@@ -18,6 +18,7 @@
 #   John Zobitz (2024-04-07)
 #     original creation
 #     2024-04-08: update to get namespaces correct
+#     2024-05-07: colorscheme updates
 
 env_fingerprint_plot <- function(input_fluxes) {
   prep_env <- out_fluxes |>
@@ -26,9 +27,9 @@ env_fingerprint_plot <- function(input_fluxes) {
       week_day = lubridate::wday(startDateTime),
       decimal_hour = lubridate::hour(startDateTime) + lubridate::minute(startDateTime) / 60,
       day = lubridate::floor_date(startDateTime, unit = "day"),
-      soilCO2concentrationMeanQF = as.numeric(soilCO2concentrationMeanQF)
     ) |>
-    tidyr::pivot_longer(cols = c("soilCO2concentrationMeanQF":"staPresMeanQF"))
+    tidyr::pivot_longer(cols = c("soilCO2concentrationMeanQF":"staPresMeanQF")) |>
+    dplyr::mutate(name = stringr::str_extract(name,pattern=".+(?=MeanQF)"))
 
   prep_env |>
     dplyr::mutate(value = factor(value, labels = c("Pass", "Monthly Mean", "Fail"))) |>
@@ -37,5 +38,6 @@ env_fingerprint_plot <- function(input_fluxes) {
     ggplot2::facet_grid(horizontalPosition ~ name) +
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +
-    ggplot2::theme(legend.position = "bottom")
+    ggplot2::theme(legend.position = "bottom")  +
+    ggplot2::scale_fill_manual(values=c("#33CC00","#FFC333", "#FF3333"))
 }

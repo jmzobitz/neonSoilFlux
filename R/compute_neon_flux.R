@@ -196,7 +196,7 @@ compute_neon_flux <- function(input_file_name,
     dplyr::relocate(startDateTime,horizontalPosition,flux_compute,diffusivity)
 
   # Kicking it out school again with a loop - easiest to fill in where we aren't able to compute
-  for(i in seq_along(out_fluxes)) {
+  for(i in 1:nrow(out_fluxes)) {
     if(is.null(out_fluxes$diffusivity[[i]])) {
       out_fluxes$diffusivity[[i]] <- na_diffusivity
     }
