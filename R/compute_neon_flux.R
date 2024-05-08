@@ -65,8 +65,10 @@ compute_neon_flux <- function(input_file_name,
 
 
   ### Then take each of the measurements to associate them with errors
-  all_measures <- extract_env_data(input_file_name)
+  corrected_data <- correct_env_data(site_data)
 
+  qf_flags <- corrected_data$all_flags
+  all_measures <- corrected_data$site_filtered
 
   # Yay!  We solved the joining problem!
 
@@ -170,17 +172,9 @@ compute_neon_flux <- function(input_file_name,
 
 
 
-  ################
+  ################  Fluxes computed!  Now join back to the original data frame and we are ready to rock and roll!
 
-  # 5) Compute the fluxes and join to a continuous timeperiod based on the input frequency, saving the final result
-  seq_time_freq <- dplyr::if_else(time_frequency == "30_minute", "30 min", "1 min")
-  out_dates <- tidyr::expand_grid(startDateTime = seq(min(flux_out$startDateTime), max(flux_out$startDateTime), by = seq_time_freq), horizontalPosition = unique(all_measures$horizontalPosition))
-
-  # Join the time vector to the data and the QF flags and save
-  measurement_flags <- all_measures |>
-    dplyr::select(-env_data, -press_data)
-
-  null_fluxes <- tibble::tibble(
+  na_fluxes <- tibble::tibble(
     flux = NA,
     flux_err = NA,
     method = c(
@@ -191,47 +185,28 @@ compute_neon_flux <- function(input_file_name,
     )
   )
 
-  null_diffusivity <- tibble::tibble(
+  na_diffusivity <- tibble::tibble(
     zOffset = NA,
     diffusivity = NA,
     diffusExpUncert = NA
   )
 
-  out_fluxes <- out_dates |>
-    dplyr::left_join(flux_out, by = c("startDateTime", "horizontalPosition")) |>
-    dplyr::left_join(measurement_flags, by = c("horizontalPosition", "startDateTime")) |>
-    dplyr::mutate(
-      flux_compute = purrr::map(.x = flux_compute, .f = ~ (if (is.null(.x)) {
-        null_fluxes
-      } else {
-        .x
-      })),
-      diffusivity = purrr::map(.x = diffusivity, .f = ~ (if (is.null(.x)) {
-        null_diffusivity
-      } else {
-        .x
-      })),
-      VSWCMeanQF = purrr::map_dbl(.x = VSWCMeanQF, .f = ~ (if (is.na(.x)) {
-        2
-      } else {
-        .x
-      })),
-      soilTempMeanQF = purrr::map_dbl(.x = soilTempMeanQF, .f = ~ (if (is.na(.x)) {
-        2
-      } else {
-        .x
-      })),
-      soilCO2concentrationMeanQF = purrr::map_dbl(.x = soilCO2concentrationMeanQF, .f = ~ (if (is.na(.x)) {
-        2
-      } else {
-        .x
-      })),
-      staPresMeanQF = purrr::map_dbl(.x = staPresMeanQF, .f = ~ (if (is.na(.x)) {
-        2
-      } else {
-        .x
-      }))
-    )
+  out_fluxes <- qf_flags |>
+    dplyr::left_join(flux_out,by=c("startDateTime","horizontalPosition")) |>
+    dplyr::relocate(startDateTime,horizontalPosition,flux_compute,diffusivity)
+
+  # Kicking it out school again with a loop - easiest to fill in where we aren't able to compute
+  for(i in seq_along(out_fluxes)) {
+    if(is.null(out_fluxes$diffusivity[[i]])) {
+      out_fluxes$diffusivity[[i]] <- na_diffusivity
+    }
+
+    if(is.null(out_fluxes$flux_compute[[i]])) {
+      out_fluxes$flux_compute[[i]] <- na_fluxes
+    }
+  }
+
+
 
 
 

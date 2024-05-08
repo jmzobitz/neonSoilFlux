@@ -28,7 +28,7 @@ env_fingerprint_plot <- function(input_fluxes) {
       day = lubridate::floor_date(startDateTime, unit = "day"),
       soilCO2concentrationMeanQF = as.numeric(soilCO2concentrationMeanQF)
     ) |>
-    tidyr::pivot_longer(cols = c("VSWCMeanQF":"staPresMeanQF"))
+    tidyr::pivot_longer(cols = c("soilCO2concentrationMeanQF":"staPresMeanQF"))
 
   prep_env |>
     dplyr::mutate(value = factor(value, labels = c("Pass", "Monthly Mean", "Fail"))) |>
