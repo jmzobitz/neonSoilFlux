@@ -38,7 +38,7 @@ depth_interpolate <- function(input_measurements,
   # Get out the depths to which we will interpolate, make it into a nested data frame
   interp_positions_co2 <- input_measurements |>
     dplyr::filter(measurement == measurement_interpolate) |>
-    dplyr::select(-monthly_mean, -n_obs) |>
+    dplyr::select(-monthly_mean) |>
     tidyr::unnest(cols = c("data")) |>
     dplyr::group_by(horizontalPosition, startDateTime) |>
     tidyr::nest() |>
@@ -49,7 +49,7 @@ depth_interpolate <- function(input_measurements,
   # This takes the measurements we want to interpolate and creates a nested data frame for them
   input_env_values <- input_measurements |>
     dplyr::filter(measurement %in% c(measurement_name)) |>
-    dplyr::select(-n_obs, -monthly_mean) |>
+    dplyr::select(-monthly_mean) |>
     dplyr::mutate(data = purrr::map(.x = data, .f = ~ (.x |> dplyr::group_by(horizontalPosition, startDateTime) |> tidyr::nest()))) |>
     # unnest(cols=c("data")) |>
     dplyr::rename(measurement_data = data) |>

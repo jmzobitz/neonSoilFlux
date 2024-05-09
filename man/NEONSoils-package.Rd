@@ -4,8 +4,20 @@
 \name{NEONSoils-package}
 \alias{NEONSoils}
 \alias{NEONSoils-package}
-\title{NEONSoils: What the Package Does (Title Case)}
+\title{NEONSoils: Compute Soil Carbon Fluxes for the National Ecological Observatory Network Sites.}
 \description{
-More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.
+Acquires and synthesizes soil carbon fluxes at sites located in the National Ecological Observatory Network (NEON). Provides flux estimates and associated uncertainty as well as key environmental measurements (soil water, temperature, CO2 concentration) that are used to compute soil fluxes.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jmzobitz/NEONSoils}
+  \item Report bugs at \url{https://github.com/jmzobitz/NEONSoils/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: John Zobitz \email{zobitz@augsburg.edu} (\href{https://orcid.org/0000-0002-1830-143X}{ORCID}) [copyright holder]
+
 }
 \keyword{internal}

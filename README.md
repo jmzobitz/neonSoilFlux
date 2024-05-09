@@ -6,9 +6,14 @@ NEONSoils is a repository code to acquire, tidy, and compute soil respiration fl
 An online applet for visualization at select NEON sites is found [here](https://jmzobitz.shinyapps.io/NEON-soil-fluxes/)
 
 ## Installation 
-Installation in R is done through the devtools package:
+Installation in R through:
+
+- CRAN: `install.packages(NEONSoils)`
+- Github using the devtools package:
 
 `devtools::install_github("jmzobitz/NEONSoils", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"),force=TRUE)`
+
+If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
 
 ## Usage
 To analyze fluxes once the package is installed requires a two step process:
@@ -24,7 +29,6 @@ To analyze fluxes once the package is installed requires a two step process:
 ` compute_neon_flux(input_file_name = "my-file-2020-06.Rda",`
                                       `out_flux_file_name = "my-file-flux-2020-06.Rda") `
 
-If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
 
 ## Credits & Acknowledgements
 This is a project solely funded by the National Science Foundation, NSF# 2017829. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
@@ -39,7 +43,10 @@ This is a project solely funded by the National Science Foundation, NSF# 2017829
 
 
 ## License
-GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
+GNU Affero General Public License Version 3, 19 November 2007
 
 ## Disclaimer
 Information and documents contained within this repository are available as-is. Codes or documents, or their use, may not be supported or maintained under any program or service and may not be compatible with data currently available from the NEON Data Portal.
+
+## Funding Acknowledgment
+`NEONSoils` was funding with support from the National Science Foundation, grant \#2017829. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.   
