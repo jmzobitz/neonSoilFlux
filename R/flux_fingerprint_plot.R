@@ -39,12 +39,13 @@ flux_fingerprint_plot <- function(input_fluxes) {
     dplyr::mutate(
       week_day = lubridate::wday(startDateTime),
       decimal_hour = lubridate::hour(startDateTime) + lubridate::minute(startDateTime) / 60,
-      day = lubridate::floor_date(startDateTime, unit = "day"),
+      day = lubridate::floor_date(startDateTime, unit = "day")
     ) |>
     tidyr::pivot_longer(cols = c("diffusivity":"tang_2005")) |>
     dplyr::mutate(name = factor(name,levels=c("diffusivity","dejong_shappert_1972","hirano_2005","tang_2003","tang_2005"))) |>
+    dplyr::mutate(value = as.factor(value)) |>
     ggplot2::ggplot() +
-    ggplot2::geom_tile(aes(x = decimal_hour, y = day, fill = value)) +
+    ggplot2::geom_tile(ggplot2::aes(x = decimal_hour, y = day, fill = value)) +
     ggplot2::facet_grid(horizontalPosition ~ name) +
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +

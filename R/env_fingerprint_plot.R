@@ -32,8 +32,9 @@ env_fingerprint_plot <- function(input_fluxes) {
     dplyr::mutate(name = stringr::str_extract(name,pattern=".+(?=MeanQF)"))
 
   prep_env |>
+    dplyr::mutate(value = as.factor(value)) |>
     ggplot2::ggplot() +
-    ggplot2::geom_tile(aes(x = decimal_hour, y = day, fill = value)) +
+    ggplot2::geom_tile(ggplot2::aes(x = decimal_hour, y = day, fill = value)) +
     ggplot2::facet_grid(horizontalPosition ~ name) +
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +
