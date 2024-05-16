@@ -42,7 +42,6 @@ flux_fingerprint_plot <- function(input_fluxes) {
       day = lubridate::floor_date(startDateTime, unit = "day"),
     ) |>
     tidyr::pivot_longer(cols = c("diffusivity":"tang_2005")) |>
-    dplyr::mutate(value = factor(value, levels = c(0,2),labels = c("Pass","Fail"))) |>
     dplyr::mutate(name = factor(name,levels=c("diffusivity","dejong_shappert_1972","hirano_2005","tang_2003","tang_2005"))) |>
     ggplot2::ggplot() +
     ggplot2::geom_tile(aes(x = decimal_hour, y = day, fill = value)) +
@@ -50,5 +49,7 @@ flux_fingerprint_plot <- function(input_fluxes) {
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +
     ggplot2::theme(legend.position = "bottom")  +
-    ggplot2::scale_fill_manual(values=c("#33CC00", "#FF3333"))
+    ggplot2::scale_fill_manual(values=c("#33CC00", "#FF3333"),
+                               labels = c("0"="Pass","2"="Fail"),
+                               drop = FALSE)
 }
