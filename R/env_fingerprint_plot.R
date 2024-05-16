@@ -21,7 +21,7 @@
 #     2024-05-07: colorscheme updates
 
 env_fingerprint_plot <- function(input_fluxes) {
-  prep_env <- out_fluxes |>
+  prep_env <- input_fluxes |>
     dplyr::select(-flux_compute, -diffusivity) |>
     dplyr::mutate(
       week_day = lubridate::wday(startDateTime),

@@ -21,7 +21,7 @@
 
 flux_fingerprint_plot <- function(input_fluxes) {
 
-  prep_flux <- out_fluxes |>
+  prep_flux <- input_fluxes |>
     dplyr::select(startDateTime,horizontalPosition,flux_compute,diffusivity) |>
     tidyr::unnest(cols=c(flux_compute)) |>
     dplyr::mutate(fluxMeanQF = purrr::map_lgl(flux,anyNA),
