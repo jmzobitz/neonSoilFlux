@@ -1,4 +1,4 @@
-#' @title Determine the depth of a measurement
+#' @title Internal function to determine the depth of a measurement
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -11,13 +11,6 @@
 
 
 #' @return A data frame that reports the measurement depth for and associated environmental measurement.
-
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-
-
-
-#' @export
-
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-01-17)
 #     original creation

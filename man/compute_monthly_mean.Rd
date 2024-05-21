@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_monthly_mean.R
 \name{compute_monthly_mean}
 \alias{compute_monthly_mean}
-\title{Function to compute monthly means to smooth the data.}
+\title{Function to compute monthly means for a given month of NEON data.}
 \usage{
 compute_monthly_mean(
   NEON_data,
@@ -12,7 +12,7 @@ compute_monthly_mean(
 \arguments{
 \item{NEON_data}{Required. Input vector of neon measurements for a month}
 
-\item{position_columns}{Optional. Do we group by horiztonalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
+\item{position_columns}{Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
 }
 \value{
 A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
@@ -21,7 +21,8 @@ A data frame that reports for each horiztonal and vertical position the computed
 Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 }
 \examples{
-# Download the NEON data - here this would be soil moisture
+\donttest{
+# Download the NEON data directly - here this would be soil moisture
 NEON_moist_30m_orig <- neonUtilities::loadByProduct(
   dpID = "DP1.00094.001",
   site = "WREF",
@@ -40,13 +41,17 @@ column_selectors <- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 
 swc <- site_swc |>
   pluck(paste0("SWS_", time_frequency)) |>
-  select(domainID, siteID, horizontalPosition, verticalPosition, startDateTime, matches(str_c("VSWC", column_selectors)), VSWCFinalQF)
+  select(
+  domainID, siteID, horizontalPosition, verticalPosition, startDateTime,
+   matches(str_c("VSWC", column_selectors)),
+   VSWCFinalQF)
 
 # Now apply the monthly mean:
 swc_monthly_mean <- compute_monthly_mean(swc)
 }
+}
 \references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

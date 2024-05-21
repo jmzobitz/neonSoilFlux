@@ -2,7 +2,7 @@
 % Please edit documentation in R/tang_2003_flux.R
 \name{tang_2003_flux}
 \alias{tang_2003_flux}
-\title{Compute surface flux at a given timepoint using a surface gradient via Tang et al 2003}
+\title{Internal function to compute surface co2 flux at a given timepoint via Tang et al 2003}
 \usage{
 tang_2003_flux(zOffset, co2, co2_err, diffusive, diffusive_err)
 }
@@ -22,6 +22,14 @@ Data frame of fluxes associated error
 }
 \description{
 Given  zOffsets, diffusivity, and co2 (umol mol-1) and their associated errors, compute the surface flux. This is done by computing the gradient of co2 (slope from linear regression) and linear extrapolation of surface diffusivity. Modified from Tang et al (2003).
+}
+\references{
+Tang, Jianwu, Dennis D Baldocchi, Ye Qi, and Liukang Xu. 2003. “Assessing Soil CO2 Efflux Using Continuous Measurements of CO2 Profiles in Soils with Small Solid-State Sensors.” Agricultural and Forest Meteorology 118 (3): 207–20. https://doi.org/10.1016/S0168-1923(03)00112-6.
+
+Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+}
+\seealso{
+[dejong_shappert_flux()], [hirano_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

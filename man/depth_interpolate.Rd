@@ -2,7 +2,7 @@
 % Please edit documentation in R/depth_interpolate.R
 \name{depth_interpolate}
 \alias{depth_interpolate}
-\title{Interpolate different depth measurements}
+\title{Internal function to interpolate different depth measurements}
 \usage{
 depth_interpolate(
   input_measurements,
@@ -22,9 +22,6 @@ A nested data frame with interpolated measurements.
 }
 \description{
 Definition function. Linearly interpolate a measurement across the different measurement depths
-}
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

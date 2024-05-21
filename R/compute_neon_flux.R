@@ -19,14 +19,20 @@
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
 #' @param input_column_selectors Optional. List of measurements from which fluxes will be computed typically c("Mean","Minimum","Maximum","ExpUncert","StdErMean") (the more used increases computational time)
 #'
-#' @examples acquire_neon_data("SJER","my-out-file.Rda")
+#' @examples
+#' \donttest{
+#'  # First acquire the NEON data at a given NEON site
+#' acquire_neon_data("SJER","2020-05","my-file.Rda")
 #'
 #' # Then process and compute the fluxes from that data file.
 #'  compute_neon_flux("my-out-file.Rda","flux-file.Rda")
-#'
+#' }
 
 #' @return Data frame of fluxes and gradient from the timeperiod
 
+
+#' @export
+#'
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-22)
 #     original creation
@@ -34,8 +40,6 @@
 #     2023-10-23: Update to exit computing a flux if there are no half-hourly measurements.
 #     2024-04-08: update to get namespaces correct
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
 
 

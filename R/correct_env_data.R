@@ -1,4 +1,4 @@
-#' @title Return NEON environmental data
+#' @title Internal function that prepares downloaded NEON data for flux processing
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -13,8 +13,17 @@
 
 #' @param input_data Required. Nested data frame from acquire_neon_data.
 #'
-#' @example correct_env_data(site_data)
+#' @examples correct_env_data(site_data)
+#' \donttest{
+#' # First aqcuire the NEON data
+#' acquire_neon_data("SJER","2020-05","my-file.Rda")
 #'
+#' # Load up the NEON data. Will load data frame site_data
+#' load("my-file.Rda")
+#'
+#' # Now correct:
+#' corrected_data <- correct_env_data(site_data)
+#' }
 
 
 #' @return List of all QF flags over time period and Data frame of environmental measurements for flux computation
@@ -22,9 +31,6 @@
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-05-07)
 #     original creation
-
-
-
 
 
 correct_env_data <- function(input_data) {

@@ -1,4 +1,4 @@
-#' @title Compute surface flux at a given timepoint using a surface gradient via De Jong and Schappert (1972)
+#' @title Internal function to compute surface co2 flux at a given timepoint via De Jong and Schappert (1972)
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -14,6 +14,12 @@
 #' @param diffusive_err Required Associated errors with diffusivity
 #'
 #' @return Data frame of fluxes associated error
+#' @seealso [hirano_flux()], [tang_2003_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
+#'
+#' @references
+#' Jong, E. De, and H. J. V. Schappert. 1972. “Calculation of Soil Respiration and Activity from CO2 Profiles in the Soil.” Soil Science 113 (5): 328.
+#'
+#' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2023-01-20)

@@ -1,4 +1,4 @@
-#' @title Interpolate different depth measurements
+#' @title Internal function to interpolate different depth measurements
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -15,11 +15,6 @@
 
 #' @return A nested data frame with interpolated measurements.
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-
-
-#' @export
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-20)

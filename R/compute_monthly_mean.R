@@ -1,4 +1,4 @@
-#' @title Function to compute monthly means to smooth the data.
+#' @title Function to compute monthly means for a given month of NEON data.
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -7,17 +7,16 @@
 #' Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 
 #' @param NEON_data Required. Input vector of neon measurements for a month
-#' @param position_columns Optional. Do we group by horiztonalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.
+#' @param position_columns Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.
 
 #' @return A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
 #' @keywords Currently none
 
 #' @examples
-#' # Download the NEON data - here this would be soil moisture
+#' \donttest{
+#' # Download the NEON data directly - here this would be soil moisture
 #' NEON_moist_30m_orig <- neonUtilities::loadByProduct(
 #'   dpID = "DP1.00094.001",
 #'   site = "WREF",
@@ -36,23 +35,28 @@
 #'
 #' swc <- site_swc |>
 #'   pluck(paste0("SWS_", time_frequency)) |>
-#'   select(domainID, siteID, horizontalPosition, verticalPosition, startDateTime, matches(str_c("VSWC", column_selectors)), VSWCFinalQF)
+#'   select(
+#'   domainID, siteID, horizontalPosition, verticalPosition, startDateTime,
+#'    matches(str_c("VSWC", column_selectors)),
+#'    VSWCFinalQF)
 #'
 #' # Now apply the monthly mean:
 #' swc_monthly_mean <- compute_monthly_mean(swc)
+#' }
 
 
 #' @export
 
 # changelog and author contributions / copyrights
+#   Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 #   John Zobitz (2024-01-17)
 #     modified to also compute the depth (zOffset) from the max of all zOffsets that month
 #   John Zobitz (2024-01-10)
 #     original creation
-#   Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 #     2024-04-08: update to get namespaces correct
 
-
+#' @references
+#' Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 
 compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosition", "verticalPosition")) {
   out_mean <- NEON_data |>

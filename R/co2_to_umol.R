@@ -4,20 +4,19 @@
 #' John Zobitz \email{zobitz@augsburg.edu}
 
 #' @description
-#' Given a measurement of co2, convert it from ppm to umol m-3 based on temperature and pressure
+#' Given a measurement of co2, convert it from ppm to umol m-3 based on temperature and pressure. Also compute associated error via quadrature.
 
 
 #' @param temperature Required. Soil temperature (degrees C)
 #' @param pressure Required. Barometric air pressure (kilopascal)
 #' @param co2 Carbon dioxide in ppm
 #' @param temperature_err Required. Reported Soil temperature error (degrees C)
-#' @param pressure Required. Reported Barometric air pressure error (kilopascal)
-#' @param co2 Carbon dioxide in ppm
+#' @param pressure_err Required. Reported Barometric air pressure error (kilopascal)
+#' @param co2_err Required. Carbon dioxide in ppm error
+#' @param zOffset Required. Surface depth (m). Reported as a negative number.
 
 #' @return A value of the converted co2
-
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+#' @examples co2_to_umol(31,96.3,654,.15,.05,9,-.05)
 
 #' @export
 

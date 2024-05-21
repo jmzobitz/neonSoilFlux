@@ -2,7 +2,7 @@
 % Please edit documentation in R/hirano_flux.R
 \name{hirano_flux}
 \alias{hirano_flux}
-\title{Compute surface flux at a given timepoint using a surface gradient via Hirano et al 2005}
+\title{Internal function to compute surface co2 flux at a given timepoint via Hirano et al 2005}
 \usage{
 hirano_flux(zOffset, co2, co2_err, diffusive, diffusive_err)
 }
@@ -22,6 +22,14 @@ Data frame of fluxes associated error
 }
 \description{
 Given  zOffsets, diffusivity, and co2 (umol mol-1) and their associated errors, compute the surface flux. This is done by estimating the surface concentration through linear regression and linear extrapolation of the bottom and top surface fluxes. Modified from Hirano et al (2005).
+}
+\references{
+Hirano, Takashi, Honghyun Kim, and Yumiko Tanaka. 2003. “Long-Term Half-Hourly Measurement of Soil CO2 Concentration and Soil Respiration in a Temperate Deciduous Forest.” Journal of Geophysical Research: Atmospheres 108 (D20). https://doi.org/10.1029/2003JD003766.
+
+Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+}
+\seealso{
+[dejong_shappert_flux()], [tang_2003_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

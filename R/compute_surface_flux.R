@@ -1,4 +1,4 @@
-#' @title Compute CO2 surface flux
+#' @title Internal fucntion to compute CO2 surface flux
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -8,8 +8,6 @@
 
 #' @param input_data Required. A data frame containing zOffsets, diffusivity, and co2 (umol mol-1) and their associated errors
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
 #' @return A value of the surface CO2 flux (umol m-2 s-1)
 

@@ -13,12 +13,13 @@
 #' @param column_selectors Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
 
 #'
-#' @example acquire_neon_data("SJER","2020-05","my-file.Rda")
-#'
-#' @return Nothing is returned - the file is saved to the location provided
+#' @examples
+#' \donttest{
+#' acquire_neon_data("SJER","2020-05","my-file.Rda")
+#' }
+#' @return Nothing is returned - the file is saved to the location provided (either a .Rda or .csv file)
+#' @export
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-22)
@@ -105,7 +106,7 @@ acquire_neon_data <- function(site_name,
   # Process each site measurement
     co2 <- site_co2 |>
       purrr::pluck(paste0("SCO2C_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(stringr::str_c("soilCO2concentration",column_selectors)),finalQF) |>
+      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("soilCO2concentration",column_selectors)),.data$finalQF) |>
       dplyr::rename(soilCO2concentrationFinalQF = finalQF)
 
 
@@ -121,7 +122,7 @@ acquire_neon_data <- function(site_name,
 
     temperature <- site_temp |>
       purrr::pluck(paste0("ST_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,tidyr::matches(stringr::str_c("soilTemp",column_selectors)),finalQF)  |>
+      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("soilTemp",column_selectors)),.data$finalQF)  |>
       dplyr::rename(soilTempFinalQF = finalQF)
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -138,7 +139,7 @@ acquire_neon_data <- function(site_name,
 
     swc <- site_swc |>
       purrr::pluck(paste0("SWS_",time_frequency)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(stringr::str_c("VSWC",column_selectors)),VSWCFinalQF)
+      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("VSWC",column_selectors)),.data$VSWCFinalQF)
 
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -159,7 +160,7 @@ acquire_neon_data <- function(site_name,
 
     pressure <- site_press |>
       purrr::pluck(paste0("BP_",time_frequency_bp)) |>
-      dplyr::select(domainID,siteID,horizontalPosition,verticalPosition,startDateTime,matches(stringr::str_c("staPres",column_selectors)),staPresFinalQF)
+      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("staPres",column_selectors)),.data$staPresFinalQF)
 
     pressure_positions <- site_press |>
       purrr::pluck(paste0("sensor_positions_","00004"))

@@ -1,4 +1,4 @@
-#' @title Makes sure for each time, position, and depth we have at least two data points for soil temp and soil h20, 3 for soil co2
+#' @title Internal function that makes sure for each time, position, and depth we have at least two data points for soil temp and soil h20, 3 for soil co2
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -11,7 +11,7 @@
 #' 3) Filters if we have at least 3 distinct measurements at each time and horizontal position
 #' 4) Returns the resulting data frame.
 #'
-#' This as created to speed up data processing.
+#' This internal function is created to speed up data processing.
 
 #' @param input_data Required. Nested data frame of merged soil water, temperature, co2, and pressure across different NEON locations and depths
 #'

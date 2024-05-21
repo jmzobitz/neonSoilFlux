@@ -1,4 +1,4 @@
-#' @title Compute surface flux at a given timepoint using a surface gradient via Tang et al 2005
+#' @title Internal function to compute surface co2 flux at a given timepoint via Tang et al 2005
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -15,6 +15,12 @@
 #'
 
 #' @return Data frame of fluxes associated error
+#' @seealso [dejong_shappert_flux()], [hirano_flux()], [tang_2003_flux()] for other ways to compute surface fluxes.
+
+#' @references
+#' Tang, Jianwu, Laurent Misson, Alexander Gershenson, Weixin Cheng, and Allen H. Goldstein. 2005. “Continuous Measurements of Soil Respiration with and without Roots in a Ponderosa Pine Plantation in the Sierra Nevada Mountains.” Agricultural and Forest Meteorology 132 (3): 212–27. https://doi.org/10.1016/j.agrformet.2005.07.011.
+#'
+#' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2023-01-20)

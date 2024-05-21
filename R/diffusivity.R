@@ -17,9 +17,8 @@
 #' @param porVol2To20 Required. Porosity of the 0-20 mm fraction (cm3 cm-3). Assumes no pores within rocks.
 #'
 #' @return A value of the computed diffusivity
+#' @examples diffusivity(31,0.0102,96.3,.15,.2135,.05,-.05,0.45)
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
 
 #' @export

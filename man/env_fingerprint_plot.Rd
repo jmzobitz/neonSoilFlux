@@ -2,7 +2,7 @@
 % Please edit documentation in R/env_fingerprint_plot.R
 \name{env_fingerprint_plot}
 \alias{env_fingerprint_plot}
-\title{Helper function to plot QF results.}
+\title{Helper function to plot QF results for environmental measurements.}
 \usage{
 env_fingerprint_plot(input_fluxes)
 }

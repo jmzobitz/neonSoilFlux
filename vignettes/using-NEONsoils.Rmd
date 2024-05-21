@@ -1,0 +1,212 @@
+---
+title: "Introducing the NEONSoils package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{using-NEONsoils}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup,message = FALSE, warning = FALSE}
+library(NEONSoils)  # The main package
+library(tidyverse)  # For data wrangling
+```
+
+# Introduction
+Welcome to the `NEONSoils` package! This vignette will guide you through the process of using this package to acquire and compute soil CO$_{2}$ fluxes at different sites in the National Ecological Observatory Network.
+
+You can think about this package working in two primary phases:
+
+1. acquiring the environment data for a given month at a NEON site (`acquire_neon_data`). This includes:
+
+a. Soil temperature at different depths.
+b. Soil water content at different depths.
+c. Soil CO$_{2}$ concentration.
+d. Atmospheric pressure
+e. Soil properties (bulk density, others)
+
+2. Given those properties, computing the soil surface fluxes and the associated uncertainty using a variety of methods to compute fluxes (`compute_neon_flux`).
+
+We split these two functions in order to optimize time and that both were fundamentally different processes.  Acquiring the NEON data makes use of the `neonUtilities` package. Computing the soil fluxes is more computational.  We also thought that a user might want to download all the environmental data first and them come across a range of different sites to compute the fluxes later.
+
+This package takes the guess work out of which data products to collect, hoping to reduce the workflow needed.  We rely very much on the `tidyverse` philosophy for computation and coding here.
+
+## Quick startup example
+Load up the relevant libraries:
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(NEONSoils)
+```
+
+Let's say we want to acquire the NEON soil data at the `SJER` [site](https://www.neonscience.org/field-sites/sjer) during the month June in 2021:
+```{r, eval=FALSE}
+acquire_neon_data(site_name = 'SJER',
+                  download_date = '2021-06',
+                  data_file_name = 'env-meas-SJER-2021-06.Rda'
+                  )
+```
+
+We then compute the fluxes at this site:
+```{r, eval=FALSE}
+compute_neon_flux(input_file_name = 'env-meas-SJER-2021-06.Rda',
+                  out_flux_file_name = 'out-flux-SJER-2021-06.Rda'
+                  )
+```
+
+
+To plot the flux results, 
+
+```{r, eval=FALSE}
+out_fluxes |>
+  select(-diffusivity) |>
+  unnest(cols=c(flux_compute)) |>
+  ggplot(aes(x=startDateTime,y=flux,color=method)) +
+    geom_line() +
+    facet_wrap(~horizontalPosition,scales = "free_y")
+```
+
+The diffusivity can be plotted similarly:
+
+```{r, eval=FALSE}
+out_fluxes |>
+  select(-flux_compute) |>
+  unnest(cols=c(diffusivity)) |>
+  ggplot(aes(x=startDateTime,y=diffusivity,color=as.factor(zOffset))) +
+  geom_line() +
+  facet_wrap(~horizontalPosition,scales = "free_y")  
+```
+
+To see a the distribution of the QF flags for the different measurements, use `env_fingerprint_plot`:
+
+```{r, eval=FALSE}
+env_fingerprint_plot(out_fluxes)
+```
+
+Similarly, to see a the distribution of the QF flags for the different computed fluxes, use `flux_fingerprint_plot`:
+
+```{r, eval=FALSE}
+flux_fingerprint_plot(out_fluxes)
+```
+
+
+## Acquiring the data
+Let's say we want to acquire the NEON soil data at the `SJER` [site](https://www.neonscience.org/field-sites/sjer) during the month June in 2021:
+
+```{r, eval=FALSE}
+acquire_neon_data(site_name = 'SJER',
+                  download_date = '2021-06',
+                  data_file_name = 'env-meas-SJER-2021-06.Rda'
+                  )
+```
+
+Three inputs are needed to run the function acquire_neon_data:
+
+- NEON site name (a four digit code standard by NEON)
+- Download date, a string in the YYYY-MM format
+- Name of the data file, which can be either the R data format (`Rda`) or comma separate list (`csv`)
+
+If you are planning to compute soil fluxes you will need to use the `.Rda` extension. Optional arguments include `time_frequency`, which is 30 minutes (the default) or the 1 minute data.
+
+If you are planning a simple data acquisition, you may also want to only select particular columns provided by NEON (Mean, Maximum, Minimum, ExpUncert).  You can read more about how these are computed here PROVIDE LINK
+
+As the data are acquired various messages from the `loadByProduct` function from the `neonUtilities` package are shown - this is normal.  Products are acquired from each spatial location (`horizontalPosition`) or vertical depth (`verticalPosition`) at a NEON site
+
+For each data product, the `acquire_neon_data` function also performs two additional checks: 
+
+- The soil water content data product requires some additional calibration to correct both the soil sensor depth and calibration in the function `swc_correct`.  Information about this fix is HERE Once updated sensors are installed in the future we will depreciate this function.
+- The actual measurement depth (in meters) is extracted for each position.
+- The monthly mean for each measurement at each depth is computed, described below.
+
+
+### Computing the monthly mean
+The monthly mean is utilized when a given measurement fails final QF checks. This function is provided by [code](https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r) from [Zoey Werbin](https://github.com/zoey-rw).  For a location (`horizontalPosition`) given depth and A monthly mean is computed when there are at least 15 days of measurements. Assume you have a vector of measurements $\vec{y}$, standard errors $\vec{\sigma}$, and expanded uncertainty $\vec{\epsilon}$ (all of length $M$) that passes the QF checks in a given month. The expanded uncertainty $\vec{\epsilon}$ is generated by NEON to be inclusive of more XXXX LINK here [data quality](https://www.neonscience.org/data-samples/data-management/data-quality-program). We have that $\vec{\sigma}_{i}\leq\vec{\epsilon}_{i}$.  We define the bias $\vec{b}=\sqrt{\left(\vec{\epsilon}\right)^{2}-\left(\vec{\sigma}\right)^{2}}$ to be the quadrature difference between the expanded uncertainty and the standard error.
+
+
+We generate a bootstrap sample of the mean $\overline{y}$ and standard error $\overline{s}$ the following ways. Here we set the number of bootstrap samples $N$ to be 5000. Entries for $\overline{y}_{i}$ and $\overline{s}_{i}$ are determined by the following:
+
+1. Randomly sample from the uncertainty and bias independently: $\vec{\sigma}_{j}$ and the bias $\vec{b}_{k}$ (not necessarily the same sample)
+2. Generate $N$ random samples from a normal distribution with mean $\vec{y}$ and standard deviation $\vec{\sigma}_{j}$. Since $M<N$, `R` will recycle the vector $\vec{y}$ so that this sample is of length $M$. We will call the sample of $\vec{y}$ as $\vec{x}$.
+3. With these $N$ random samples, $\overline{y}_{i}=\overline{\vec{x}}+\vec{b}_{k}$ and $s_{i}$ is the sample standard deviation of $\vec{x}$. We expect that $s_{i} \approx \vec{\sigma}_{j}$.
+
+Once that is complete, the reported monthly mean and standard deviation is $\overline{\overline{y}}$ and $\overline{s}$.
+
+
+### Final reporting
+What gets saved with the `.Rda` file are two nested data frames:
+
+- `site_data` This contains three variables: the measurement name (one of `soilCO2concentration`, `VSWC` (soil water content), `soilTemp` (soil temperature), and `staPres` (atmospheric pressure)), `monthly_mean` contains the mean value of the measurement at each horizontal and vertical depth.  We compute the monthly mean using a bootstapped technique.  `data` which contains the stacked variables acquired from neonUtilities - the horizontal and vertial positions, timestamp (in UTC), associated values, the QF flag (0 = pass, 1 = fail - get links )
+- `site_megapit`: the nested data frame of the soil sampling data, found here (LINK).  This is essential what is reported back from acquiring this from NEON.
+
+If you save the data as a CSV, the `site_megapit` is not returned.
+
+You can then unnest the different data frames to make plots, for example:
+
+```{r, eval=FALSE}
+
+# Load up saved data file
+load('env-meas-SJER-2021-06.Rda')
+
+# Extract data
+VSWC_data <- site_data |>
+  filter(measurement == 'VSWC') |>
+  unnest(cols=c("data"))
+
+# Plot data
+VSWC_data |>
+  ggplot(aes(x=startDateTime,y=VSWCMean)) +
+  geom_point(aes(color=as.factor(VSWCFinalQF))) +
+  facet_grid(verticalPosition~horizontalPosition)
+```
+
+## Computing fluxes
+
+Once you have an environmental dataset, `compute_neon_flux` then analyzes the data and calculates a flux using 4 different approaches:
+```{r, eval=FALSE}
+compute_neon_flux(input_file_name = 'env-meas-SJER-2021-06.Rda',
+                  out_flux_file_name = 'out-flux-SJER-2021-06.Rda'
+                  )
+```
+
+
+The file name can either be a `.csv` or and `.Rda` file. We prefer the `.Rda` file because it keeps a consistent structure for plotting.
+
+What gets saved to `out_flux_file_name` is a nested data frame `out_fluxes` with the following variables:
+
+- `startDateTime`: Time period of measurement (as POSIXct)
+- `horizontalPosition`: Sensor location where flux is computed
+- `flux_compute`: A nested tibble with variables (1) `flux`, `flux_err`, and `method` (one of 4 implemented)
+- `diffusivity`: Computation of surface diffusivity
+- `VSWCMeanQF`: QF flag for soil water content across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
+- `soilTempMeanQF`: QF flag for soil temperature across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
+- `soilCO2concentrationMeanQF`: QF flag for soil CO2 concentration across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
+- `staPresMeanQF`: QF flag for atmospheric pressure across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
+
+A QF measurement fails when there is a monthly mean could not be computed for a measurement. Note that this would cause **all** flux calculations to fail at that given horizontal position.
+
+You can see the distribution the QF flags for each environmental measurement with `env_fingerprint_plot`:
+
+```{r, eval = FALSE}
+env_fingerprint_plot(out_fluxes)
+```
+
+Explanation of QF Check values:
+- "Pass" means that for the given timepoint, the monthly mean was not used or the sensor was not offline.  This is the highest quality measurement.
+- "Monthly Mean" means that for the given timepoint the measurement value was replaced by the monthly mean.
+- "Fail" means that no measurement was available. This occurs if there is not sufficient data to compute the monthly mean.  When a measurement fails it usually will be for the entire month.
+
+Similarly, you can see the distribution of QF flags for each diffusivity and flux computation with `flux_fingerprint_plot`:
+
+```{r, eval = FALSE}
+flux_fingerprint_plot(out_fluxes)
+```
+
+Explanation of QF Check values:
+- "Pass" means that for the given timepoint, the computed flux measurement was not NA or positive (the sign of the derived flux conformed to expectations). Monthly means could be used in the computation.
+- "Fail" means that the flux was not computed.  This occurs if there is not sufficient data to compute the monthly mean (one environmental measurement was "Fail"), or the computed flux was negative.

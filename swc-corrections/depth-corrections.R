@@ -18,4 +18,4 @@ swc_corrections <- read_csv('swc-corrections/swc_depthsV2.csv') |>
 
 
 
-use_data(swc_corrections,overwrite = TRUE)
+use_data(swc_corrections,overwrite = TRUE,internal = TRUE)

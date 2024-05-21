@@ -1,4 +1,4 @@
-#' Helper function to determine availability of data within a time interval
+#' @title Internal helper function to determine availability of data within a time interval
 #'
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -37,17 +37,17 @@ check_qf_flags <- function(measurement_name,data) {
       dplyr::group_by(horizontalPosition,startDateTime) |>
       tidyr::nest() |>
       dplyr::mutate(n_valid = purrr::map_dbl(data,nrow)) |>
-      dplyr::filter(n_valid > 2) |>
+      dplyr::filter(.data$n_valid > 2) |>
       dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
       ) |>
-      dplyr::select(-data,-n_valid)
+      dplyr::select(-c("data",".data$n_valid"))
   } else {
 
     # Filter if there is a valid (QF neq 2) measurements at each timepoint and horizontalPosition.
     # Also check to see if there any measurements use the mean
 
     data_revised <- data |>
-      dplyr::filter(if_any(ends_with("FinalQF"), ~ (.x != 2)) ) |>
+      dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x != 2)) ) |>
       dplyr::group_by(horizontalPosition,startDateTime) |>
       tidyr::nest() |>
       dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
@@ -60,7 +60,7 @@ check_qf_flags <- function(measurement_name,data) {
   # Join it to the measurements
   my_join <- tidyr::expand_grid(startDateTime,horizontalPosition) |>
     dplyr::left_join(data_revised,by=c("startDateTime","horizontalPosition")) |>
-    dplyr::mutate(mean_used = dplyr::if_else(is.na(mean_used),2,mean_used) )
+    dplyr::mutate(mean_used = dplyr::if_else(is.na(.data$mean_used),2,.data$mean_used) )
 
   # rename final QF frame
   names(my_join)[names(my_join) == "mean_used"] <- paste0(measurement_name,"MeanQF")

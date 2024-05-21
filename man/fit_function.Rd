@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_function.R
 \name{fit_function}
 \alias{fit_function}
-\title{Interpolate a soil measurement to different depths}
+\title{Internal function that interpolates a soil measurement to different depths}
 \usage{
 fit_function(
   input_depth,
@@ -31,9 +31,6 @@ A data frame of the depth and the measured column for the measurements and repor
 }
 \description{
 Definition function. Linearly interpolate a measurement across the different measurement depths
-}
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

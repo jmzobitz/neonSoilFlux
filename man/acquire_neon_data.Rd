@@ -27,13 +27,15 @@ acquire_neon_data(
 \item{column_selectors}{Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
 }
 \value{
-Nothing is returned - the file is saved to the location provided
+Nothing is returned - the file is saved to the location provided (either a .Rda or .csv file)
 }
 \description{
 Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 }
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+\examples{
+\donttest{
+acquire_neon_data("SJER","2020-05","my-file.Rda")
+}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

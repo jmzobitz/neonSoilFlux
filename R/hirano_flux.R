@@ -1,4 +1,4 @@
-#' @title Compute surface flux at a given timepoint using a surface gradient via Hirano et al 2005
+#' @title Internal function to compute surface co2 flux at a given timepoint via Hirano et al 2005
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -15,6 +15,14 @@
 #'
 
 #' @return Data frame of fluxes associated error
+
+#' @seealso [dejong_shappert_flux()], [tang_2003_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
+
+#' @references
+#' Hirano, Takashi, Honghyun Kim, and Yumiko Tanaka. 2003. “Long-Term Half-Hourly Measurement of Soil CO2 Concentration and Soil Respiration in a Temperate Deciduous Forest.” Journal of Geophysical Research: Atmospheres 108 (D20). https://doi.org/10.1029/2003JD003766.
+#'
+#' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-01-20)

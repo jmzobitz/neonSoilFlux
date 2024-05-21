@@ -1,5 +1,5 @@
-# NEONSoils
-NEONSoils is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method. 
+# neonSoilFlux
+neonSoilFlux is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method. 
 
 **This is an early prototype package and should not be used for research purposes until scientifically validated.**
 
@@ -8,12 +8,12 @@ An online applet for visualization at select NEON sites is found [here](https://
 ## Installation 
 Installation in R through:
 
-- CRAN: `install.packages(NEONSoils)`
+- CRAN: `install.packages(neonSoilFlux)`
 - Github using the devtools package:
 
-`devtools::install_github("jmzobitz/NEONSoils", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"),force=TRUE)`
+`devtools::install_github("jmzobitz/neonSoilFlux", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"),force=TRUE)`
 
-If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/NEONSoils/issues).
+If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/neonSoilFlux/issues).
 
 ## Usage
 To analyze fluxes once the package is installed requires a two step process:
@@ -40,6 +40,7 @@ This is a project solely funded by the National Science Foundation, NSF# 2017829
   * Ridwan Abdi, Kebba Janeh, Nevin Lor, Diana Ortiz Alvarracin, Dijone Mehmeti, Ali Musa, Barbara Sabino Pina, Ly Xiong, Xeng Yang (Augsburg University)
   * Courtney Leung (Northwestern University)
  - 2024: Refinement to include a gapfilling routine from Zoey Werbin at Boston University as well as additional calculations of the soil flux via different approaches in Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July): 78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+ - 05.2024 Renaming of pacakge to neonSoilFlux from NEONSoils
 
 
 ## License
@@ -49,4 +50,4 @@ GNU Affero General Public License Version 3, 19 November 2007
 Information and documents contained within this repository are available as-is. Codes or documents, or their use, may not be supported or maintained under any program or service and may not be compatible with data currently available from the NEON Data Portal.
 
 ## Funding Acknowledgment
-`NEONSoils` was funding with support from the National Science Foundation, grant \#2017829. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.   
+`neonSoilFlux` was funding with support from the National Science Foundation, grant \#2017829. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.   

@@ -1,4 +1,4 @@
-#' @title Helper function to plot QF results.
+#' @title Helper function to plot QF results for environmental measurements.
 #'
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}

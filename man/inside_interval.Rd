@@ -14,10 +14,21 @@ inside_interval(start, end, reference_time)
 \item{reference_time}{time we are comparing to - YYYY-MM string}
 }
 \value{
-Logical indicating whether or not the reference time is inside the interval
+Logical indicating whether or not the reference time is inside the interval. We need this when working with downloaded NEON data which usually comes in a YYYY-MM string
 }
 \description{
 Determine if a YYYY-MM string is inside a interval
+}
+\examples{
+# Define starting and ending dates:
+start_date <- as.POSIXct("2021-06-01 09:30:00",tz="UTC")
+end_date <- as.POSIXct("2023-06-01 20:00:00",tz="UTC")
+
+# Test, should return TRUE
+inside_interval(start_date,end_date,"2022-06")
+
+# Test, should return FALSE
+inside_interval(start_date,end_date,"2020-06")
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

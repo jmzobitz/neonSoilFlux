@@ -8,8 +8,25 @@
 #' @param end  ending interval time
 #' @param reference_time time we are comparing to - YYYY-MM string
 #'
-#' @return Logical indicating whether or not the reference time is inside the interval
+#' @return Logical indicating whether or not the reference time is inside the interval. We need this when working with downloaded NEON data which usually comes in a YYYY-MM string
 #' @export
+
+#' @examples
+#' # Define starting and ending dates:
+#' start_date <- as.POSIXct("2021-06-01 09:30:00",tz="UTC")
+#' end_date <- as.POSIXct("2023-06-01 20:00:00",tz="UTC")
+#'
+#' # Test, should return TRUE
+#' inside_interval(start_date,end_date,"2022-06")
+#'
+#' # Test, should return FALSE
+#' inside_interval(start_date,end_date,"2020-06")
+
+
+# changelog and author contributions / copyrights
+#   John Zobitz (2024-04-10)
+#     original creation
+
 
 inside_interval <- function(start,end,reference_time) {
   # First evaluate if the input vector times are valid time
@@ -25,6 +42,3 @@ inside_interval <- function(start,end,reference_time) {
 
 }
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-04-10)
-#     original creation

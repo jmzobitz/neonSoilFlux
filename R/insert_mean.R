@@ -1,4 +1,4 @@
-#' @title Insert smoothed mean value of a measurement at a site
+#' @title Internal function that inserts smoothed mean value of a measurement at a site
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}

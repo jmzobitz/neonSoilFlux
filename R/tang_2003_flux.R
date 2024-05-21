@@ -1,4 +1,4 @@
-#' @title Compute surface flux at a given timepoint using a surface gradient via Tang et al 2003
+#' @title Internal function to compute surface co2 flux at a given timepoint via Tang et al 2003
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -15,6 +15,13 @@
 
 
 #' @return Data frame of fluxes associated error
+
+#' @seealso [dejong_shappert_flux()], [hirano_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
+
+#' @references
+#' Tang, Jianwu, Dennis D Baldocchi, Ye Qi, and Liukang Xu. 2003. “Assessing Soil CO2 Efflux Using Continuous Measurements of CO2 Profiles in Soils with Small Solid-State Sensors.” Agricultural and Forest Meteorology 118 (3): 207–20. https://doi.org/10.1016/S0168-1923(03)00112-6.
+#'
+#' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-01-20)

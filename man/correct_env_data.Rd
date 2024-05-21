@@ -2,7 +2,7 @@
 % Please edit documentation in R/correct_env_data.R
 \name{correct_env_data}
 \alias{correct_env_data}
-\title{Return NEON environmental data}
+\title{Internal function that prepares downloaded NEON data for flux processing}
 \usage{
 correct_env_data(input_data)
 }
@@ -17,6 +17,19 @@ This file takes data frame from acquire_neon_data and:
 1) Takes the needed components (QF and measurement flags) for soil water, temperature, co2, binding them together in a tidy data frame
 2) Interpolates across the measurements
 3) Merges air pressure data into this data frame
+}
+\examples{
+correct_env_data(site_data)
+\donttest{
+# First aqcuire the NEON data
+acquire_neon_data("SJER","2020-05","my-file.Rda")
+
+# Load up the NEON data. Will load data frame site_data
+load("my-file.Rda")
+
+# Now correct:
+corrected_data <- correct_env_data(site_data)
+}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

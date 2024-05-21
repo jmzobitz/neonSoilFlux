@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_qf_flags.R
 \name{check_qf_flags}
 \alias{check_qf_flags}
-\title{Helper function to determine availability of data within a time interval}
+\title{Internal helper function to determine availability of data within a time interval}
 \usage{
 check_qf_flags(measurement_name, data)
 }

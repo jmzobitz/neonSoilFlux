@@ -2,7 +2,7 @@
 % Please edit documentation in R/measurement_merge.R
 \name{measurement_merge}
 \alias{measurement_merge}
-\title{Acquire data from a NEON site}
+\title{Internal function that filters environmental data for easier processing of fluxes.}
 \usage{
 measurement_merge(
   neon_data,
@@ -27,10 +27,7 @@ measurement_merge(
 A data frame of the requested data.
 }
 \description{
-Definition function. Given a measurement return the necessary components we need to compute flux calculations (and nothing more). Currently only works with 30 minute data
-}
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+Internal function. Given a set of environmental measurements, create a merged data frame of measurements and positions where the QF_flag exists (either observed or a smoothed mean measurement).
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

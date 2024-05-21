@@ -17,20 +17,26 @@ co2_to_umol(
 \arguments{
 \item{temperature}{Required. Soil temperature (degrees C)}
 
-\item{pressure}{Required. Reported Barometric air pressure error (kilopascal)}
+\item{pressure}{Required. Barometric air pressure (kilopascal)}
 
 \item{co2}{Carbon dioxide in ppm}
 
 \item{temperature_err}{Required. Reported Soil temperature error (degrees C)}
+
+\item{pressure_err}{Required. Reported Barometric air pressure error (kilopascal)}
+
+\item{co2_err}{Required. Carbon dioxide in ppm error}
+
+\item{zOffset}{Required. Surface depth (m). Reported as a negative number.}
 }
 \value{
 A value of the converted co2
 }
 \description{
-Given a measurement of co2, convert it from ppm to umol m-3 based on temperature and pressure
+Given a measurement of co2, convert it from ppm to umol m-3 based on temperature and pressure. Also compute associated error via quadrature.
 }
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+\examples{
+co2_to_umol(31,96.3,654,.15,.05,9,-.05)
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

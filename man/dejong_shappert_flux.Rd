@@ -2,7 +2,7 @@
 % Please edit documentation in R/dejong_shappert_flux.R
 \name{dejong_shappert_flux}
 \alias{dejong_shappert_flux}
-\title{Compute surface flux at a given timepoint using a surface gradient via De Jong and Schappert (1972)}
+\title{Internal function to compute surface co2 flux at a given timepoint via De Jong and Schappert (1972)}
 \usage{
 dejong_shappert_flux(zOffset, co2, co2_err, diffusive, diffusive_err)
 }
@@ -22,6 +22,14 @@ Data frame of fluxes associated error
 }
 \description{
 Given  zOffsets, diffusivity, and co2 (umol mol-1) and their associated errors, compute the surface flux. This is done by estimating the surface concentration (through linear regression) and doing a gradient calculation. Modified from De Jong and Schappert (1972).
+}
+\references{
+Jong, E. De, and H. J. V. Schappert. 1972. “Calculation of Soil Respiration and Activity from CO2 Profiles in the Soil.” Soil Science 113 (5): 328.
+
+Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
+}
+\seealso{
+[hirano_flux()], [tang_2003_flux()], [tang_2005_flux()] for other ways to compute surface fluxes.
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

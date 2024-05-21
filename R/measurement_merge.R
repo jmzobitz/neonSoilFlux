@@ -1,11 +1,10 @@
-#' @title Acquire data from a NEON site
+#' @title Internal function that filters environmental data for easier processing of fluxes.
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
 
 #' @description
-#' Definition function. Given a measurement return the necessary components we need to compute flux calculations (and nothing more). Currently only works with 30 minute data
-
+#' Internal function. Given a set of environmental measurements, create a merged data frame of measurements and positions where the QF_flag exists (either observed or a smoothed mean measurement).
 
 #' @param neon_data Required. A list of NEON data downloaded from the utilities
 #' @param data_code Required. Names of data product we are interpolating. (SWS = soil water, ST = soil temperature, SCO2C = soil CO2)
@@ -14,11 +13,6 @@
 #' @param qf_name Required. Names of qf column we are grabbing. (VSWCFinalQF = soil water, finalQF = soil temperature, finalQF = soil CO2)
 #'
 #' @return A data frame of the requested data.
-
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
-
-#' @export
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-19)

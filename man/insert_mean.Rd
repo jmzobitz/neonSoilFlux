@@ -2,7 +2,7 @@
 % Please edit documentation in R/insert_mean.R
 \name{insert_mean}
 \alias{insert_mean}
-\title{Insert smoothed mean value of a measurement at a site}
+\title{Internal function that inserts smoothed mean value of a measurement at a site}
 \usage{
 insert_mean(data, monthly_mean, measurement_name)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_surface_flux.R
 \name{compute_surface_flux}
 \alias{compute_surface_flux}
-\title{Compute CO2 surface flux}
+\title{Internal fucntion to compute CO2 surface flux}
 \usage{
 compute_surface_flux(input_data)
 }
@@ -14,9 +14,6 @@ A value of the surface CO2 flux (umol m-2 s-1)
 }
 \description{
 Computation function. Given a measurement of the co2 and diffusive flux at different levels, return the surface flux
-}
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

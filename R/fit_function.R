@@ -1,4 +1,4 @@
-#' @title Interpolate a soil measurement to different depths
+#' @title Internal function that interpolates a soil measurement to different depths
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -17,12 +17,7 @@
 
 #' @return A data frame of the depth and the measured column for the measurements and reported error
 
-#' @references
-#' License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
 
-
-
-#' @export
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2021-07-15)

@@ -38,8 +38,8 @@ A value of the computed diffusivity
 \description{
 Given a tidied data frame of soil measurements (from interpolate.R), compute the diffusivity in a given soil layer
 }
-\references{
-License: Terms of use of the NEON FIU algorithm repository dated 2015-01-16. \cr
+\examples{
+diffusivity(31,0.0102,96.3,.15,.2135,.05,-.05,0.45)
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
