@@ -20,6 +20,7 @@ A revised list of corrected soil water content and depths.
 Given the expanded SWC data, return a corrected version based on the values below
 }
 \examples{
+\donttest{
 # Download the soil water content data:
 site_swc <- neonUtilities::loadByProduct(
 dpID="DP1.00094.001",
@@ -34,6 +35,7 @@ include.provisional = TRUE
 
 # Then correct the swc:
 site_swc <- swc_correct(site_swc,"SJER","2020-05")
+}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
