@@ -14,22 +14,20 @@
 #' @return A revised list of corrected soil water content and depths.
 #'
 #' @examples
-#' \donttest{
 #' # Download the soil water content data:
 #' site_swc <- neonUtilities::loadByProduct(
-#' #' dpID="DP1.00094.001",
+#' dpID="DP1.00094.001",
 #' site="SJER",
 #' startdate="2020-05",
 #' enddate="2020-05",
 #' timeIndex = "30",
 #' package="expanded",
-#' check.size = F,
+#' check.size = FALSE,
 #' include.provisional = TRUE
 #' )
 #'
-#' Then correct the swc:
-#' site_swc <- swc_correct(site_swc,site_name,download_date)
-#' }
+#' # Then correct the swc:
+#' site_swc <- swc_correct(site_swc,"SJER","2020-05")
 
 #' @details
 #' # (From correspondence w/ Edward Ayres \email{eayres@battelleecology.org}): The first issue is the sensor depths being incorrectly reported in the sensor_positions file. Our current data processing system does not allow a fix to this issue, so in the meantime we’ve added a file containing the installation depths and an associated readme file (both attached) to the data product documentation. This is mentioned in the Description section of the webpage you linked and you can find the files in the Documentation section. If you adapt your code to pull the depths from this file it should solve this issue.
@@ -51,28 +49,29 @@
 
 swc_correct <- function(input_swc,curr_site,reference_time) {
 
+  .data = NULL  # Appease R CMD Check
    ### Determine which of the sites we are working with:
   swc_corrections_site <- swc_corrections |>
-    dplyr::filter(siteID == curr_site) |>
-    dplyr::mutate(interval = purrr::map2_lgl(.x=startDateTime,
-                                             .y=endDateTime,
+    dplyr::filter(.data[[ "siteID" ]] == curr_site) |>
+    dplyr::mutate(interval = purrr::map2_lgl(.x=.data[["startDateTime"]],
+                                             .y=.data[["endDateTime"]],
                                              .f=~inside_interval(.x,.y,reference_time)
     )
     ) |>
-    dplyr::filter(interval)
+    dplyr::filter(.data[["interval"]])
 
     # Update the depths of the soil water sensors
     input_swc$sensor_positions_00094 <- input_swc$sensor_positions_00094 |>
-      dplyr::group_by(siteID,HOR.VER) |>
+      dplyr::group_by(.data[["siteID"]],.data[["HOR.VER"]]) |>
       tidyr::nest() |>
       dplyr::left_join(swc_corrections_site,by=c("siteID","HOR.VER")) |>
-      dplyr::mutate(data = purrr::map(data,dplyr::slice_head), # Get one variable
-                    data = purrr::map2(.x=data,
-                                      .y=sensorDepth,
+      dplyr::mutate(data = purrr::map(.data[["data"]],dplyr::slice_head), # Get one variable
+                    data = purrr::map2(.x=.data[["data"]],
+                                      .y=.data[["sensorDepth"]],
                                       .f=~(.x |> dplyr::mutate(zOffset = .y) )
                     )
       ) |>
-      dplyr::select(siteID,HOR.VER,data) |>
+      dplyr::select(.data[["siteID"]],.data[["HOR.VER"]],.data[["data"]]) |>
       tidyr::unnest(cols=c("data"))
 
 
