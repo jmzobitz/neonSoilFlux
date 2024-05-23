@@ -24,12 +24,14 @@
 
 #' @return List of all QF flags over time period and Data frame of environmental measurements for flux computation
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-05-07)
-#     original creation
 
 
 correct_env_data <- function(input_data) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2024-05-07)
+  #     original creation
+
 
   .data = NULL  # Appease R CMD Check
   ################

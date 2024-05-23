@@ -34,14 +34,17 @@
 
 #' @export
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2023-07-19)
-#     original creation
-#     2024-05-21: documentation updated
-
 
 
 quadrature_error <- function(x_pd,x_err) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2023-07-19)
+  #     original creation
+  #     2024-05-21: documentation updated
+
+
+
 
   out_val <- sqrt( sum( x_pd^2*x_err^2 ) )
 

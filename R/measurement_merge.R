@@ -14,14 +14,16 @@
 #'
 #' @return A data frame of the requested data.
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-19)
-#     original creation
-#     2024-04-08: update to get namespaces correct
-
-##############################################################################################
 
 measurement_merge <- function(neon_data,data_code,data_product_id,measurement_name,qf_name) {
+
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-19)
+  #     original creation
+  #     2024-04-08: update to get namespaces correct
+
+
 
   .data = NULL  # Appease R CMD Check
   # Create data frame for soil temperature data after interpolating across depths with columns from 0 m to 2 m

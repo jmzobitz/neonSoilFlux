@@ -52,18 +52,19 @@
 
 #' @export
 
-# changelog and author contributions / copyrights
-#   Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
-#   John Zobitz (2024-01-17)
-#     modified to also compute the depth (zOffset) from the max of all zOffsets that month
-#   John Zobitz (2024-01-10)
-#     original creation
-#     2024-04-08: update to get namespaces correct
-
 #' @references
 #' Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 
 compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosition", "verticalPosition")) {
+
+  # changelog and author contributions / copyrights
+  #   Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
+  #   John Zobitz (2024-01-17)
+  #     modified to also compute the depth (zOffset) from the max of all zOffsets that month
+  #   John Zobitz (2024-01-10)
+  #     original creation
+  #     2024-04-08: update to get namespaces correct
+
 
   .data = NULL  # Appease R CMD Check
 

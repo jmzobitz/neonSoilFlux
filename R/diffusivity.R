@@ -23,14 +23,18 @@
 
 #' @export
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-21)
-#     original creation
-#   John Zobitz (2024-01-20)
-#     modified to account if soil water > porosity - just set to 0
-
 
 diffusivity <- function(temperature, soil_water, pressure, temperature_err, soil_water_err, pressure_err, zOffset, porVol2To20) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-21)
+  #     original creation
+  #   John Zobitz (2024-01-20)
+  #     modified to account if soil water > porosity - just set to 0
+
+
+
+
   # Since pressure is a single value, make it equal to all the other lengths
   pressure <- rep(pressure, length(temperature))
   pressure_err <- rep(pressure_err, length(temperature_err))

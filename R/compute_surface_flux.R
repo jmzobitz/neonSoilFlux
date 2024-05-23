@@ -11,19 +11,23 @@
 
 #' @return A value of the surface CO2 flux (umol m-2 s-1)
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-21)
-#     original creation
-#   John Zobitz (2022-06-21)
-#     revision to account for correct directionality when computing fluxes
-#   John Zobitz (2023-07-14)
-#     revision to include value of gradient at surface and computation of quadrature errors
-#   John Zobitz (2024-01-20)
-#     revision to simplify code - fluxes are calculated via different approaches with the measurements
-
 
 compute_surface_flux <- function(input_data) {
-  .data = NULL  # Appease R CMD Check
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-21)
+  #     original creation
+  #   John Zobitz (2022-06-21)
+  #     revision to account for correct directionality when computing fluxes
+  #   John Zobitz (2023-07-14)
+  #     revision to include value of gradient at surface and computation of quadrature errors
+  #   John Zobitz (2024-01-20)
+  #     revision to simplify code - fluxes are calculated via different approaches with the measurements
+
+
+
+
+   .data = NULL  # Appease R CMD Check
 
   # Compute the flux between the two different layers
 

@@ -19,17 +19,20 @@
 
 
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-15)
-#     original creation
-#   2022-06-11: revision to include spline fits of temperature and water, better functionality
-#   2023-07-23: revision to includes prediction error for linear interpolation - for splines (n measurements > 3) this is done by estimating the prediction error by quadrature using formulas for simple linear regression.  Also included is the addition of measurement_special, a flag to just do linear interpolation and any other positivity measures.
-#   2024-01-19: revision to include the qf flags
-#     2024-04-08: update to get namespaces correct
-##############################################################################################
 
 
 fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,interp_depth,measurement_special) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-15)
+  #     original creation
+  #   2022-06-11: revision to include spline fits of temperature and water, better functionality
+  #   2023-07-23: revision to includes prediction error for linear interpolation - for splines (n measurements > 3) this is done by estimating the prediction error by quadrature using formulas for simple linear regression.  Also included is the addition of measurement_special, a flag to just do linear interpolation and any other positivity measures.
+  #   2024-01-19: revision to include the qf flags
+  #     2024-04-08: update to get namespaces correct
+  ##############################################################################################
+
+
 
   .data = NULL  # Appease R CMD Check
 

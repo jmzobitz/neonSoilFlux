@@ -22,14 +22,18 @@
 #'
 #' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2023-01-20)
-#     original creation
-#     2024-04-08: update to get namespaces correct
-
 
 
 tang_2005_flux <- function(zOffset, co2, co2_err, diffusive, diffusive_err) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2023-01-20)
+  #     original creation
+  #     2024-04-08: update to get namespaces correct
+
+
+
+
   # Assume zOffset is positive, so we want the flux to be negative (opposite the direction of the flux)
   # Tang05: linearly extrapolate flux from the bottom two measurement leavels
   # Calculate diffusivty between measurement levels (use weighted harmonic mean based on Turcu et al. (2005) Vadose Zone J 4, 1161-1169).

@@ -18,16 +18,19 @@
 
 #' @return Data frame of fluxes from the timeperiod
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2022-06-11)
-#     original creation
-#   John Zobitz (2023-10-23)
-#     modified to apply drop_na rather in map rather than doing a filter.
-#     drop_na() checks for complete rows.
-#     2024-04-08: update to get namespaces correct
-
 
 measurement_detect <- function(input_data) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2022-06-11)
+  #     original creation
+  #   John Zobitz (2023-10-23)
+  #     modified to apply drop_na rather in map rather than doing a filter.
+  #     drop_na() checks for complete rows.
+  #     2024-04-08: update to get namespaces correct
+
+
+
 
   .data = NULL  # Appease R CMD Check
 

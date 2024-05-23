@@ -11,13 +11,16 @@
 
 
 #' @return A data frame that reports the measurement depth for and associated environmental measurement.
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-01-17)
-#     original creation
-
 
 
 determine_position <- function(input_positions, input_measurement) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2024-01-17)
+  #     original creation
+
+
+
   .data = NULL  # Appease R CMD Check
 
   # Define %within% so we can use here

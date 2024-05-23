@@ -31,21 +31,23 @@
 
 #' @export
 #'
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-22)
-#     original creation
-#     2023-07-16: Update to take advantage of nested structures to improve / decrease computational time, allowing for multiple measurements to compute the flux.
-#     2023-10-23: Update to exit computing a flux if there are no half-hourly measurements.
-#     2024-04-08: update to get namespaces correct
-
-
-
 
 
 
 compute_neon_flux <- function(input_site_env,
                               input_site_megapit) {
   .data = NULL  # Appease R CMD Check
+
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-22)
+  #     original creation
+  #     2023-07-16: Update to take advantage of nested structures to improve / decrease computational time, allowing for multiple measurements to compute the flux.
+  #     2023-10-23: Update to exit computing a flux if there are no half-hourly measurements.
+  #     2024-04-08: update to get namespaces correct
+
+
+
 
 
   ################
