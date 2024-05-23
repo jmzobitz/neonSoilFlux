@@ -21,6 +21,7 @@ A data frame that reports for each horiztonal and vertical position the computed
 Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 }
 \examples{
+\donttest{
 # Download the NEON data directly - here this would be soil moisture
 NEON_moist_30m_orig <- neonUtilities::loadByProduct(
   dpID = "DP1.00094.001",
@@ -53,6 +54,7 @@ column_selectors <- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 
   # Add on the positions for swc
   swc <- determine_position(swc_positions,swc)
+  }
 }
 \references{
 Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r

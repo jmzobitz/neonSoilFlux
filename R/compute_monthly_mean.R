@@ -15,6 +15,7 @@
 #' @keywords Currently none
 
 #' @examples
+#' \donttest{
 #' # Download the NEON data directly - here this would be soil moisture
 #' NEON_moist_30m_orig <- neonUtilities::loadByProduct(
 #'   dpID = "DP1.00094.001",
@@ -47,6 +48,7 @@
 #'
 #'   # Add on the positions for swc
 #'   swc <- determine_position(swc_positions,swc)
+#'   }
 
 
 

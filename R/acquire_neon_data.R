@@ -12,7 +12,9 @@
 
 #'
 #' @examples
+#' \donttest{
 #' out_env_data <- acquire_neon_data("SJER","2022-06")
+#' }
 
 
 #' @return A list containing stacked environmental data (`site_data`) and soil properties (`site_megapit`).

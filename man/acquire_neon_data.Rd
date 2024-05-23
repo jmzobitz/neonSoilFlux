@@ -27,7 +27,9 @@ A list containing stacked environmental data (`site_data`) and soil properties (
 Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 }
 \examples{
+\donttest{
 out_env_data <- acquire_neon_data("SJER","2022-06")
+}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
