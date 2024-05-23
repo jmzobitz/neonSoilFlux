@@ -3,3 +3,5 @@
 ^archive-files$
 ^cran-comments\.md$
 ^LICENSE\.md$
+^swc-corrections$
+^data-raw$

@@ -21,34 +21,38 @@ A data frame that reports for each horiztonal and vertical position the computed
 Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 }
 \examples{
-\donttest{
 # Download the NEON data directly - here this would be soil moisture
 NEON_moist_30m_orig <- neonUtilities::loadByProduct(
   dpID = "DP1.00094.001",
   site = "WREF",
   startdate = "2022-06",
   enddate = "2022-06",
+  timeIndex = "30",
   package = "expanded",
-  check.size = F
+  check.size = FALSE,
+  include.provisional = TRUE
 )
 
+
 # Then correct the swc
-site_swc <- swc_correct(NEON_moist_30m_orig, "WREF")
+site_swc <- swc_correct(NEON_moist_30m_orig, "WREF","2022-06")
 
 # Select the columns and the time frequency
 time_frequency <- "30_minute"
 column_selectors <- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 
-swc <- site_swc |>
-  pluck(paste0("SWS_", time_frequency)) |>
-  select(
-  domainID, siteID, horizontalPosition, verticalPosition, startDateTime,
-   matches(str_c("VSWC", column_selectors)),
-   VSWCFinalQF)
+    swc <- site_swc |>
+    purrr::pluck(paste0("SWS_",time_frequency)) |>
+    dplyr::select(tidyselect::all_of(c("domainID","siteID",
+    "horizontalPosition","verticalPosition","startDateTime","VSWCFinalQF")),
+    tidyselect::matches(stringr::str_c("VSWC",column_selectors)))
 
-# Now apply the monthly mean:
-swc_monthly_mean <- compute_monthly_mean(swc)
-}
+  # Determine a data frame of the different horizontal and vertical positions
+  swc_positions <- site_swc |>
+  purrr::pluck(paste0("sensor_positions_","00094"))
+
+  # Add on the positions for swc
+  swc <- determine_position(swc_positions,swc)
 }
 \references{
 Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r

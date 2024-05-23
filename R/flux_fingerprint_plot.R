@@ -11,41 +11,42 @@
 #' @export
 #'
 #' @examples
-#' # Say you have a file name of computed fluxes:
-#' load("my-fluxes.Rda") # Loads up out_fluxes
-#' flux_fingerprint_plot(out_fluxes)
-#'
+#' # Make a fingerprint plot for computed flux values:
+#' flux_fingerprint_plot(sjer_flux_2022_06)
+
 # changelog and author contributions / copyrights
 #   John Zobitz (2025-05-07)
 #     original creation
 
 flux_fingerprint_plot <- function(input_fluxes) {
 
+  .data = NULL  # Appease R CMD Check
+
   prep_flux <- input_fluxes |>
-    dplyr::select(startDateTime,horizontalPosition,flux_compute,diffusivity) |>
-    tidyr::unnest(cols=c(flux_compute)) |>
-    dplyr::mutate(fluxMeanQF = purrr::map_lgl(flux,anyNA),
-           fluxMeanQF = dplyr::if_else(fluxMeanQF,2,0),
+    dplyr::select(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["flux_compute"]],.data[["diffusivity"]]) |>
+    tidyr::unnest(cols=c("flux_compute")) |>
+    dplyr::mutate(fluxMeanQF = purrr::map_lgl(.data[["flux"]],anyNA),
+           fluxMeanQF = dplyr::if_else(.data[["fluxMeanQF"]],2,0),
            ) |>
-    dplyr::select(startDateTime,horizontalPosition,method,fluxMeanQF,diffusivity) |>
-    tidyr::pivot_wider(names_from=method,values_from = fluxMeanQF) |>
+    dplyr::select(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["method"]],.data[["fluxMeanQF"]],.data[["diffusivity"]]) |>
+    tidyr::pivot_wider(names_from=.data[["method"]],values_from = .data[["fluxMeanQF"]]) |>
     tidyr::unnest(cols=c(diffusivity)) |>
-    mutate(diffusivity = purrr::map_lgl(diffusivity,is.na),
-           diffusivity = dplyr::if_else(diffusivity,2,0)
+    dplyr::mutate(diffusivity = purrr::map_lgl(.data[["diffusivity"]],is.na),
+           diffusivity = dplyr::if_else(.data[["diffusivity"]],2,0)
     ) |>
-    dplyr::select(-zOffset,-diffusExpUncert)
+    dplyr::select(-.data[["zOffset"]],-.data[["diffusExpUncert"]])
 
   prep_flux |>
     dplyr::mutate(
-      week_day = lubridate::wday(startDateTime),
-      decimal_hour = lubridate::hour(startDateTime) + lubridate::minute(startDateTime) / 60,
-      day = lubridate::floor_date(startDateTime, unit = "day")
+      week_day = lubridate::wday(.data[["startDateTime"]]),
+      decimal_hour = lubridate::hour(.data[["startDateTime"]]) + lubridate::minute(.data[["startDateTime"]]) / 60,
+      day = lubridate::floor_date(.data[["startDateTime"]], unit = "day")
     ) |>
     tidyr::pivot_longer(cols = c("diffusivity":"tang_2005")) |>
-    dplyr::mutate(name = factor(name,levels=c("diffusivity","dejong_shappert_1972","hirano_2005","tang_2003","tang_2005"))) |>
-    dplyr::mutate(value = as.factor(value)) |>
+    dplyr::mutate(name = factor(.data[["name"]],levels=c("diffusivity","dejong_shappert_1972","hirano_2005","tang_2003","tang_2005"))) |>
+    dplyr::mutate(value = as.factor(.data[["value"]])) |>
     ggplot2::ggplot() +
-    ggplot2::geom_tile(ggplot2::aes(x = decimal_hour, y = day, fill = value)) +
+    ggplot2::geom_tile(ggplot2::aes(x = .data[["decimal_hour"]], y = .data[["day"]], fill = .data[["value"]])) +
     ggplot2::facet_grid(horizontalPosition ~ name) +
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +

@@ -11,9 +11,9 @@
 #' @export
 #'
 #' @examples
-#' # Say you have a file name of computed fluxes:
-#' load("my-fluxes.Rda") # Loads up out_fluxes
-#' env_fingerprint_plot(out_fluxes)
+#' # Make a fingerprint plot for environmental variables:
+#' env_fingerprint_plot(sjer_flux_2022_06)
+
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-04-07)
 #     original creation
@@ -21,20 +21,23 @@
 #     2024-05-07: colorscheme updates
 
 env_fingerprint_plot <- function(input_fluxes) {
+
+  .data = NULL  # Appease R CMD Check
+
   prep_env <- input_fluxes |>
-    dplyr::select(-flux_compute, -diffusivity) |>
+    dplyr::select(-.data[["flux_compute"]], -.data[["diffusivity"]]) |>
     dplyr::mutate(
-      week_day = lubridate::wday(startDateTime),
-      decimal_hour = lubridate::hour(startDateTime) + lubridate::minute(startDateTime) / 60,
-      day = lubridate::floor_date(startDateTime, unit = "day"),
+      week_day = lubridate::wday(.data[["startDateTime"]]),
+      decimal_hour = lubridate::hour(.data[["startDateTime"]]) + lubridate::minute(.data[["startDateTime"]]) / 60,
+      day = lubridate::floor_date(.data[["startDateTime"]], unit = "day"),
     ) |>
     tidyr::pivot_longer(cols = c("soilCO2concentrationMeanQF":"staPresMeanQF")) |>
-    dplyr::mutate(name = stringr::str_extract(name,pattern=".+(?=MeanQF)"))
+    dplyr::mutate(name = stringr::str_extract(.data[["name"]],pattern=".+(?=MeanQF)"))
 
   prep_env |>
-    dplyr::mutate(value = as.factor(value)) |>
+    dplyr::mutate(value = as.factor(.data[["value"]])) |>
     ggplot2::ggplot() +
-    ggplot2::geom_tile(ggplot2::aes(x = decimal_hour, y = day, fill = value)) +
+    ggplot2::geom_tile(ggplot2::aes(x = .data[["decimal_hour"]], y = .data[["day"]], fill =.data[["value"]])) +
     ggplot2::facet_grid(horizontalPosition ~ name) +
     ggplot2::labs(fill = "QF Check:", x = "Hour of Day", y = "Date") +
     ggplot2::scale_y_datetime(breaks = "7 day") +

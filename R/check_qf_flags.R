@@ -19,6 +19,7 @@
 
 check_qf_flags <- function(measurement_name,data) {
 
+  .data = NULL  # Appease R CMD Check
   ## Function takes data and the measurement, checks to see if there are more than 2 measurements for swc, temperature, and co2 at a given spatial location and time.
   ## For atmospheric pressure, just checks to see if we have a measurement
 
@@ -37,10 +38,10 @@ check_qf_flags <- function(measurement_name,data) {
       dplyr::group_by(horizontalPosition,startDateTime) |>
       tidyr::nest() |>
       dplyr::mutate(n_valid = purrr::map_dbl(data,nrow)) |>
-      dplyr::filter(.data$n_valid > 2) |>
+      dplyr::filter(.data[["n_valid"]] > 2) |>
       dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
       ) |>
-      dplyr::select(-c("data",".data$n_valid"))
+      dplyr::select(-data,-.data[["n_valid"]])
   } else {
 
     # Filter if there is a valid (QF neq 2) measurements at each timepoint and horizontalPosition.
@@ -60,7 +61,7 @@ check_qf_flags <- function(measurement_name,data) {
   # Join it to the measurements
   my_join <- tidyr::expand_grid(startDateTime,horizontalPosition) |>
     dplyr::left_join(data_revised,by=c("startDateTime","horizontalPosition")) |>
-    dplyr::mutate(mean_used = dplyr::if_else(is.na(.data$mean_used),2,.data$mean_used) )
+    dplyr::mutate(mean_used = dplyr::if_else(is.na(.data[["mean_used"]]),2,.data[["mean_used"]]) )
 
   # rename final QF frame
   names(my_join)[names(my_join) == "mean_used"] <- paste0(measurement_name,"MeanQF")

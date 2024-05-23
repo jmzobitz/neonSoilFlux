@@ -28,6 +28,9 @@
 
 
 measurement_detect <- function(input_data) {
+
+  .data = NULL  # Appease R CMD Check
+
   # Do a single pass across each of the measurements to see if we have all of the measurements (MeanQF) and if there are no NA values for interpolation
 
   # if the monthly mean is a NA, then we use a 2
@@ -37,26 +40,26 @@ measurement_detect <- function(input_data) {
 
 
   input_data_rev <- input_data |>
-    dplyr::mutate(data = purrr::map(.x = data, .f = ~ dplyr::filter(.x, if_any(ends_with("FinalQF"), ~ (.x != 2))) |>
+    dplyr::mutate(data = purrr::map(.x = .data[["data"]], .f = ~ dplyr::filter(.x, if_any(ends_with("FinalQF"), ~ (.x != 2))) |>
       tidyr::drop_na()))
 
   # Each column selector, time, and horizontal position needs at least three measurements, then we should also do the same for the pressure measurements by time point
   # filter out co2 data with more than 3 measurements at a given timepoint
 
   input_data_interp <- input_data_rev |>
-    dplyr::mutate(data = purrr::map2(.x = data, .y = measurement, .f = ~ (
+    dplyr::mutate(data = purrr::map2(.x = .data[["data"]], .y =.data[["measurement"]], .f = ~ (
       if (.y == "soilCO2concentration") {
         .x |>
-          dplyr::group_by(horizontalPosition, startDateTime) |>
+          dplyr::group_by(.data[["horizontalPosition"]], .data[["startDateTime"]]) |>
           tidyr::nest() |>
-          dplyr::mutate(tot = purrr::map_dbl(data, nrow)) |>
+          dplyr::mutate(tot = purrr::map_dbl(.data[["data"]], nrow)) |>
           dplyr::filter(tot > 2) |>
           tidyr::unnest(cols = c("data"))
       } else if (.y %in% c("VSWC", "soilTemp")) {
         .x |>
-          dplyr::group_by(horizontalPosition, startDateTime) |>
+          dplyr::group_by(.data[["horizontalPosition"]],.data[["startDateTime"]]) |>
           tidyr::nest() |>
-          dplyr::mutate(tot = purrr::map_dbl(data, nrow)) |>
+          dplyr::mutate(tot = purrr::map_dbl(.data[["data"]], nrow)) |>
           dplyr::filter(tot >= 2) |>
           tidyr::unnest(cols = c("data"))
       } else {
@@ -67,27 +70,27 @@ measurement_detect <- function(input_data) {
   # Now we need to see (for the first three measurements), how many we have at a given time point
 
   have_three_measurement <- input_data_interp |>
-    dplyr::filter(measurement != "staPres") |>
+    dplyr::filter(.data[["measurement"]] != "staPres") |>
     tidyr::unnest(cols = c("data")) |>
-    dplyr::group_by(horizontalPosition, startDateTime) |>
+    dplyr::group_by(.data[["horizontalPosition"]], .data[["startDateTime"]]) |>
     tidyr::nest() |>
-    dplyr::mutate(tot_meas = purrr::map_dbl(.x = data, .f = ~ (length(unique(.x$measurement))))) |>
-    dplyr::filter(tot_meas == 3) |> # Keep only when we have co2, temp, and water
-    dplyr::select(horizontalPosition, startDateTime)
+    dplyr::mutate(tot_meas = purrr::map_dbl(.x = .data[["data"]], .f = ~ (length(unique(.x$measurement))))) |>
+    dplyr::filter(.data[["tot_meas"]] == 3) |> # Keep only when we have co2, temp, and water
+    dplyr::select(.data[["horizontalPosition"]], .data[["startDateTime"]])
 
   # Next we go down and do filtering on across the data ready for interpolation - semi join!
 
   input_data_interp_ready <- input_data_interp |>
-    dplyr::mutate(data = purrr::map2(.x = data, .y = measurement, .f = ~ (
+    dplyr::mutate(data = purrr::map2(.x = .data[["data"]], .y =.data[["measurement"]], .f = ~ (
       if (.y != "staPres") {
         .x |> dplyr::semi_join(have_three_measurement, by = c("horizontalPosition", "startDateTime"))
       } else { ## For the column with pressure, we just want a starting time.
         .x |> dplyr::semi_join(have_three_measurement, by = c("startDateTime"))
       }))) |>
-    dplyr::mutate(n_obs = purrr::map2_dbl(.x = data, .y = measurement, .f = ~ (
+    dplyr::mutate(n_obs = purrr::map2_dbl(.x = .data[["data"]], .y = .data[["measurement"]], .f = ~ (
       if (.y != "staPres") {
         .x |>
-          dplyr::group_by(horizontalPosition, startDateTime) |>
+          dplyr::group_by(.data[["horizontalPosition"]], .data[["startDateTime"]]) |>
           nrow()
       } else { ## For the column with pressure, we just want a starting time.
         .x |>

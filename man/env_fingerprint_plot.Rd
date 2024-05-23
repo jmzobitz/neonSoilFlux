@@ -16,9 +16,8 @@ A ggplot graph where we have ordered factors showing the QA values a given envir
 Given a flux measurement data frame, show when the environmental measurements produced a QF value
 }
 \examples{
-# Say you have a file name of computed fluxes:
-load("my-fluxes.Rda") # Loads up out_fluxes
-env_fingerprint_plot(out_fluxes)
+# Make a fingerprint plot for environmental variables:
+env_fingerprint_plot(sjer_flux_2022_06)
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

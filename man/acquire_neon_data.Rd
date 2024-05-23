@@ -7,10 +7,8 @@
 acquire_neon_data(
   site_name,
   download_date,
-  data_file_name,
   time_frequency = "30_minute",
-  provisional = FALSE,
-  column_selectors = c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
+  provisional = FALSE
 )
 }
 \arguments{
@@ -18,24 +16,18 @@ acquire_neon_data(
 
 \item{download_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only}
 
-\item{data_file_name}{Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)}
-
 \item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
 
-\item{provisional}{Required. Should you use provisional data in download. Defaults to F. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).}
-
-\item{column_selectors}{Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))}
+\item{provisional}{Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).}
 }
 \value{
-Nothing is returned - the file is saved to the location provided (either a .Rda or .csv file)
+A list containing stacked environmental data (`site_data`) and soil properties (`site_megapit`).
 }
 \description{
 Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 }
 \examples{
-\donttest{
-acquire_neon_data("SJER","2020-05","my-file.Rda")
-}
+out_env_data <- acquire_neon_data("SJER","2022-06")
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

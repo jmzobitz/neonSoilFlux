@@ -23,25 +23,27 @@
 
 
 compute_surface_flux <- function(input_data) {
+  .data = NULL  # Appease R CMD Check
+
   # Compute the flux between the two different layers
 
   # Select the first three levels (closest to the surface)
   input_data_rev <- input_data |>
-    dplyr::arrange(desc(zOffset)) |>
+    dplyr::arrange(dplyr::desc(.data[["zOffset"]])) |>
     dplyr::slice(1:3)
 
 
   # Select the first three levels (closest to the surface)
   zOffset_pos <- input_data_rev |>
-    dplyr::pull(zOffset) |>
+    dplyr::pull(.data[["zOffset"]]) |>
     abs() # Make these positive, just to avoid problems down the road.
 
 
-  diffus <- input_data_rev |> dplyr::pull(diffusivity)
-  co2umol <- input_data_rev |> dplyr::pull(co2_umol)
+  diffus <- input_data_rev |> dplyr::pull(.data[["diffusivity"]])
+  co2umol <- input_data_rev |> dplyr::pull(.data[["co2_umol"]])
 
-  co2_err <- input_data_rev |> dplyr::pull(co2ExpUncert)
-  diffusive_err <- input_data_rev |> dplyr::pull(diffusExpUncert)
+  co2_err <- input_data_rev |> dplyr::pull(.data[["co2ExpUncert"]])
+  diffusive_err <- input_data_rev |> dplyr::pull(.data[["diffusExpUncert"]])
 
   # Collect the names of all the flux calculations
   function_names <- c(

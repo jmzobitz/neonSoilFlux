@@ -14,20 +14,17 @@
 #' 5) Adds in the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 #' 6) Saves the data
 
-#' @param input_file_name Required. Path of location for the save file from acquire_neon_data. Must end in .Rda (a string), otherwise exits gracefully
-#' @param out_flux_file_name Required. Path of location where you will save file for fluxes.  Must end in .Rda or .csv - otherwise exits gracefully.
-#' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
-#' @param input_column_selectors Optional. List of measurements from which fluxes will be computed typically c("Mean","Minimum","Maximum","ExpUncert","StdErMean") (the more used increases computational time)
+#' @param input_site_env Required. Input list of environmental data.  Usually given from acquire_neon_data
+#' @param input_site_megapit Required. Input list of environmental soil data.  Usually given from acquire_neon_data
 #'
 #' @examples
-#' \donttest{
-#'  # First acquire the NEON data at a given NEON site
-#' acquire_neon_data("SJER","2020-05","my-file.Rda")
 #'
-#' # Then process and compute the fluxes from that data file.
-#'  compute_neon_flux("my-out-file.Rda","flux-file.Rda")
-#' }
-
+#'  # First acquire the NEON data at a given NEON site
+#' out_env_data <- acquire_neon_data("SJER","2020-05")
+#'
+#' # Then process and compute the fluxes:
+#'  out_flux <- compute_neon_flux(out_env_data$site_data,out_env_data$site_megapit)
+#'
 #' @return Data frame of fluxes and gradient from the timeperiod
 
 
@@ -45,31 +42,19 @@
 
 
 
-compute_neon_flux <- function(input_file_name,
-                              out_flux_file_name,
-                              time_frequency = "30_minute",
-                              input_column_selectors = c("Mean", "ExpUncert")) {
-  # Get the save file extension and do a quick check
-  extension_name <- stringr::str_extract(out_flux_file_name, pattern = "(?<=\\.).{3}$")
-  if (!(extension_name %in% c("csv", "Rda", "rda"))) {
-    stop("Save file name extension must be a Rdata file (Rda) or comma separated file (csv). Please revise.")
-  }
+compute_neon_flux <- function(input_site_env,
+                              input_site_megapit) {
+  .data = NULL  # Appease R CMD Check
 
-  input_extension_name <- stringr::str_extract(input_file_name, pattern = "(?<=\\.).{3}$")
-  if (!(input_extension_name %in% c("Rda", "rda"))) {
-    stop("Input file name extension must be a Rdata file (Rda). Please revise.")
-  }
 
   ################
   # 1) Load up the data (this may take a while)  Will be two data frames:
   # site_megapit: a nested file containing specific information about the site (for bulk density calculations, etc)
   # site_data: a nested data file containing measurements for the required flux gradient model during the given time period
 
-  load(input_file_name)
-
 
   ### Then take each of the measurements to associate them with errors
-  corrected_data <- correct_env_data(site_data)
+  corrected_data <- correct_env_data(input_site_env)
 
   qf_flags <- corrected_data$all_flags
   all_measures <- corrected_data$site_filtered
@@ -83,10 +68,10 @@ compute_neon_flux <- function(input_file_name,
   # 3) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 
   # Ingest the megapit soil physical properties pit, horizon, and biogeo data
-  mgp.pit <- site_megapit$mgp_permegapit
-  mgp.hzon <- site_megapit$mgp_perhorizon
-  mgp.bgeo <- site_megapit$mgp_perbiogeosample
-  mgp.bden <- site_megapit$mgp_perbulksample
+  mgp.pit <-  input_site_megapit$mgp_permegapit
+  mgp.hzon <- input_site_megapit$mgp_perhorizon
+  mgp.bgeo <- input_site_megapit$mgp_perbiogeosample
+  mgp.bden <- input_site_megapit$mgp_perbulksample
 
 
   # Merge the soil properties into a single data frame
@@ -114,7 +99,7 @@ compute_neon_flux <- function(input_file_name,
   ### Now go through the environmental data and add the correct porVol2To20 at each of the zOffsets -- a double map :-)
 
   all_measures2 <- all_measures |>
-    dplyr::mutate(env_data = purrr::map(.x = env_data, .f = function(x) {
+    dplyr::mutate(env_data = purrr::map(.x = .data[["env_data"]], .f = function(x) {
       porVol2To20 <- purrr::map_dbl(.x = x$zOffset, .f = function(x) {
         horizon <- dplyr::intersect(which(abs(x) >= mgp$horizonTopDepth / 100), which(abs(x) <= mgp$horizonBottomDepth / 100))
 
@@ -135,7 +120,7 @@ compute_neon_flux <- function(input_file_name,
 
 
   flux_out <- all_measures2 |> # first filter out any bad measurements
-    dplyr::mutate(flux_intro = purrr::map2(.x = env_data, .y = press_data, .f = function(.x, .y) {
+    dplyr::mutate(flux_intro = purrr::map2(.x = .data[["env_data"]], .y = .data[["press_data"]], .f = function(.x, .y) {
       c <- co2_to_umol(
         .x$soilTempMean,
         .y$staPresMean,
@@ -166,13 +151,13 @@ compute_neon_flux <- function(input_file_name,
       return(new_data)
     })) |>
     dplyr::mutate(
-      flux_compute = purrr::map(flux_intro, compute_surface_flux),
-      diffusivity = purrr::map(.x = flux_intro, .f = ~ (.x |>
+      flux_compute = purrr::map(.data[["flux_intro"]], compute_surface_flux),
+      diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
         dplyr::slice_max(order_by = zOffset) |>
         dplyr::select(zOffset, diffusivity, diffusExpUncert)
       ))
     ) |>
-    dplyr::select(horizontalPosition, startDateTime, flux_compute, diffusivity)
+    dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "diffusivity")))
 
 
 
@@ -197,7 +182,7 @@ compute_neon_flux <- function(input_file_name,
 
   out_fluxes <- qf_flags |>
     dplyr::left_join(flux_out,by=c("startDateTime","horizontalPosition")) |>
-    dplyr::relocate(startDateTime,horizontalPosition,flux_compute,diffusivity)
+    dplyr::relocate(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["flux_compute"]],.data[["diffusivity"]])
 
   # Kicking it out school again with a loop - easiest to fill in where we aren't able to compute
   for(i in 1:nrow(out_fluxes)) {
@@ -211,16 +196,6 @@ compute_neon_flux <- function(input_file_name,
   }
 
 
+  return(out_fluxes)
 
-
-
-  # Now start saving
-  if (extension_name == "csv") {
-    out_flux_full <- out_fluxes |>
-      tidyr::unnest(cols = tidyselect::everything())
-
-    readr::write_csv(out_flux_full, file = out_flux_file_name)
-  } else {
-    save(out_fluxes, file = out_flux_file_name)
-  }
 }

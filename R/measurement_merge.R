@@ -23,14 +23,15 @@
 
 measurement_merge <- function(neon_data,data_code,data_product_id,measurement_name,qf_name) {
 
+  .data = NULL  # Appease R CMD Check
   # Create data frame for soil temperature data after interpolating across depths with columns from 0 m to 2 m
 
 
   # Determine a data frame of the different horizontal and vertial positions
   positions_name <- paste0("sensor_positions_",data_product_id)
   positions <- neon_data[[positions_name]] |>
-    tidyr::separate(HOR.VER,into=c("HOR","VER")) |>
-    dplyr::select(siteID,HOR,VER,zOffset)
+    tidyr::separate(.data[["HOR.VER"]],into=c("HOR","VER")) |>
+    dplyr::select(.data[["siteID"]],.data[["HOR"]],.data[["VER"]],.data[["zOffset"]])
 
 
   # Identify good (i.e., unflagged) soil temperature data, join the positions, and group by and nest

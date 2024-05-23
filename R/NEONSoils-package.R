@@ -4,7 +4,6 @@
 ## usethis namespace: start
 #' @importFrom lubridate %within%
 #' @importFrom neonUtilities loadByProduct
-#' @importFrom readr write_csv
 #' @importFrom rlang .data
 #' @importFrom stats approx
 #' @importFrom stats predict
@@ -17,6 +16,5 @@
 #' @importFrom tidyselect contains
 #' @importFrom tidyselect everything
 #' @importFrom tidyselect matches
-#' @importFrom utils data
 ## usethis namespace: end
 NULL

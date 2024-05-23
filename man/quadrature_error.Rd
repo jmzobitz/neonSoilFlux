@@ -30,7 +30,7 @@ temperature_error <- c(0.1508,0.1507,0.1497,0.1496,0.1497)
 # The sample mean is the sum of all measurements divided by the average:
 sum(temperature)/5  # (Can also be computed with mean(temperature))
 
-The vector of partial derivatives is just 1/n for each measurement:
+# The vector of partial derivatives is just 1/n for each measurement:
 temperature_pd <- c(1/5,1/5,1/5,1/5,1/5)
 quadrature_error(temperature_pd,temperature_error)
 # Note: quadrature_error(1/5,temperature_error) is also allowed.

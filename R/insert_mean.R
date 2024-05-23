@@ -21,10 +21,12 @@
 
 insert_mean <- function(data,monthly_mean,measurement_name) {
 
+  .data = NULL  # Appease R CMD Check
+
   joined_data <- data |>
     dplyr::left_join(monthly_mean,by=c("horizontalPosition","verticalPosition")) |>
-    dplyr::select(-zOffset.y) |>
-    dplyr::rename(zOffset=zOffset.x)
+    dplyr::select(-.data[["zOffset.y"]]) |>
+    dplyr::rename(zOffset=.data[["zOffset.x"]])
 
 
   col_names <- names(joined_data)
@@ -32,8 +34,8 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
 
 
   var_mean <- dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,"[^StdEr]Mean$")) )  # 30-min means
-  monthly_mean <- dplyr::pull(joined_data,comp_mean)
-  monthly_uncert <- dplyr::pull(joined_data,comp_sd)
+  monthly_mean <- dplyr::pull(joined_data,.data[["comp_mean"]])
+  monthly_uncert <- dplyr::pull(joined_data,.data[["comp_sd"]])
   var_uncert <- dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,'ExpUncert$') ) ) # expanded measurement uncertainty at 95% confidence
   var_QF <-  dplyr::pull(joined_data,var=which(stringr::str_detect(col_names,"FinalQF$")) )
 
@@ -41,7 +43,7 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
     dplyr::mutate(var_mean = dplyr::if_else(var_QF ==0,var_mean,monthly_mean),
            var_uncert = dplyr::if_else(var_QF ==0,var_uncert,monthly_uncert),
            mean_QF =dplyr::if_else(var_QF ==0,0,1),
-           mean_QF = dplyr::if_else(is.na(monthly_mean) | is.na(monthly_uncert),2,mean_QF))
+           mean_QF = dplyr::if_else(is.na(monthly_mean) | is.na(monthly_uncert),2,.data[["mean_QF"]]))
   # if the monthly mean is a NA, then we use a 2
   # meanQF = 0 --> no smoothed mean
   # meanQF = 1 --> smoothed mean used
@@ -51,9 +53,9 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
     dplyr::mutate(dplyr::across(.cols=tidyselect::contains("[^StdEr]Mean$"),.fns=~dplyr::pull(smoothed_data,var_mean)),
            dplyr::across(.cols=tidyselect::contains('ExpUncert$'),.fns=~dplyr::pull(smoothed_data,var_uncert)) ) |>
     dplyr::ungroup() |>
-    dplyr::mutate(mean_QF = dplyr::pull(smoothed_data,mean_QF)) |>
+    dplyr::mutate(mean_QF = dplyr::pull(smoothed_data,.data[["mean_QF"]])) |>
 
-    dplyr::select(-comp_mean,-comp_sd,-simple_mean,-simple_sd)
+    dplyr::select(-.data[["comp_mean"]],-.data[["comp_sd"]],-.data[["simple_mean"]],-.data[["simple_sd"]])
 
   # rename final QF frame
   names(out_data)[names(out_data) == "mean_QF"] <- paste0(measurement_name,"MeanQF")

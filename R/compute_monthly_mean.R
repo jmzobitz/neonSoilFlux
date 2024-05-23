@@ -15,34 +15,39 @@
 #' @keywords Currently none
 
 #' @examples
-#' \donttest{
 #' # Download the NEON data directly - here this would be soil moisture
 #' NEON_moist_30m_orig <- neonUtilities::loadByProduct(
 #'   dpID = "DP1.00094.001",
 #'   site = "WREF",
 #'   startdate = "2022-06",
 #'   enddate = "2022-06",
+#'   timeIndex = "30",
 #'   package = "expanded",
-#'   check.size = F
+#'   check.size = FALSE,
+#'   include.provisional = TRUE
 #' )
 #'
+#'
 #' # Then correct the swc
-#' site_swc <- swc_correct(NEON_moist_30m_orig, "WREF")
+#' site_swc <- swc_correct(NEON_moist_30m_orig, "WREF","2022-06")
 #'
 #' # Select the columns and the time frequency
 #' time_frequency <- "30_minute"
 #' column_selectors <- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
 #'
-#' swc <- site_swc |>
-#'   pluck(paste0("SWS_", time_frequency)) |>
-#'   select(
-#'   domainID, siteID, horizontalPosition, verticalPosition, startDateTime,
-#'    matches(str_c("VSWC", column_selectors)),
-#'    VSWCFinalQF)
+#'     swc <- site_swc |>
+#'     purrr::pluck(paste0("SWS_",time_frequency)) |>
+#'     dplyr::select(tidyselect::all_of(c("domainID","siteID",
+#'     "horizontalPosition","verticalPosition","startDateTime","VSWCFinalQF")),
+#'     tidyselect::matches(stringr::str_c("VSWC",column_selectors)))
 #'
-#' # Now apply the monthly mean:
-#' swc_monthly_mean <- compute_monthly_mean(swc)
-#' }
+#'   # Determine a data frame of the different horizontal and vertical positions
+#'   swc_positions <- site_swc |>
+#'   purrr::pluck(paste0("sensor_positions_","00094"))
+#'
+#'   # Add on the positions for swc
+#'   swc <- determine_position(swc_positions,swc)
+
 
 
 #' @export
@@ -59,16 +64,19 @@
 #' Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 
 compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosition", "verticalPosition")) {
+
+  .data = NULL  # Appease R CMD Check
+
   out_mean <- NEON_data |>
-    dplyr::filter(if_any(ends_with("FinalQF"), ~ (.x == 0))) |>
+    dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x == 0))) |>
     tidyr::drop_na() |>
-    dplyr::mutate(day = lubridate::day(startDateTime)) |>
+    dplyr::mutate(day = lubridate::day(.data[["startDateTime"]])) |>
     dplyr::group_by(dplyr::across(tidyr::any_of(position_columns))) |>
     tidyr::nest() |>
-    dplyr::mutate(month_stats = purrr::map(.x = data, .f = function(input_data) {
+    dplyr::mutate(month_stats = purrr::map(.x = .data[["data"]], .f = function(input_data) {
       zOffset <- input_data |>
         dplyr::count(zOffset) |>
-        dplyr::slice_max(n) |>
+        dplyr::slice_max(.data[["n"]]) |>
         dplyr::pull(zOffset) # Take the max tally of the different depths (if there are any)
 
 
@@ -96,7 +104,7 @@ compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosi
           tsim <- stats::rnorm(nm, tsY, uNAT.samp) ## sample random error per half hour - uses R recycling since nm < tsY
 
           tsamp[i] <- mean(tsim, na.rm = TRUE) + bias # output monthly mean
-          tsamp_sd[i] <- sd(tsim, na.rm = TRUE) # output monthly sd
+          tsamp_sd[i] <- stats::sd(tsim, na.rm = TRUE) # output monthly sd
         }
         comp_mean <- mean(tsamp)
         comp_sd <- mean(tsamp_sd)
@@ -113,8 +121,8 @@ compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosi
 
       return(out_tibble)
     })) |>
-    dplyr::select(-data) |>
-    tidyr::unnest(cols = c(month_stats)) |>
+    dplyr::select(-.data[["data"]]) |>
+    tidyr::unnest(cols = c(.data[["month_stats"]])) |>
     dplyr::ungroup()
 
   return(out_mean)

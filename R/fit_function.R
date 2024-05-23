@@ -31,6 +31,8 @@
 
 fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,interp_depth,measurement_special) {
 
+  .data = NULL  # Appease R CMD Check
+
   # The default value if we have nothing
   out_value <- tibble::tibble(zOffset = interp_depth, value = NA, ExpUncert = NA)
 
@@ -42,12 +44,12 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
     qf = input_value_qf
   ) |>
     tidyr::drop_na() |>
-    dplyr::filter(qf !=2)  # Can use mean qf values
+    dplyr::filter(.data[["qf"]] !=2)  # Can use mean qf values
 
   if (nrow(test_data) > 2) {
-    input_depth <- test_data |> dplyr::pull(depth)
-    input_value <- test_data |> dplyr::pull(value)
-    input_value_err <- test_data |> dplyr::pull(err)
+    input_depth <- test_data |> dplyr::pull(.data[["depth"]])
+    input_value <- test_data |> dplyr::pull(.data[["value"]])
+    input_value_err <- test_data |> dplyr::pull(.data[["err"]])
     # Define top layer for interpolation
     if (max(input_depth) > -0.05) {
       from_depth <- 0 # Extrapolate to soil surface is sensor is less than 5 cm from soil surface
@@ -81,8 +83,8 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
       # Predict
      out_value <- stats::predict(measurement_spline, x = interp_depth) |>
        tibble::as_tibble() |>
-      dplyr::rename(zOffset = x,
-               value = y) |>
+      dplyr::rename(zOffset = .data[["x"]],
+               value = .data[["y"]]) |>
        dplyr::mutate(ExpUncert = predict_err)
 
 
@@ -92,9 +94,9 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
     } else if(dplyr::between(nrow(test_data),2,3) | measurement_special) {
 
       # Just use linear interpolation here and compute the error by quadrature using the first two data points
-      input_depth <- test_data |> dplyr::pull(depth)
-      input_value <- test_data |> dplyr::pull(value)
-      input_value_err <- test_data |> dplyr::pull(err)
+      input_depth <- test_data |> dplyr::pull(.data[["depth"]])
+      input_value <- test_data |> dplyr::pull(.data[["value"]])
+      input_value_err <- test_data |> dplyr::pull(.data[["err"]])
 
       xbar <- mean(input_depth)
       n <- length(input_depth)
@@ -105,8 +107,8 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
 
       out_value <- stats::approx(x = input_depth,y=input_value,xout= interp_depth,rule = 2) |>
         tibble::as_tibble() |>
-        dplyr::rename(zOffset = x,
-               value = y) |>
+        dplyr::rename(zOffset = .data[["x"]],
+               value = .data[["y"]]) |>
         dplyr::mutate(ExpUncert = predict_err)
 
       if(measurement_special & any(out_value$value < 0)) {

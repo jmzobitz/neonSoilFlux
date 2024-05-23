@@ -7,17 +7,15 @@
 #' Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
-#' @param data_file_name Required. Path of location for save file. Must end in .Rda or .csv - otherwise exits gracefully. Note: Rda files save both the environmental measurements and megapit data as 2 nested data frames. .csv files save only the environmental data (including monthly means) as two separate csv files (not the megapit data)
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
-#' @param provisional Required. Should you use provisional data in download. Defaults to F. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
-#' @param column_selectors Required. Types of measurements we will be computing (detaults to column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean"))
+#' @param provisional Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
 
 #'
 #' @examples
-#' \donttest{
-#' acquire_neon_data("SJER","2020-05","my-file.Rda")
-#' }
-#' @return Nothing is returned - the file is saved to the location provided (either a .Rda or .csv file)
+#' out_env_data <- acquire_neon_data("SJER","2022-06")
+
+
+#' @return A list containing stacked environmental data (`site_data`) and soil properties (`site_megapit`).
 #' @export
 
 
@@ -29,15 +27,17 @@
 #     2024-04-08: update to get namespaces correct
 #     2024-04-10: update to get the swc depths corrected
 #     2024-04-23: update to allow provisional data
+#     2024-05-23: update to prepare for CRAN submission
 
 acquire_neon_data <- function(site_name,
                               download_date,
-                              data_file_name,
                               time_frequency = "30_minute",
-                              provisional = FALSE,
-                              column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
-                              ) {
+                              provisional = FALSE) {
 
+  .data = NULL  # Appease R CMD Check
+
+  # Define the columns that we are plucking from each dataset:
+  column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
 
   # Stop if we don't specify 1 or 30 minutes
   if (!(time_frequency %in% c("30_minute","1_minute"))) {
@@ -47,16 +47,11 @@ acquire_neon_data <- function(site_name,
   # Extract out the download time
   download_time <- stringr::str_extract(time_frequency,pattern="^[:digit:]+(?=_)")
 
-  # Get the save file extension and do a quick check
-  extension_name <- stringr::str_extract(data_file_name,pattern="(?<=\\.).{3}$")
-  if (!(extension_name %in% c("csv","Rda","rda"))) {
-    stop("Save file name extension must be a Rdata file (Rda) or comma separated file (csv). Please revise.")
-  }
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
                                                package="expanded",
-                                               check.size = F,
+                                               check.size = FALSE,
                                                include.provisional = provisional)
 
 
@@ -66,7 +61,7 @@ acquire_neon_data <- function(site_name,
                                             enddate=download_date,
                                             timeIndex = download_time,
                                             package="expanded",
-                                            check.size = F,
+                                            check.size = FALSE,
                                             include.provisional = provisional)
 
 
@@ -76,7 +71,7 @@ acquire_neon_data <- function(site_name,
                                            enddate=download_date,
                                            timeIndex = download_time,
                                            package="expanded",
-                                           check.size = F,
+                                           check.size = FALSE,
                                            include.provisional = provisional)
   # Then correct the swc
   site_swc <- swc_correct(site_swc,site_name,download_date)
@@ -89,7 +84,7 @@ acquire_neon_data <- function(site_name,
                                              enddate=download_date,
                                              timeIndex = download_time,
                                              package="expanded",
-                                             check.size = F,
+                                             check.size = FALSE,
                                              include.provisional = provisional)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
@@ -99,15 +94,15 @@ acquire_neon_data <- function(site_name,
                                            timeIndex = download_time,
                                            package="expanded",
                                            include.provisional = provisional,
-                                           check.size = F)
+                                           check.size = FALSE)
 
 
 
   # Process each site measurement
     co2 <- site_co2 |>
       purrr::pluck(paste0("SCO2C_",time_frequency)) |>
-      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("soilCO2concentration",column_selectors)),.data$finalQF) |>
-      dplyr::rename(soilCO2concentrationFinalQF = finalQF)
+      dplyr::select(tidyselect::all_of(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","finalQF")),tidyselect::matches(stringr::str_c("soilCO2concentration",column_selectors))) |>
+      dplyr::rename(soilCO2concentrationFinalQF = tidyselect::all_of("finalQF"))
 
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -122,8 +117,8 @@ acquire_neon_data <- function(site_name,
 
     temperature <- site_temp |>
       purrr::pluck(paste0("ST_",time_frequency)) |>
-      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("soilTemp",column_selectors)),.data$finalQF)  |>
-      dplyr::rename(soilTempFinalQF = finalQF)
+      dplyr::select(tidyselect::all_of(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","finalQF")),tidyselect::matches(stringr::str_c("soilTemp",column_selectors)))  |>
+      dplyr::rename(soilTempFinalQF = tidyselect::all_of("finalQF"))
 
     # Determine a data frame of the different horizontal and vertical positions
     temperature_positions <- site_temp |>
@@ -139,7 +134,7 @@ acquire_neon_data <- function(site_name,
 
     swc <- site_swc |>
       purrr::pluck(paste0("SWS_",time_frequency)) |>
-      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("VSWC",column_selectors)),.data$VSWCFinalQF)
+      dplyr::select(tidyselect::all_of(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","VSWCFinalQF")),tidyselect::matches(stringr::str_c("VSWC",column_selectors)))
 
 
     # Determine a data frame of the different horizontal and vertical positions
@@ -160,7 +155,7 @@ acquire_neon_data <- function(site_name,
 
     pressure <- site_press |>
       purrr::pluck(paste0("BP_",time_frequency_bp)) |>
-      dplyr::select(.data$domainID,.data$siteID,.data$horizontalPosition,.data$verticalPosition,.data$startDateTime,tidyselect::matches(stringr::str_c("staPres",column_selectors)),.data$staPresFinalQF)
+      dplyr::select(tidyselect::all_of(c("domainID","siteID","horizontalPosition","verticalPosition","startDateTime","staPresFinalQF")),tidyselect::matches(stringr::str_c("staPres",column_selectors)))
 
     pressure_positions <- site_press |>
       purrr::pluck(paste0("sensor_positions_","00004"))
@@ -175,33 +170,12 @@ acquire_neon_data <- function(site_name,
 
     # Put everything in a nested data frame
     site_data <- tibble::tibble(
+      measurement=c("soilCO2concentration","VSWC","soilTemp","staPres"),
       data = list(co2,swc,temperature,pressure),
-      monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean),
-      measurement=c("soilCO2concentration","VSWC","soilTemp","staPres")) |>
-      dplyr::mutate(data = purrr::map(.x=data,.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(startDateTime,tzone="UTC"))))) # Make sure the time zone stamp is in universal time
+      monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean)) |>
+      dplyr::mutate(data = purrr::map(.x=.data[["data"]],.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(.data[["startDateTime"]],tzone="UTC"))))) # Make sure the time zone stamp is in universal time
 
-
-    # Now start saving
-    location_name <- stringr::str_extract(data_file_name,pattern=".+(?=\\..{3}$)")
-    if(extension_name == "csv") {
-      site_env_data <- site_data |>
-        dplyr::select(-monthly_mean) |>
-        tidyr::unnest(cols=everything())
-
-      # Write the environmental data
-      readr::write_csv(site_env_data,file = data_file_name)
-
-      # Save the monthly mean data as a separate file
-      site_mm <- site_data |>
-        dplyr::select(-data) |>
-        tidyr::unnest(cols=everything())
-
-      readr::write_csv(site_mm,file = paste0(location_name,"-monthly_mean.",extension_name))
-
-    } else{
-      save(site_data,site_megapit,file=data_file_name)
-    }
-
+    return(list(site_data=site_data,site_megapit=site_megapit))
 
 
 }

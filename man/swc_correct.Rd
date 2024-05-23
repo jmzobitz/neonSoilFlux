@@ -29,22 +29,20 @@ Given the expanded SWC data, return a corrected version based on the values belo
 # (Added 07-17-2023) Prior to RELEASE-2023, the final quality flag for soil water content data was raised (i.e., VSWCFinalQF = 1) when soil water content was calculated using the sensor manufacturer’s default calibration (calDefaultQM > 0) rather than a soil-specific calibration (calNEONQM > 0) . However, for many use cases the default calibration is sufficient. To identify data that were solely flagged because they were generated using the default calibration, download the “Expanded” data download package and identify rows where VSWCFinalQF = 1, VSWCAlphaQM < 10, VSWCBetaQM < 20, (VSWCFinalQFSciRvw = 0 or NA), and tempFailQM = 0. As of RELEASE-2023 (issued in January 2023), the final quality flag is no longer raised when the manufacturer's default calibration is used. The quality metrics indicating which calibration was used (calDefaultQM and calNEONQM) continue to be published in the expanded download package as informational metrics. (from the data documentation page for this product) - in this case we commented out the correction.
 }
 \examples{
-\donttest{
 # Download the soil water content data:
 site_swc <- neonUtilities::loadByProduct(
-#' dpID="DP1.00094.001",
+dpID="DP1.00094.001",
 site="SJER",
 startdate="2020-05",
 enddate="2020-05",
 timeIndex = "30",
 package="expanded",
-check.size = F,
+check.size = FALSE,
 include.provisional = TRUE
 )
 
-Then correct the swc:
-site_swc <- swc_correct(site_swc,site_name,download_date)
-}
+# Then correct the swc:
+site_swc <- swc_correct(site_swc,"SJER","2020-05")
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

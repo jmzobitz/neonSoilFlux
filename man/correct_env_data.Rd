@@ -19,17 +19,9 @@ This file takes data frame from acquire_neon_data and:
 3) Merges air pressure data into this data frame
 }
 \examples{
-correct_env_data(site_data)
-\donttest{
-# First aqcuire the NEON data
-acquire_neon_data("SJER","2020-05","my-file.Rda")
-
-# Load up the NEON data. Will load data frame site_data
-load("my-file.Rda")
-
-# Now correct:
-corrected_data <- correct_env_data(site_data)
-}
+# Note: you may need to first aqcuire the NEON data using acquire_neon_data
+# Now correct existing environmental data:
+corrected_data <- correct_env_data(sjer_env_data_2022_06)
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

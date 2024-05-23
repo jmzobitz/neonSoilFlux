@@ -4,7 +4,7 @@
 \name{neonSoilFlux-package}
 \alias{neonSoilFlux}
 \alias{neonSoilFlux-package}
-\title{neonSoilFlux: Compute Soil Carbon Fluxes for the National Ecological Observatory Network Sites.}
+\title{neonSoilFlux: Compute Soil Carbon Fluxes for the National Ecological Observatory Network Sites}
 \description{
 Acquires and synthesizes soil carbon fluxes at sites located in the National Ecological Observatory Network (NEON). Provides flux estimates and associated uncertainty as well as key environmental measurements (soil water, temperature, CO2 concentration) that are used to compute soil fluxes.
 }
@@ -26,11 +26,12 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Kathleen O'Rourke [contributor]
-  \item Lajntxiag Lee [contributor]
-  \item Ridwan Abdi [contributor]
-  \item Dijone Mehmeti [contributor]
-  \item Ly Xiong [contributor]
+  \item Katie O'Rourke (LinkedIn, <https://www.linkedin.com/in/katie-o-rourke-5a898b194/>) [contributor]
+  \item Zoey Werbin \email{zrwerbin@bu.edu} [contributor]
+  \item Lajntxiag Lee \email{lajntxiag@alumni.augsburg.edu} [contributor]
+  \item Ridwan Abdi (LinkedIn, <https://www.linkedin.com/in/ridwaan-cabdi/>) [contributor]
+  \item Dijonë Mehmeti (LinkedIn, <https://www.linkedin.com/in/dijon%C3%AB-mehmeti/>) [contributor]
+  \item Ly Xiong (LinkedIn, <https://www.linkedin.com/in/ly-xiong-bb83ba1b2/>) [contributor]
 }
 
 }
