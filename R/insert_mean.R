@@ -13,13 +13,16 @@
 
 #' @return Nested data frame of measurements
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-01-18)
-#     original creation
-#     2024-04-08: update to get namespaces correct
 
 
 insert_mean <- function(data,monthly_mean,measurement_name) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2024-01-18)
+  #     original creation
+  #     2024-04-08: update to get namespaces correct
+
+
 
   .data = NULL  # Appease R CMD Check
 

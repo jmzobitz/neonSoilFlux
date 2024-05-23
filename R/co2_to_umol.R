@@ -20,15 +20,19 @@
 
 #' @export
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-21)
-#     original creation
-#   2023-07-18: Included experimental uncertainty in the mix.
-#     2024-04-08: update to get namespaces correct
-#   2024-04-15: update to fix error in calculation of partial derivative of pressure (from Yang song)
+
 
 
 co2_to_umol <- function(temperature, pressure, co2, temperature_err, pressure_err, co2_err, zOffset) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-21)
+  #     original creation
+  #   2023-07-18: Included experimental uncertainty in the mix.
+  #     2024-04-08: update to get namespaces correct
+  #   2024-04-15: update to fix error in calculation of partial derivative of pressure (from Yang song)
+
+
   # Since pressure is a single value, make it equal to all the other lengths
   pressure <- rep(pressure, length(temperature))
   pressure_err <- rep(pressure_err, length(temperature_err))

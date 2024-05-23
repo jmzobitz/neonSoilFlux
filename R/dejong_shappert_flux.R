@@ -21,14 +21,17 @@
 #'
 #' Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July):78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2023-01-20)
-#     original creation
-#     2024-04-08: update to get namespaces correct
 
 
 dejong_shappert_flux <- function(zOffset, co2, co2_err, diffusive, diffusive_err) {
-  # Define the output vector:
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2023-01-20)
+  #     original creation
+  #     2024-04-08: update to get namespaces correct
+
+
+   # Define the output vector:
   out_flux <- tibble::tibble(flux = NA, flux_err = NA, method = "dejong_shappert_1972")
 
   if (any(is.na(co2)) | any(is.na(co2_err)) | any(is.na(diffusive)) | any(is.na(diffusive_err))) {

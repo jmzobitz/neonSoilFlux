@@ -14,20 +14,24 @@
 #' @param input_data Required. Nested data frame from acquire_neon_data.
 #'
 #' @examples
+#' \donttest{
 #' # Note: you may need to first aqcuire the NEON data using acquire_neon_data
 #' # Now correct existing environmental data:
 #' corrected_data <- correct_env_data(sjer_env_data_2022_06)
+#' }
 
 
 
 #' @return List of all QF flags over time period and Data frame of environmental measurements for flux computation
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-05-07)
-#     original creation
 
 
 correct_env_data <- function(input_data) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2024-05-07)
+  #     original creation
+
 
   .data = NULL  # Appease R CMD Check
   ################

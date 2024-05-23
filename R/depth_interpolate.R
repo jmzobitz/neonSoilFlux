@@ -16,20 +16,23 @@
 #' @return A nested data frame with interpolated measurements.
 
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2021-07-20)
-#     original creation
-#   2022-06-06: Modification of the interpolation to accelerate computation
-#   2022-06-11: Modification to improve fitting
-#   2023-07-14: Extensive modification to improve interpolation of multiple columns of data.
-#               This now includes all the input data, but only interpolates measurements
-#     2024-04-08: update to get namespaces correct
-##############################################################################################
-
 
 depth_interpolate <- function(input_measurements,
                               measurement_name,
                               measurement_interpolate) {
+
+
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2021-07-20)
+  #     original creation
+  #   2022-06-06: Modification of the interpolation to accelerate computation
+  #   2022-06-11: Modification to improve fitting
+  #   2023-07-14: Extensive modification to improve interpolation of multiple columns of data.
+  #               This now includes all the input data, but only interpolates measurements
+  #     2024-04-08: update to get namespaces correct
+  ##############################################################################################
+
 
   .data = NULL  # Appease R CMD Check
 

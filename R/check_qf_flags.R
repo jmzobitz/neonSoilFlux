@@ -11,13 +11,15 @@
 #'
 #' @return A data frame of startDateTime, horizontalPosition, and the associated QF flag.
 
-#'
-#' # changelog and author contributions / copyrights
-#   John Zobitz (2024-05-08)
-#     original creation
+
 
 
 check_qf_flags <- function(measurement_name,data) {
+
+  #'
+  #' # changelog and author contributions / copyrights
+  #   John Zobitz (2024-05-08)
+  #     original creation
 
   .data = NULL  # Appease R CMD Check
   ## Function takes data and the measurement, checks to see if there are more than 2 measurements for swc, temperature, and co2 at a given spatial location and time.

@@ -23,12 +23,15 @@
 #' inside_interval(start_date,end_date,"2020-06")
 
 
-# changelog and author contributions / copyrights
-#   John Zobitz (2024-04-10)
-#     original creation
 
 
 inside_interval <- function(start,end,reference_time) {
+
+  # changelog and author contributions / copyrights
+  #   John Zobitz (2024-04-10)
+  #     original creation
+
+
   # First evaluate if the input vector times are valid time
 
   new_reference <- as.POSIXct(lubridate::ym(reference_time))

@@ -25,13 +25,14 @@ This file takes a saved data file from acquire:
 6) Saves the data
 }
 \examples{
-
+\donttest{
  # First acquire the NEON data at a given NEON site
 out_env_data <- acquire_neon_data("SJER","2020-05")
 
 # Then process and compute the fluxes:
- out_flux <- compute_neon_flux(out_env_data$site_data,out_env_data$site_megapit)
-
+ out_flux <- compute_neon_flux(input_site_env = sjer_env_data_2022_06,
+ input_site_megapit = sjer_megapit_data_2022_06)
+}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
