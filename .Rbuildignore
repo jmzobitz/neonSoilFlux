@@ -6,3 +6,4 @@
 ^swc-corrections$
 ^data-raw$
 ^\.github$
+^CRAN-SUBMISSION$

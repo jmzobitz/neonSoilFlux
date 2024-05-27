@@ -1,5 +1,5 @@
 ---
-title: "Introduction the neonSoilFlux package"
+title: "Introducing the neonSoilFlux package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{using-neonSoilFlux}
