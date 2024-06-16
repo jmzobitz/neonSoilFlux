@@ -36,12 +36,12 @@ check_qf_flags <- function(measurement_name,data) {
     # Also check to see if there any measurements use the mean
 
     data_revised <- data |>
-      dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x != 2)) ) |>
+      dplyr::filter(dplyr::if_any(tidyselect::ends_with("MeanQF"), ~ (.x != 2)) ) |>
       dplyr::group_by(horizontalPosition,startDateTime) |>
       tidyr::nest() |>
       dplyr::mutate(n_valid = purrr::map_dbl(data,nrow)) |>
       dplyr::filter(.data[["n_valid"]] > 2) |>
-      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
+      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("MeanQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
       ) |>
       dplyr::select(-data,-.data[["n_valid"]])
   } else {
@@ -50,10 +50,10 @@ check_qf_flags <- function(measurement_name,data) {
     # Also check to see if there any measurements use the mean
 
     data_revised <- data |>
-      dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x != 2)) ) |>
+      dplyr::filter(dplyr::if_any(tidyselect::ends_with("MeanQF"), ~ (.x != 2)) ) |>
       dplyr::group_by(horizontalPosition,startDateTime) |>
       tidyr::nest() |>
-      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
+      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("MeanQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
       ) |>
       dplyr::select(-data)
 

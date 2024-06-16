@@ -115,7 +115,8 @@ acquire_neon_data <- function(site_name,
       purrr::pluck(paste0("sensor_positions_","00095"))
 
     # Add on the positions for co2
-    co2 <- determine_position(co2_positions,co2)
+    co2 <- determine_position(co2_positions,co2) |>
+      dplyr::ungroup()
 
     # Apply monthly means
     co2_monthly_mean <- compute_monthly_mean(co2)
@@ -131,7 +132,8 @@ acquire_neon_data <- function(site_name,
 
 
     # Add on the positions for temperature
-    temperature <- determine_position(temperature_positions,temperature)
+    temperature <- determine_position(temperature_positions,temperature) |>
+      dplyr::ungroup()
 
 
     # Apply monthly means
@@ -148,7 +150,8 @@ acquire_neon_data <- function(site_name,
       purrr::pluck(paste0("sensor_positions_","00094"))
 
     # Add on the positions for swc
-    swc <- determine_position(swc_positions,swc)
+    swc <- determine_position(swc_positions,swc) |>
+      dplyr::ungroup()
 
 
 
@@ -167,10 +170,11 @@ acquire_neon_data <- function(site_name,
 
 
     # Add on the positions for pressure
-    pressure <- determine_position(pressure_positions,pressure)
+    pressure <- determine_position(pressure_positions,pressure) |>
+      dplyr::ungroup()
 
-    # Apply monthly means
-    pressure_monthly_mean <- compute_monthly_mean(pressure)
+    # Apply monthly means - we adjust the monthly mean here to allow for a looser threshold.
+    pressure_monthly_mean <- compute_monthly_mean(pressure,time_horizon = 10)
 
 
     # Put everything in a nested data frame
