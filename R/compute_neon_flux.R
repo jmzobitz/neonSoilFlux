@@ -56,19 +56,8 @@ compute_neon_flux <- function(input_site_env,
   # site_data: a nested data file containing measurements for the required flux gradient model during the given time period
 
 
-  ### Then take each of the measurements to associate them with errors
-  corrected_data <- correct_env_data(input_site_env)
-
-  qf_flags <- corrected_data$all_flags
-  all_measures <- corrected_data$site_filtered
-
-  # Yay!  We solved the joining problem!
-
   ################
-
-
-  ################
-  # 3) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
+  # 1) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 
   # Ingest the megapit soil physical properties pit, horizon, and biogeo data
   mgp.pit <-  input_site_megapit$mgp_permegapit
@@ -117,13 +106,30 @@ compute_neon_flux <- function(input_site_env,
            horizonBottomDepth = horizonBottomDepth/100)  # convert to m
 
 
-  ### Now go through the environmental data and add the correct porVol2To20 at each of the zOffsets -- a double map :-)
 
-  all_measures2 <- all_measures |>
-    dplyr::mutate(env_data = purrr::map(.x = .data[["env_data"]],
-                                        .f = ~(.x |>
-                                                 dplyr::mutate(porVol2To20 = mgp[abs(.x$zOffset) > mgp$horizonTopDepth & abs(.x$zOffset) <= mgp$horizonBottomDepth,"porVol2To20"])
-    )))
+  # Now interpolate everything to the depth of the co2 measurements
+
+  # Tells us the depths at each site, adds in the porosity
+  site_depths <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>
+    dplyr::group_by(horizontalPosition,verticalPosition) |>
+    dplyr::distinct(zOffset) |>
+    dplyr::mutate(porVol2To20 = purrr::map_dbl(.x=.data[["zOffset"]],
+                                               .f=~mgp[abs(.x) > mgp$horizonTopDepth & abs(.x) <= mgp$horizonBottomDepth,"porVol2To20"])
+    ) |>
+    dplyr::select(horizontalPosition,verticalPosition,porVol2To20)
+
+  ### Now we can join things together
+  input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]]  <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>
+    dplyr::inner_join(site_depths,by=c("horizontalPosition","verticalPosition"))
+
+
+  # Now correct
+  corrected_data <- correct_env_data(input_site_env)
+
+  qf_flags <- corrected_data$all_flags
+  all_measures <- corrected_data$site_filtered
+
+
 
   ################
 
@@ -133,7 +139,7 @@ compute_neon_flux <- function(input_site_env,
 
 
 
-  flux_out <- all_measures2 |> # first filter out any bad measurements
+  flux_out <- all_measures |> # first filter out any bad measurements
     dplyr::mutate(flux_intro = purrr::map2(.x = .data[["env_data"]], .y = .data[["press_data"]], .f = function(.x, .y) {
       c <- co2_to_umol(
         .x$soilTempMean,
