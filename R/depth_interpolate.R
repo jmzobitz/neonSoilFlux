@@ -80,7 +80,7 @@ depth_interpolate <- function(input_measurements,
           col_names <- names(current_data)
 
           var_mean <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
-          var_uncert <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence
+          var_uncert <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "StdErMean$"))) # standard error bar
           var_qf <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "FinalQF$")))
 
 
@@ -94,7 +94,7 @@ depth_interpolate <- function(input_measurements,
           ) |>
             dplyr::rename(Mean = .data[["value"]])
 
-          bad_measures <- any(is.na(out_fitted_vals$Mean) | is.na(out_fitted_vals$ExpUncert)) # Check if any are NA
+          bad_measures <- any(is.na(out_fitted_vals$Mean) | is.na(out_fitted_vals$StdErMean)) # Check if any are NA
           # Adjust the names so we don't do it later
           curr_names <- names(out_fitted_vals)
           new_names <- stringr::str_c(curr_measurement, curr_names) |>

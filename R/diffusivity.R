@@ -94,6 +94,6 @@ diffusivity <- function(temperature, soil_water, pressure, temperature_err, soil
 
   calc_err <- quadrature_error(measurement_pd, errs)
 
-  out_tibble <- tibble::tibble(zOffset, diffusivity = diffusivity, diffusExpUncert = calc_err)
+  out_tibble <- tibble::tibble(zOffset, diffusivity = diffusivity, diffusStdErMean = calc_err)
   return(out_tibble)
 }

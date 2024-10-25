@@ -33,10 +33,10 @@ compute_surface_flux_layer <- function(input_data) {
   zOffset <- input_data_rev |> dplyr::pull(.data[["zOffset"]])
 
   diffus <- input_data_rev |> dplyr::pull(.data[["diffusivity"]])
-  diffus_err <- input_data_rev |> dplyr::pull(.data[["diffusExpUncert"]])
+  diffus_err <- input_data_rev |> dplyr::pull(.data[["diffusStdErMean"]])
 
   co2 <- input_data_rev |> dplyr::pull(.data[["co2_umol"]])
-  co2_err <- input_data_rev |> dplyr::pull(.data[["co2ExpUncert"]])
+  co2_err <- input_data_rev |> dplyr::pull(.data[["co2StdErMean"]])
 
 
 
@@ -98,6 +98,7 @@ compute_surface_flux_layer <- function(input_data) {
 
   # Remember that the top layer is the surface, so for the diffusivity we always use the computed measurements
   for(i in seq_along(results)) {
+    print(i)
     results[[i]] <- compute_flux_gradient_layer(depths = flux_data_pre_revised$zOffset[i:(i+1)],
                                                 co2 = flux_data_pre_revised$co2[i:(i+1)],
                                                 co2_err = flux_data_pre_revised$co2_err[i:(i+1)],

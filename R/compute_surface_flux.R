@@ -1,4 +1,4 @@
-#' @title Internal fucntion to compute CO2 surface flux
+#' @title Internal function to compute CO2 surface flux
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}
@@ -46,8 +46,8 @@ compute_surface_flux <- function(input_data) {
   diffus <- input_data_rev |> dplyr::pull(.data[["diffusivity"]])
   co2umol <- input_data_rev |> dplyr::pull(.data[["co2_umol"]])
 
-  co2_err <- input_data_rev |> dplyr::pull(.data[["co2ExpUncert"]])
-  diffusive_err <- input_data_rev |> dplyr::pull(.data[["diffusExpUncert"]])
+  co2_err <- input_data_rev |> dplyr::pull(.data[["co2StdErMean"]])
+  diffusive_err <- input_data_rev |> dplyr::pull(.data[["diffusStdErMean"]])
 
   # Collect the names of all the flux calculations
   function_names <- c(

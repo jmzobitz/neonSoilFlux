@@ -116,7 +116,7 @@ The resulting data frame `out_fluxes` has the following variables:
 
 - `startDateTime`: Time period of measurement (as POSIXct)
 - `horizontalPosition`: Sensor location where flux is computed
-- `flux_compute`: A nested tibble with variables (1) `flux`, `flux_err`, and `method` (one of 4 implemented)
+- `flux_compute`: A nested tibble with variables (1) `flux`, `flux_err`, and `method` (one of 4 implemented). See below for more information.
 - `diffusivity`: Computation of surface diffusivity
 - `VSWCMeanQF`: QF flag for soil water content across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 - `soilTempMeanQF`: QF flag for soil temperature across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
