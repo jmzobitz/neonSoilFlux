@@ -84,62 +84,43 @@ compute_surface_flux_layer <- function(input_data) {
 
   # Set up a data frame to compute fluxes at each layer
   flux_data_pre_revised <-  tibble::tibble(
-    zOffset = c(0,zOffset),
+    zOffset = c(zOffset),
     zOffset_err = 0,
-    co2 = c(co2_0_fit, co2),
-    co2_err = c(co2_0_fit_err,co2_err),
-    diffus = c(diffus_0_fit,diffus),
-    diffus_err = c(diffus_0_fit_err,diffus_err)
+    co2 = c(co2),
+    co2_err = c(co2_err),
+    diffus = c(diffus),
+    diffus_err = c(diffus_err)
   ) |>
     dplyr::arrange(dplyr::desc(zOffset))
 
   # Now we need to get ready to map!
-  results <- vector(mode = "list",length=(nrow(flux_data_pre_revised)-1))
+  results <- vector(mode = "list",length=(nrow(flux_data_pre_revised)))
 
-
-  # Remember that the top layer is the surface, so for the diffusivity we always use the computed measurements
+  # Take all possible combinations of levels
+  index_combination <- combn(1:nrow(flux_data_pre_revised),2,simplify=FALSE)
+  # Remember that the top layer is the surface, so for the diffusivity we always use the computed measurements at the lower layer
   for(i in seq_along(results)) {
-    results[[i]] <- compute_flux_gradient_layer(depths = flux_data_pre_revised$zOffset[i:(i+1)],
-                                                co2 = flux_data_pre_revised$co2[i:(i+1)],
-                                                co2_err = flux_data_pre_revised$co2_err[i:(i+1)],
-                                                diffus = flux_data_pre_revised$diffus[i+1],
-                                                diffus_err = flux_data_pre_revised$diffus_err[i+1])
 
+    out_test_flux <- compute_flux_gradient_layer(depths = flux_data_pre_revised$zOffset[index_combination[[i]]],
+                                co2 = flux_data_pre_revised$co2[index_combination[[i]]],
+                                co2_err = flux_data_pre_revised$co2_err[index_combination[[i]]],
+                                diffus = flux_data_pre_revised$diffus[index_combination[[i]][2]],
+                                diffus_err = flux_data_pre_revised$diffus_err[index_combination[[i]][2]])
 
-  }
-
-
-  flux_levels <- dplyr::bind_rows(results) |>
-    dplyr::arrange(dplyr::desc(zOffset)) |>
-    dplyr::mutate(zOffset_err = 0,
-           method = c("100","010","001"),
-           r2 = NA)
-
-
-  flux_indices <- powerset(1:3,size_start=2)
-
-  surface_flux <- purrr::map(.x=flux_indices,.f=function(.x) {
-    new_vec <- dplyr::slice(flux_levels,.x)
-
-    out_vec <- linear_regression(x = new_vec$zOffset,
-                                 y = new_vec$flux,
-                                 x_err = new_vec$zOffset_err,
-                                 y_err = new_vec$flux_err )
     out_char <- c("0","0","0")
-    out_char[.x] <- "1"
+    out_char[index_combination[[i]]] <- "1"  # Report a 1 at a given measurement level
 
-    return(tibble::tibble(flux = out_vec$intercept,
-                  flux_err = out_vec$intercept_err,
-                  r2 = out_vec$r2,
-                  method = stringr::str_c(out_char,collapse="")))
+
+    results[[i]] <- out_test_flux |>
+      dplyr::mutate(method = stringr::str_c(out_char,collapse=""),
+                    r2 = NA)
 
   }
-  )
 
 
-  dplyr::bind_rows(surface_flux) |>
-    rbind(dplyr::select(flux_levels,flux,flux_err,method,r2),
-          flux_000)
+  dplyr::bind_rows(results) |>
+    dplyr::select(flux,flux_err,method,r2) |>
+    rbind(flux_000)
 
 
 }
