@@ -56,6 +56,11 @@ compute_neon_flux <- function(input_site_env,
   # site_data: a nested data file containing measurements for the required flux gradient model during the given time period
 
 
+  # Adjust the ExpUncert to 1 SD from 2 -- note from Ed on 10/17
+  input_site_env <- input_site_env |>
+    mutate(data=map(data,.f=~mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
+
+
   ################
   # 1) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 
@@ -145,9 +150,9 @@ compute_neon_flux <- function(input_site_env,
         .x$soilTempMean,
         .y$staPresMean,
         .x$soilCO2concentrationMean,
-        .x$soilTempStdErMean,
-        .y$staPresStdErMean,
-        .x$soilCO2concentrationStdErMean,
+        .x$soilTempExpUncert,
+        .y$staPresExpUncert,
+        .x$soilCO2concentrationExpUncert,
         .x$zOffset
       )
 
@@ -157,9 +162,9 @@ compute_neon_flux <- function(input_site_env,
         temperature = .x$soilTempMean,
         soil_water = .x$VSWCMean,
         pressure = .y$staPresMean,
-        temperature_err = .x$soilTempStdErMean,
-        soil_water_err = .x$VSWCStdErMean,
-        pressure_err = .y$staPresStdErMean,
+        temperature_err = .x$soilTempExpUncert,
+        soil_water_err = .x$VSWCExpUncert,
+        pressure_err = .y$staPresExpUncert,
         zOffset = .x$zOffset,
         porVol2To20 = .x$porVol2To20
       )
@@ -174,7 +179,7 @@ compute_neon_flux <- function(input_site_env,
       flux_compute = purrr::map(.data[["flux_intro"]], compute_surface_flux_layer),
       diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
         dplyr::slice_max(order_by = zOffset) |>
-        dplyr::select(zOffset, diffusivity, diffusStdErMean)
+        dplyr::select(zOffset, diffusivity, diffusExpUncert)
       ))
     ) |>
     dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "diffusivity")))
@@ -193,7 +198,7 @@ compute_neon_flux <- function(input_site_env,
   na_diffusivity <- tibble::tibble(
     zOffset = NA,
     diffusivity = NA,
-    diffusStdErMean = NA
+    diffusExpUncert = NA
   )
 
   out_fluxes <- qf_flags |>

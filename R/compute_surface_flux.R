@@ -46,8 +46,8 @@ compute_surface_flux <- function(input_data) {
   diffus <- input_data_rev |> dplyr::pull(.data[["diffusivity"]])
   co2umol <- input_data_rev |> dplyr::pull(.data[["co2_umol"]])
 
-  co2_err <- input_data_rev |> dplyr::pull(.data[["co2StdErMean"]])
-  diffusive_err <- input_data_rev |> dplyr::pull(.data[["diffusStdErMean"]])
+  co2_err <- input_data_rev |> dplyr::pull(.data[["co2ExpUncert"]])
+  diffusive_err <- input_data_rev |> dplyr::pull(.data[["diffusExpUncert"]])
 
   # Collect the names of all the flux calculations
   function_names <- c(
