@@ -62,11 +62,16 @@ linear_regression <- function(x,x_err,y,y_err) {
 
   intercept_err <- quadrature_error(c(intercept_pdslope,intercept_pdybar,intercept_pdxbar), c(slope_err,ybar_err,xbar_err))
 
+  yfit <- intercept + slope*x
+  ss_res <- sum((y-yfit)^2)
+  ss_tot <- sum((y-ybar)^2)
+  r2 <- 1-ss_res/ss_tot
 
   out_values <- tidyr::tibble(slope,
                        slope_err,
                        intercept,
-                       intercept_err)
+                       intercept_err,
+                       r2)
 
   return(out_values)
 

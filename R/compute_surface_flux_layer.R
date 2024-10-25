@@ -79,6 +79,7 @@ compute_surface_flux_layer <- function(input_data) {
       x_pd = c(-co2_regression$slope,-diffus_0_fit),
       x_err = c(diffus_0_fit_err,co2_regression$slope_err)
       ),
+    r2 = co2_regression$r2,
     method = "000")
 
   # Set up a data frame to compute fluxes at each layer
@@ -129,6 +130,7 @@ compute_surface_flux_layer <- function(input_data) {
 
     return(tibble::tibble(flux = out_vec$intercept,
                   flux_err = out_vec$intercept_err,
+                  r2 = out_vec$r2,
                   method = stringr::str_c(out_char,collapse="")))
 
   }
