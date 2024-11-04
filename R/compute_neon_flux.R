@@ -166,7 +166,8 @@ compute_neon_flux <- function(input_site_env,
         soil_water_err = .x$VSWCExpUncert,
         pressure_err = .y$staPresExpUncert,
         zOffset = .x$zOffset,
-        porVol2To20 = .x$porVol2To20
+        porVol2To20 = .x$porVol2To20,
+        tortuosity = "MillingtonQuirk"
       )
 
 
@@ -184,7 +185,46 @@ compute_neon_flux <- function(input_site_env,
     ) |>
     dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "diffusivity")))
 
+  flux_out_marshall <- all_measures |> # first filter out any bad measurements
+    dplyr::mutate(flux_intro = purrr::map2(.x = .data[["env_data"]], .y = .data[["press_data"]], .f = function(.x, .y) {
+      c <- co2_to_umol(
+        .x$soilTempMean,
+        .y$staPresMean,
+        .x$soilCO2concentrationMean,
+        .x$soilTempExpUncert,
+        .y$staPresExpUncert,
+        .x$soilCO2concentrationExpUncert,
+        .x$zOffset
+      )
 
+
+
+      d <- diffusivity(
+        temperature = .x$soilTempMean,
+        soil_water = .x$VSWCMean,
+        pressure = .y$staPresMean,
+        temperature_err = .x$soilTempExpUncert,
+        soil_water_err = .x$VSWCExpUncert,
+        pressure_err = .y$staPresExpUncert,
+        zOffset = .x$zOffset,
+        porVol2To20 = .x$porVol2To20,
+        tortuosity = "Marshall"
+      )
+
+
+      new_data <- dplyr::inner_join(c, d, by = "zOffset")
+
+
+      return(new_data)
+    })) |>
+    dplyr::mutate(
+      flux_compute = purrr::map(.data[["flux_intro"]], compute_surface_flux_layer),
+      diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
+                                                                     dplyr::slice_max(order_by = zOffset) |>
+                                                                     dplyr::select(zOffset, diffusivity, diffusExpUncert)
+      ))
+    ) |>
+    dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "diffusivity")))
 
   ################  Fluxes computed!  Now join back to the original data frame and we are ready to rock and roll!
   flux_method_names <- flux_out$flux_compute[[1]]$method
@@ -216,7 +256,40 @@ compute_neon_flux <- function(input_site_env,
     }
   }
 
+### Do the same for the second diffusivity
 
-  return(out_fluxes)
+  ################  Fluxes computed!  Now join back to the original data frame and we are ready to rock and roll!
+  flux_method_names <- flux_out_marshall$flux_compute[[1]]$method
+
+  na_fluxes <- tibble::tibble(
+    flux = NA,
+    flux_err = NA,
+    method = flux_method_names
+  )
+
+  na_diffusivity <- tibble::tibble(
+    zOffset = NA,
+    diffusivity = NA,
+    diffusExpUncert = NA
+  )
+
+  out_fluxes_marshall <- qf_flags |>
+    dplyr::left_join(flux_out_marshall,by=c("startDateTime","horizontalPosition")) |>
+    dplyr::relocate(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["flux_compute"]],.data[["diffusivity"]])
+
+  # Kicking it out school again with a loop - easiest to fill in where we aren't able to compute
+  for(i in 1:nrow(out_fluxes_marshall)) {
+    if(is.null(out_fluxes_marshall$diffusivity[[i]])) {
+      out_fluxes_marshall$diffusivity[[i]] <- na_diffusivity
+    }
+
+    if(is.null(out_fluxes_marshall$flux_compute[[i]])) {
+      out_fluxes_marshall$flux_compute[[i]] <- na_fluxes
+    }
+  }
+
+
+
+  return(list(millington_quirk =out_fluxes, marshall = out_fluxes_marshall))
 
 }
