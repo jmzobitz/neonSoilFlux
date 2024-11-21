@@ -232,6 +232,8 @@ compute_neon_flux <- function(input_site_env,
   na_fluxes <- tibble::tibble(
     flux = NA,
     flux_err = NA,
+    gradient = NA,
+    gradient_err = NA,
     method = flux_method_names
   )
 
@@ -264,6 +266,8 @@ compute_neon_flux <- function(input_site_env,
   na_fluxes <- tibble::tibble(
     flux = NA,
     flux_err = NA,
+    gradient = NA,
+    gradient_err = NA,
     method = flux_method_names
   )
 

@@ -18,6 +18,8 @@ compute_surface_flux_layer <- function(input_data) {
   # changelog and author contributions / copyrights
   #   John Zobitz (2024-06-13)
   #     original creation
+  #   John Zobitz (2024-11-20)
+  #     modified to report out co2 gradient and error
 
 
   .data = NULL  # Appease R CMD Check
@@ -80,6 +82,8 @@ compute_surface_flux_layer <- function(input_data) {
       x_err = c(diffus_0_fit_err,co2_regression$slope_err)
       ),
     r2 = co2_regression$r2,
+    gradient = co2_regression$slope,
+    gradient_err = co2_regression$slope_err,
     method = "000")
 
   # Set up a data frame to compute fluxes at each layer
@@ -119,7 +123,7 @@ compute_surface_flux_layer <- function(input_data) {
 
 
   dplyr::bind_rows(results) |>
-    dplyr::select(flux,flux_err,method,r2) |>
+    dplyr::select(flux,flux_err,gradient,gradient_err,method,r2) |>
     rbind(flux_000)
 
 

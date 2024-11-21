@@ -41,7 +41,9 @@ compute_flux_gradient_layer <- function(depths,co2,co2_err,diffus,diffus_err) {
   flux_err <- quadrature_error(flux_pd, errs)
   zOffset <- mean(depths)
 
+  gradient <- diff(co2)/diff(depths)
+  gradient_pd <- c(-1,1)/diff(depths)
+  gradient_err <- quadrature_error(gradient_pd,co2_err)
 
-
-  return(tibble::tibble(zOffset,flux,flux_err))
+  return(tibble::tibble(zOffset,flux,flux_err,gradient,gradient_err))
 }
