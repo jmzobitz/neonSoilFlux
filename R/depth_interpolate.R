@@ -30,7 +30,8 @@ depth_interpolate <- function(input_measurements,
   #   2022-06-11: Modification to improve fitting
   #   2023-07-14: Extensive modification to improve interpolation of multiple columns of data.
   #               This now includes all the input data, but only interpolates measurements
-  #     2024-04-08: update to get namespaces correct
+  #   2024-04-08: update to get namespaces correct
+  #   2024-11-24: update to improve efficiency and interpolation
   ##############################################################################################
 
 
@@ -41,6 +42,7 @@ depth_interpolate <- function(input_measurements,
     dplyr::filter(.data[["measurement"]] == measurement_interpolate) |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     tidyr::unnest(cols = c("data")) |>
+    #dplyr::select(.data[["horizontalPosition"]], .data[["startDateTime"]],.data[["zOffset"]]) |>
     dplyr::group_by(.data[["horizontalPosition"]], .data[["startDateTime"]]) |>
     tidyr::nest() |>
     dplyr::rename(interp_data = .data[["data"]])
@@ -48,123 +50,89 @@ depth_interpolate <- function(input_measurements,
 
 
   # This takes the measurements we want to interpolate and creates a nested data frame for them
+
+  ### qf_val is assigned :
+  #
+  # QF = 0 if more than 70% of QF values are 0 and at least 3 values QF = 0 or 1
+  # QF = 1 if more than 70% of QF values are 0 or 1 and at least 3 values QF = 0 or 1
+  # QF = 2 otherwise
+
   input_env_values <- input_measurements |>
     dplyr::filter(.data[["measurement"]] %in% c(measurement_name)) |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     dplyr::mutate(data = purrr::map(.x = .data[["data"]], .f = ~ (.x |> dplyr::group_by(horizontalPosition, startDateTime) |> tidyr::nest()))) |>
     dplyr::rename(measurement_data = .data[["data"]]) |>
+    dplyr::mutate(measurement_data = map(.x=measurement_data,.f=~(.x |>
+                                                                    dplyr::mutate(n_vals = purrr::map_dbl(data,nrow),
+                                                                                  n_good = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(0 )) |> sum() ))),
+                                                                                  n_mean = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(1 )) |> sum() )))
+                                                                    ) |>
+                                                                    dplyr::mutate(qf_val = dplyr::if_else(n_good / n_vals > 0.7 & ((n_good+n_mean)>=3),0,2),
+                                                                                  qf_val = dplyr::if_else((n_good + n_mean)/n_vals > 0.7 & qf_val ==2 & ((n_good+n_mean)>=3),1,qf_val)) |>
+                                                                    dplyr::select(-n_vals,-n_good,-n_mean)))) |>
     dplyr::mutate(measurement_data = purrr::map(.x = .data[["measurement_data"]], .f = ~ (.x |> dplyr::inner_join(interp_positions_co2, by = c("horizontalPosition", "startDateTime")))))
 
 
+  # We will be doing a doubly nesting map - yikes!
+
+  env_data_interp <- input_env_values |>
+    unnest(cols=c(measurement_data)) |>
+    dplyr::mutate(results = purrr::map2(.x=data,.y=interp_data,
+                                 .f=function(.x,.y) {
+                                   interpolate_depth <- .y$zOffset
+                                   col_names <- names(.x)
+
+                                   var_depth <- .x$zOffset
+                                   var_mean <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
+                                   var_uncert <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence / 2 so 1 SD
+                                   var_qf <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "MeanQF$")))
+                                  out_vals <- fit_function(
+                                     input_depth = var_depth,
+                                     input_value = var_mean,
+                                     input_value_err = var_uncert,
+                                     input_value_qf = var_qf,
+                                     interp_depth = interpolate_depth,
+                                     measurement_special = FALSE  # Do regular interpretation
+                                   ) |>
+                                     dplyr::rename(Mean = .data[["value"]])
+
+                                  return(out_vals)
+                                 }
+    )
+    )
+
 
   ### Now do the interpolation - it is fastest to fill up a list and then join it onto our data frame.
-  env_data_interp <- input_env_values |>
-    dplyr::mutate(results = purrr::map2(
-      .x = .data[["measurement_data"]],
-      .y = .data[["measurement"]],
-      .f = function(x, y) {
-        env_data <- x
-        curr_measurement <- y
-
-        out_interp <- vector(mode = "list", length = nrow(env_data))
-        out_qf <- vector(mode = "integer", length = nrow(env_data))
-
-        for (i in 1:nrow(env_data)) {
-          measurement_sp <- FALSE
-          if (curr_measurement == "VSWC") {
-            measurement_sp <- TRUE
-          }
-
-          current_data <- env_data$data[[i]]
-          interpolate_depth <- env_data$interp_data[[i]]$zOffset
-          col_names <- names(current_data)
-
-          var_mean <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
-          var_uncert <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence / 2 so 1 SD
-          var_qf <- dplyr::pull(current_data, var = which(stringr::str_detect(col_names, "FinalQF$")))
 
 
-          out_fitted_vals <- fit_function(
-            input_depth = current_data$zOffset,
-            input_value = var_mean,
-            input_value_err = var_uncert,
-            input_value_qf = var_qf,
-            interp_depth = interpolate_depth,
-            measurement_special = measurement_sp
-          ) |>
-            dplyr::rename(Mean = .data[["value"]])
-
-          bad_measures <- any(is.na(out_fitted_vals$Mean) | is.na(out_fitted_vals$ExpUncert)) # Check if any are NA
-          # Adjust the names so we don't do it later
-          curr_names <- names(out_fitted_vals)
-          new_names <- stringr::str_c(curr_measurement, curr_names) |>
-            stringr::str_replace(pattern = paste0(curr_measurement, "zOffset"), "zOffset")
-          names(out_fitted_vals) <- new_names
-
-          out_interp[[i]] <- out_fitted_vals
-
-          # Assign a QF value
-          MeanQF_val <- 0
-
-          if (bad_measures) {
-            MeanQF_val <- 2
-          } else {
-            if (any(var_qf == 1)) {
-              MeanQF_val <- 1
-            }
-          }
-
-          out_qf[[i]] <- MeanQF_val
-        }
-
-        ### Can we make this a map?
-        env_data_out <- env_data |>
-          cbind(tibble::tibble(out_interp, out_qf))
-
-
-        return(env_data_out)
-      }
-    ))
-
-
+# Next the qf_val that is assigned needs to go with the different measurements for that point
 
 
   ### UGH, this is a deeply nested list
-  env_co2_data <- env_data_interp |>
-    dplyr::select(-.data[["measurement_data"]]) |> # remove original env data
-    tidyr::unnest(cols = c("results")) |> # unnest
-    dplyr::select(-.data[["data"]]) |>
-    dplyr::mutate(measurement = paste0(.data[["measurement"]], "MeanQF")) |> # Add in the mean value to the measurement name and then nest by the half hour
-    dplyr::group_by(.data[["horizontalPosition"]], .data[["startDateTime"]]) |>
-    tidyr::nest()
+  env_interpolated_data <- env_data_interp |>
+    mutate(results = purrr::pmap(.l=list(results,qf_val,measurement),.f=function(x,y,z) {
+      x |> dplyr::mutate(MeanQF=y) |>
+      dplyr::rename_with(~ ifelse(. == "zOffset", ., paste0(z, .)))
 
-  # Next join all the soil measurements together
-  env_co2_data_2 <- env_co2_data |>
-    dplyr::mutate(
-      env_data = purrr::map(.x = .data[["data"]], .f = ~ (.x$out_interp[[1]] |> dplyr::inner_join(.x$out_interp[[2]], by = "zOffset") |>
-        dplyr::inner_join(.x$interp_data[[1]], by = "zOffset"))),
-      qf_flags = purrr::map(.x = .data[["data"]], .f = ~ (.x |> dplyr::select(-out_interp) |> tidyr::pivot_wider(names_from = "measurement", values_from = "out_qf")))
-    )
+      })) |>
+    dplyr::select(-.data[["data"]],-.data[["interp_data"]],-.data[["qf_val"]]) |>
+    dplyr::group_by(measurement) |>
+    tidyr::nest() |>
+    dplyr::mutate(data = purrr::map(.x=data,.f=~(.x |> tidyr::unnest(cols=c(.data[["results"]])) |>
+                                                   dplyr::ungroup()
+                                                 )
+                                    )
+                  )
 
-  # Almost there!
-  out_fitted <- env_co2_data_2 |>
-    dplyr::mutate(soilCO2concentrationMeanQF = purrr::map_dbl(.x = .data[["env_data"]], .f = function(x) {
-      col_names <- names(x)
-      var_qf <- dplyr::pull(x, var = which(stringr::str_detect(col_names, "FinalQF$")))
 
-      out_qf <- 0
-      if (any(var_qf == 2)) {
-        out_qf <- 2
-      }
-      if (any(var_qf == 1)) {
-        out_qf <- 1
-      }
+  ## Now start to join these all up to pitch out
 
-      return(out_qf)
-    })) |>
-    dplyr::select(-.data[["data"]]) |>
-    tidyr::unnest(cols = c(.data[["qf_flags"]])) |>
-    dplyr::select(-.data[["interp_data"]])
+  out_fitted <- input_measurements |>
+    dplyr::filter((measurement %in% measurement_name)) |>
+    dplyr::inner_join(env_co2_data,by=c("measurement")) |>
+    dplyr::select(-.data[["data.x"]]) |>
+    dplyr::rename(data = .data[["data.y"]]) |>
+    rbind( dplyr::filter(input_measurements,!(measurement %in% measurement_name)))
 
 
 
