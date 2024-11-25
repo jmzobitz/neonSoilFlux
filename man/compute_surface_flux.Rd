@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_surface_flux.R
 \name{compute_surface_flux}
 \alias{compute_surface_flux}
-\title{Internal fucntion to compute CO2 surface flux}
+\title{Internal function to compute CO2 surface flux}
 \usage{
 compute_surface_flux(input_data)
 }

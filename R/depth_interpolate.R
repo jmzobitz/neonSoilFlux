@@ -129,7 +129,7 @@ depth_interpolate <- function(input_measurements,
 
   out_fitted <- input_measurements |>
     dplyr::filter((measurement %in% measurement_name)) |>
-    dplyr::inner_join(env_co2_data,by=c("measurement")) |>
+    dplyr::inner_join(env_interpolated_data,by=c("measurement")) |>
     dplyr::select(-.data[["data.x"]]) |>
     dplyr::rename(data = .data[["data.y"]]) |>
     rbind( dplyr::filter(input_measurements,!(measurement %in% measurement_name)))
