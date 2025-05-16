@@ -20,53 +20,31 @@ check_qf_flags <- function(measurement_name,data) {
   #' # changelog and author contributions / copyrights
   #   John Zobitz (2024-05-08)
   #     original creation
+  #   John Zobitz (2024-11-24)
+  #     adjusted to single function to compute QF flags for half hour, based on proportion of measurements within a half hour (70% threshold for both good and mean)
+
 
   .data = NULL  # Appease R CMD Check
   ## Function takes data and the measurement, checks to see if there are more than 2 measurements for swc, temperature, and co2 at a given spatial location and time.
   ## For atmospheric pressure, just checks to see if we have a measurement
 
-  # Pull out the unique timeperiods and spatial locations
-  startDateTime <- data$startDateTime |> unique()
-  horizontalPosition <- data$horizontalPosition |> unique()
 
+  data_revised <- data |>
+    select(c("horizontalPosition","startDateTime") | tidyselect::ends_with("MeanQF")) |>
+    dplyr::group_by(startDateTime,horizontalPosition) |>
+    tidyr::nest() |>
+    dplyr::mutate(n_vals = purrr::map_dbl(data,nrow),
+                  n_good = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(0 )) |> sum() ))),
+                  n_mean = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(1 )) |> sum() )))
+    ) |>
+    dplyr::mutate(mean_used = dplyr::if_else(n_good / n_vals > 0.7,0,2),
+                  mean_used = dplyr::if_else((n_good + n_mean)/n_vals > 0.7 & mean_used ==2,1,mean_used)) |>
+    dplyr::select(-data,-.data[["n_good"]],-.data[["n_vals"]],-.data[["n_mean"]]) |>
+    dplyr::ungroup()
 
-  if(measurement_name != "staPres") {
-
-    # Filter if there are two valid (QF neq 2) measurements at each timepoint and horizontalPosition.
-    # Also check to see if there any measurements use the mean
-
-    data_revised <- data |>
-      dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x != 2)) ) |>
-      dplyr::group_by(horizontalPosition,startDateTime) |>
-      tidyr::nest() |>
-      dplyr::mutate(n_valid = purrr::map_dbl(data,nrow)) |>
-      dplyr::filter(.data[["n_valid"]] > 2) |>
-      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
-      ) |>
-      dplyr::select(-data,-.data[["n_valid"]])
-  } else {
-
-    # Filter if there is a valid (QF neq 2) measurements at each timepoint and horizontalPosition.
-    # Also check to see if there any measurements use the mean
-
-    data_revised <- data |>
-      dplyr::filter(dplyr::if_any(tidyselect::ends_with("FinalQF"), ~ (.x != 2)) ) |>
-      dplyr::group_by(horizontalPosition,startDateTime) |>
-      tidyr::nest() |>
-      dplyr::mutate(mean_used = purrr::map_dbl(.x=data,.f=~(.x |> dplyr::summarize(dplyr::if_any(tidyselect::ends_with("FinalQF"),~any(.x ==1) |> as.numeric()) ) |> dplyr::pull()))
-      ) |>
-      dplyr::select(-data)
-
-  }
-
-  # Create a data frame of times and positions possible in a given month.
-  # Join it to the measurements
-  my_join <- tidyr::expand_grid(startDateTime,horizontalPosition) |>
-    dplyr::left_join(data_revised,by=c("startDateTime","horizontalPosition")) |>
-    dplyr::mutate(mean_used = dplyr::if_else(is.na(.data[["mean_used"]]),2,.data[["mean_used"]]) )
 
   # rename final QF frame
-  names(my_join)[names(my_join) == "mean_used"] <- paste0(measurement_name,"MeanQF")
+  names(data_revised)[names(data_revised) == "mean_used"] <- paste0(measurement_name,"MeanQF")
 
-  return(my_join)
+  return(data_revised)
 }

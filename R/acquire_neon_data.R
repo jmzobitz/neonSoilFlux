@@ -38,6 +38,7 @@ acquire_neon_data <- function(site_name,
   #     2024-04-10: update to get the swc depths corrected
   #     2024-04-23: update to allow provisional data
   #     2024-05-23: update to prepare for CRAN submission
+  #     2024-11-20: update for SWC correction
 
   .data = NULL  # Appease R CMD Check
 
@@ -70,15 +71,29 @@ acquire_neon_data <- function(site_name,
                                             include.provisional = provisional)
 
 
-  site_swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001",
-                                           site=site_name,
-                                           startdate=download_date,
-                                           enddate=download_date,
-                                           timeIndex = download_time,
-                                           package="expanded",
-                                           check.size = FALSE,
-                                           include.provisional = provisional)
+  # 11-20-24: We use a post-hoc correction for soil swc for calibration. Should revert back after release 2024?
+
+  # site_swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001",
+  #                                          site=site_name,
+  #                                          startdate=download_date,
+  #                                          enddate=download_date,
+  #                                          timeIndex = download_time,
+  #                                          package="expanded",
+  #                                          check.size = FALSE,
+  #                                          include.provisional = provisional)
   # Then correct the swc
+  site_swc <- reprocess_vswc(site_name,download_date)
+
+  # Remove original swc and overwrite it with the corrected ones
+  site_swc2 <- site_swc |>
+    purrr::list_assign(SWS_30_minute = zap())
+
+
+  names(site_swc2)[names(site_swc2) == "SWS_30_minute_corr"] <- "SWS_30_minute"
+
+  #### Calibration correction end
+
+   # Then correct the swc
   site_swc <- swc_correct(site_swc,site_name,download_date)
 
 
@@ -115,7 +130,8 @@ acquire_neon_data <- function(site_name,
       purrr::pluck(paste0("sensor_positions_","00095"))
 
     # Add on the positions for co2
-    co2 <- determine_position(co2_positions,co2)
+    co2 <- determine_position(co2_positions,co2) |>
+      dplyr::ungroup()
 
     # Apply monthly means
     co2_monthly_mean <- compute_monthly_mean(co2)
@@ -131,7 +147,8 @@ acquire_neon_data <- function(site_name,
 
 
     # Add on the positions for temperature
-    temperature <- determine_position(temperature_positions,temperature)
+    temperature <- determine_position(temperature_positions,temperature) |>
+      dplyr::ungroup()
 
 
     # Apply monthly means
@@ -148,7 +165,8 @@ acquire_neon_data <- function(site_name,
       purrr::pluck(paste0("sensor_positions_","00094"))
 
     # Add on the positions for swc
-    swc <- determine_position(swc_positions,swc)
+    swc <- determine_position(swc_positions,swc) |>
+      dplyr::ungroup()
 
 
 
@@ -167,10 +185,11 @@ acquire_neon_data <- function(site_name,
 
 
     # Add on the positions for pressure
-    pressure <- determine_position(pressure_positions,pressure)
+    pressure <- determine_position(pressure_positions,pressure) |>
+      dplyr::ungroup()
 
-    # Apply monthly means
-    pressure_monthly_mean <- compute_monthly_mean(pressure)
+    # Apply monthly means - we adjust the monthly mean here to allow for a looser threshold.
+    pressure_monthly_mean <- compute_monthly_mean(pressure,time_horizon = 10)
 
 
     # Put everything in a nested data frame

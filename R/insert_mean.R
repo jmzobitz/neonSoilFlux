@@ -46,18 +46,20 @@ insert_mean <- function(data,monthly_mean,measurement_name) {
     dplyr::mutate(var_mean = dplyr::if_else(var_QF ==0,var_mean,monthly_mean),
            var_uncert = dplyr::if_else(var_QF ==0,var_uncert,monthly_uncert),
            mean_QF =dplyr::if_else(var_QF ==0,0,1),
-           mean_QF = dplyr::if_else(is.na(monthly_mean) | is.na(monthly_uncert),2,.data[["mean_QF"]]))
+           mean_QF = dplyr::if_else(is.na(var_mean)| is.na(var_uncert),2,.data[["mean_QF"]]))
   # if the monthly mean is a NA, then we use a 2
   # meanQF = 0 --> no smoothed mean
   # meanQF = 1 --> smoothed mean used
   # meanQF = 2 --> NA flag, so we can't use measurement
 
+  # Update columns of joined data
+  joined_data[stringr::str_detect(names(joined_data),"[^StdEr]Mean$")] <- dplyr::pull(smoothed_data,var_mean)
+  joined_data[stringr::str_detect(names(joined_data),'ExpUncert$')] <- dplyr::pull(smoothed_data,var_uncert)
+
+
   out_data <- joined_data |>
-    dplyr::mutate(dplyr::across(.cols=tidyselect::contains("[^StdEr]Mean$"),.fns=~dplyr::pull(smoothed_data,var_mean)),
-           dplyr::across(.cols=tidyselect::contains('ExpUncert$'),.fns=~dplyr::pull(smoothed_data,var_uncert)) ) |>
     dplyr::ungroup() |>
     dplyr::mutate(mean_QF = dplyr::pull(smoothed_data,.data[["mean_QF"]])) |>
-
     dplyr::select(-.data[["comp_mean"]],-.data[["comp_sd"]],-.data[["simple_mean"]],-.data[["simple_sd"]])
 
   # rename final QF frame

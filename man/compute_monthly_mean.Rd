@@ -6,11 +6,14 @@
 \usage{
 compute_monthly_mean(
   NEON_data,
+  time_horizon = 15,
   position_columns = c("horizontalPosition", "verticalPosition")
 )
 }
 \arguments{
 \item{NEON_data}{Required. Input vector of neon measurements for a month}
+
+\item{time_horizon}{Required. How many unique days do we need each month?}
 
 \item{position_columns}{Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
 }
