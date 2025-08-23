@@ -46,6 +46,7 @@ The National Ecological Observatory Network is a program sponsored by the Nation
   * Courtney Leung (Northwestern University)
  - 2024: Refinement to include a gapfilling routine from Zoey Werbin at Boston University as well as additional calculations of the soil flux via different approaches in Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July): 78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
  - 05.2024 Renaming of pacakge to neonSoilFlux from NEONSoils and associated updates to prepare for CRAN submission.
+ - 08.2025 Updates to improve internal efficiency and standardized flux outputs. Code published in [manuscript](https://github.com/jmzobitz/BES-manuscript/blob/main/BES-manuscript.pdf) detailing the method and its validation.
 
 
 ## License
