@@ -14,7 +14,9 @@
 #' @param input_data Required. Nested data frame from acquire_neon_data.
 #'
 #' @examples
+#' \donttest{
 #' corrected_data <- correct_env_data(sjer_env_data_2022_06)
+#' }
 
 
 
