@@ -1,3 +1,5 @@
+# neonSoilFlux 3.0.0
+
 # neonSoilFlux 2.0.0
 
 * 08.23.2025 Updates to package to improve internal efficiency and standardized naming of output fluxes based on the soil levels where the flux is computed.

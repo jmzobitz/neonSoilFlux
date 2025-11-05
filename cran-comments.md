@@ -1,9 +1,7 @@
-## Resubmission 23-08-25
+## Resubmission 24-08-25
 This is a re-resubmission.
 
-In this resubmission I changed fixed the Depends: R (>= 4.1.0) to be on the same line.
-
-I changed the examples in compute_neon_flux and correct_env_data in a donttest to not exceed the elapsed time.
+I changed the examples in compute_neon_flux and correct_env_data in a donttest to not exceed the elapsed time, which threw the previous error.
 
 ### R CMD check results
 
