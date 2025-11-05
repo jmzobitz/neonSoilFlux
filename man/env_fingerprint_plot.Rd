@@ -7,17 +7,20 @@
 env_fingerprint_plot(input_fluxes)
 }
 \arguments{
-\item{input_fluxes}{data frame of computed fluxes}
+\item{input_fluxes}{data frame of environmental measurements}
 }
 \value{
 A ggplot graph where we have ordered factors showing the QA values a given environmental measurement
 }
 \description{
-Given a flux measurement data frame, show when the environmental measurements produced a QF value
+Given an environmental measurement data frame, show when the environmental measurements produced a QF value
 }
 \examples{
 # Make a fingerprint plot for environmental variables:
-env_fingerprint_plot(sjer_flux_2022_06)
+env_fingerprint_plot(sjer_flux_2022_06$millington_quirk)
+# Can also use
+env_fingerprint_plot(sjer_flux_2022_06$marshall)
+# (although the input env data are the same for both diffusivity calculations)
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

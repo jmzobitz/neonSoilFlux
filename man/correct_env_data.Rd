@@ -20,8 +20,6 @@ This file takes data frame from acquire_neon_data and:
 }
 \examples{
 \donttest{
-# Note: you may need to first aqcuire the NEON data using acquire_neon_data
-# Now correct existing environmental data:
 corrected_data <- correct_env_data(sjer_env_data_2022_06)
 }
 }

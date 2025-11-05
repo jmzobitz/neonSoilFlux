@@ -4,21 +4,26 @@
 #' John Zobitz \email{zobitz@augsburg.edu}
 
 #' @description
-#' Given a flux measurement data frame, show when the environmental measurements produced a QF value
-#' @param input_fluxes data frame of computed fluxes
+#' Given an environmental measurement data frame, show when the environmental measurements produced a QF value
+#' @param input_fluxes data frame of environmental measurements
 #'
 #' @return A ggplot graph where we have ordered factors showing the QA values a given environmental measurement
 #' @export
 #'
 #' @examples
 #' # Make a fingerprint plot for environmental variables:
-#' env_fingerprint_plot(sjer_flux_2022_06)
+#' env_fingerprint_plot(sjer_flux_2022_06$millington_quirk)
+#' # Can also use
+#' env_fingerprint_plot(sjer_flux_2022_06$marshall)
+#' # (although the input env data are the same for both diffusivity calculations)
+
 
 # changelog and author contributions / copyrights
 #   John Zobitz (2024-04-07)
 #     original creation
 #     2024-04-08: update to get namespaces correct
 #     2024-05-07: colorscheme updates
+#     2025-08-23: updated documentation
 
 env_fingerprint_plot <- function(input_fluxes) {
 

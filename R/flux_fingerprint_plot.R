@@ -5,18 +5,21 @@
 
 #' @description
 #' Given a flux measurement data frame, show when the flux and diffusivity measurements produced a QF value
-#' @param input_fluxes data frame of computed fluxes
+#' @param input_fluxes data frame of computed fluxes (may be Marshall or Millington-Quirk)
 #'
 #' @return A ggplot graph where we have ordered factors showing the QA values a given flux computation
 #' @export
 #'
 #' @examples
 #' # Make a fingerprint plot for computed flux values:
-#' flux_fingerprint_plot(sjer_flux_2022_06)
+#' flux_fingerprint_plot(sjer_flux_2022_06$millington_quirk)
+#' # Can also use
+#' flux_fingerprint_plot(sjer_flux_2022_06$marshall)
 
 # changelog and author contributions / copyrights
-#   John Zobitz (2025-05-07)
+#   John Zobitz (2024-05-07)
 #     original creation
+#   2025-08-23 - modification for revisions for package update
 
 flux_fingerprint_plot <- function(input_fluxes) {
 
@@ -42,9 +45,7 @@ flux_fingerprint_plot <- function(input_fluxes) {
       decimal_hour = lubridate::hour(.data[["startDateTime"]]) + lubridate::minute(.data[["startDateTime"]]) / 60,
       day = lubridate::floor_date(.data[["startDateTime"]], unit = "day")
     ) |>
-    tidyr::pivot_longer(cols = -c("startDateTime","horizontalPosition","week_day","decimal_hour","day")) |>
-    dplyr::mutate(name = as.factor(.data[["name"]]),
-                  name = stats::relevel(.data[["name"]],ref="diffusivity")) |>
+    tidyr::pivot_longer(cols = c(-"startDateTime",-"horizontalPosition",-"week_day",-"decimal_hour",-"day")) |>
     dplyr::mutate(value = as.factor(.data[["value"]])) |>
     ggplot2::ggplot() +
     ggplot2::geom_tile(ggplot2::aes(x = .data[["decimal_hour"]], y = .data[["day"]], fill = .data[["value"]])) +
