@@ -1,4 +1,4 @@
-#' @title Internal fucntion to compute CO2 surface flux
+#' @title Internal function to compute CO2 surface flux
 
 #' @author
 #' John Zobitz \email{zobitz@augsburg.edu}

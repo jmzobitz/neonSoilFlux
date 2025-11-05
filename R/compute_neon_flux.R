@@ -42,6 +42,7 @@ compute_neon_flux <- function(input_site_env,
   #     2023-07-16: Update to take advantage of nested structures to improve / decrease computational time, allowing for multiple measurements to compute the flux.
   #     2023-10-23: Update to exit computing a flux if there are no half-hourly measurements.
   #     2024-04-08: update to get namespaces correct
+  #     2024-11-20: update to get incorporate changes to compute_surface_flux_layer (include gradient & diffusivity, code cleanup)
 
 
 
@@ -53,32 +54,28 @@ compute_neon_flux <- function(input_site_env,
   # site_data: a nested data file containing measurements for the required flux gradient model during the given time period
 
 
-  ### Then take each of the measurements to associate them with errors
-  corrected_data <- correct_env_data(input_site_env)
-
-  qf_flags <- corrected_data$all_flags
-  all_measures <- corrected_data$site_filtered
-
-  # Yay!  We solved the joining problem!
-
-  ################
+  # Adjust the ExpUncert to 1 SD from 2 -- note from Ed on 10/17
+  input_site_env <- input_site_env |>
+    mutate(data=map(data,.f=~mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
 
 
   ################
-  # 3) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
+  # 1) Addsin the megapit data so we have bulk density, porosity measurements at the interpolated depth.
 
   # Ingest the megapit soil physical properties pit, horizon, and biogeo data
   mgp.pit <-  input_site_megapit$mgp_permegapit
-  mgp.hzon <- input_site_megapit$mgp_perhorizon
+
+  ### Information about the horizons
+  mgp.hzon <- input_site_megapit$mgp_perhorizon |>
+    dplyr::select(horizonID,horizonTopDepth,horizonBottomDepth) |>
+    dplyr::arrange(horizonTopDepth)
+
+  ###
   mgp.bgeo <- input_site_megapit$mgp_perbiogeosample
   mgp.bden <- input_site_megapit$mgp_perbulksample
 
 
-  # Merge the soil properties into a single data frame
-
-  mgp.hzon.bgeo <- dplyr::inner_join(mgp.hzon, mgp.bgeo, by = c("horizonID", "pitID", "domainID", "siteID", "horizonName", "pitNamedLocation"))
-  mgp.hzon.bgeo.bden <- dplyr::inner_join(mgp.hzon.bgeo, mgp.bden, by = c("horizonID", "pitID", "domainID", "siteID", "horizonName", "labProjID", "laboratoryName", "pitNamedLocation"))
-  mgp <- dplyr::inner_join(mgp.hzon.bgeo.bden, mgp.pit, by = c("pitID", "domainID", "siteID", "pitNamedLocation", "nrcsDescriptionID"))
+  # Merge the soil properties into a single data frame.  We average by horizon
 
   ###############################
   # Future development: Estimate particle density of <2 mm fraction based on Ruhlmann et al. 2006 Geoderma 130,
@@ -87,29 +84,55 @@ compute_neon_flux <- function(input_site_env,
   # 0.373*(dfBGChem$Estimated.organic.C..../55))" = particle density of organic matter).
   ###############################
 
-  # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density.
-  rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
+  # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density for each horizon.
+  #rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
+  rockVol <- mgp.bgeo |>
+    dplyr::mutate(rockVol = (coarseFrag2To5 + coarseFrag5To20) / 1000 / 2.65) |>
+    dplyr::group_by(horizonID) |>
+    dplyr::summarize(rockVol = mean(rockVol,na.rm=TRUE)) |>
+    dplyr::ungroup()
 
-  # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3.
-  porosSub2mm <- 1 - mgp$bulkDensExclCoarseFrag / 2.65
+  # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3. (done across each horizon)
+  porosSub2mm <- mgp.bden |>
+    dplyr::mutate(porosSub2mm = 1 - bulkDensExclCoarseFrag / 2.65) |>
+    dplyr::group_by(horizonID) |>
+    dplyr::summarize(porosSub2mm = mean(porosSub2mm,na.rm=TRUE)) |>
+    dplyr::ungroup()
 
-  # Calculate porosity of the 0-20 mm fraction (cm3 cm-3). Assume no pores within rocks.
-  mgp$porVol2To20 <- porosSub2mm * (1 - rockVol)
+  # Join these all up together in a megapit data frame, convert depths to m
 
-  ### Now go through the environmental data and add the correct porVol2To20 at each of the zOffsets -- a double map :-)
+  mgp <- mgp.hzon |>
+    dplyr::inner_join(rockVol,by="horizonID") |>
+    dplyr::inner_join(porosSub2mm,by="horizonID") |>
+    dplyr::mutate(porVol2To20 = porosSub2mm * (1 - rockVol),  # Define the porosity
+           horizonTopDepth = horizonTopDepth/100,
+           horizonBottomDepth = horizonBottomDepth/100)  # convert to m
 
-  all_measures2 <- all_measures |>
-    dplyr::mutate(env_data = purrr::map(.x = .data[["env_data"]], .f = function(x) {
-      porVol2To20 <- purrr::map_dbl(.x = x$zOffset, .f = function(x) {
-        horizon <- dplyr::intersect(which(abs(x) >= mgp$horizonTopDepth / 100), which(abs(x) <= mgp$horizonBottomDepth / 100))
 
-        if (length(horizon) > 1) {
-          horizon <- horizon[which.min(mgp$horizonTopDepth[horizon])]
-        }
-        return(mgp$porVol2To20[horizon])
-      })
-      return(dplyr::mutate(x, porVol2To20))
-    }))
+
+  # Now interpolate everything to the depth of the co2 measurements
+
+  # Tells us the depths at each site, adds in the porosity
+  site_depths <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>
+    dplyr::group_by(horizontalPosition,verticalPosition) |>
+    dplyr::distinct(zOffset) |>
+    dplyr::mutate(porVol2To20 = purrr::map_dbl(.x=.data[["zOffset"]],
+                                               .f=~mgp[abs(.x) > mgp$horizonTopDepth & abs(.x) <= mgp$horizonBottomDepth,"porVol2To20"])
+    ) |>
+    dplyr::select(horizontalPosition,verticalPosition,porVol2To20)
+
+  ### Now we can join things together
+  input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]]  <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>
+    dplyr::inner_join(site_depths,by=c("horizontalPosition","verticalPosition"))
+
+
+  # Now correct
+  corrected_data <- correct_env_data(input_site_env)
+
+  qf_flags <- corrected_data$all_flags
+  all_measures <- corrected_data$site_filtered
+
+
 
   ################
 
@@ -119,7 +142,7 @@ compute_neon_flux <- function(input_site_env,
 
 
 
-  flux_out <- all_measures2 |> # first filter out any bad measurements
+  flux_out <- all_measures |> # first filter out any bad measurements
     dplyr::mutate(flux_intro = purrr::map2(.x = .data[["env_data"]], .y = .data[["press_data"]], .f = function(.x, .y) {
       c <- co2_to_umol(
         .x$soilTempMean,
@@ -130,7 +153,6 @@ compute_neon_flux <- function(input_site_env,
         .x$soilCO2concentrationExpUncert,
         .x$zOffset
       )
-
 
 
       d <- diffusivity(
@@ -151,49 +173,50 @@ compute_neon_flux <- function(input_site_env,
       return(new_data)
     })) |>
     dplyr::mutate(
-      flux_compute = purrr::map(.data[["flux_intro"]], compute_surface_flux),
-      diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
+      flux_compute = purrr::map(.x=.data[["flux_intro"]],
+                                .f= ~(.x |>
+                                        dplyr::group_by(diffus_method) |>
+                                        tidyr::nest() |>
+                                        dplyr::mutate(out = purrr::map(data,compute_surface_flux_layer)) |>
+                                        dplyr::select(diffus_method,out) |>
+                                        tidyr::unnest(cols=c("out")) |>
+                                        dplyr::ungroup()) ),
+      surface_diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
         dplyr::slice_max(order_by = zOffset) |>
-        dplyr::select(zOffset, diffusivity, diffusExpUncert)
+        dplyr::select(zOffset, diffusivity, diffusExpUncert,diffus_method)
       ))
     ) |>
-    dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "diffusivity")))
+    dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "surface_diffusivity")))
 
 
 
   ################  Fluxes computed!  Now join back to the original data frame and we are ready to rock and roll!
 
-  na_fluxes <- tibble::tibble(
-    flux = NA,
-    flux_err = NA,
-    method = c(
-      "dejong_shappert_1972",
-      "hirano_2005",
-      "tang_2003",
-      "tang_2005"
-    )
-  )
 
-  na_diffusivity <- tibble::tibble(
-    zOffset = NA,
-    diffusivity = NA,
-    diffusExpUncert = NA
-  )
+  # Create an empty vector of NA fluxes
+  na_fluxes <- flux_out$flux_compute[[1]]|>
+    dplyr::mutate(dplyr::across(-tidyselect::all_of(c("diffus_method","method")), ~ NA))
+
+
+
+  na_diffusivity <-   flux_out$surface_diffusivity[[1]]|>
+    dplyr::mutate(dplyr::across(-tidyselect::all_of(c("zOffset","diffus_method")), ~ NA))
 
   out_fluxes <- qf_flags |>
     dplyr::left_join(flux_out,by=c("startDateTime","horizontalPosition")) |>
-    dplyr::relocate(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["flux_compute"]],.data[["diffusivity"]])
+    dplyr::relocate(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["flux_compute"]],.data[["surface_diffusivity"]])
 
   # Kicking it out school again with a loop - easiest to fill in where we aren't able to compute
   for(i in 1:nrow(out_fluxes)) {
-    if(is.null(out_fluxes$diffusivity[[i]])) {
-      out_fluxes$diffusivity[[i]] <- na_diffusivity
+    if(is.null(out_fluxes$surface_diffusivity[[i]])) {
+      out_fluxes$surface_diffusivity[[i]] <- na_diffusivity
     }
 
     if(is.null(out_fluxes$flux_compute[[i]])) {
       out_fluxes$flux_compute[[i]] <- na_fluxes
     }
   }
+
 
 
   return(out_fluxes)

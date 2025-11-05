@@ -7,6 +7,7 @@
 #' Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 
 #' @param NEON_data Required. Input vector of neon measurements for a month
+#' @param time_horizon Required. How many unique days do we need each month?
 #' @param position_columns Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.
 
 #' @return A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
@@ -57,7 +58,9 @@
 #' @references
 #' Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
 
-compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosition", "verticalPosition")) {
+compute_monthly_mean <- function(NEON_data,
+                                 time_horizon = 15,
+                                 position_columns = c("horizontalPosition", "verticalPosition")) {
 
   # changelog and author contributions / copyrights
   #   Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
@@ -84,7 +87,7 @@ compute_monthly_mean <- function(NEON_data, position_columns = c("horizontalPosi
 
 
 
-      if (length(unique(input_data$day)) >= 15) {
+      if (length(unique(input_data$day)) >= time_horizon) {
         col_names <- names(input_data)
 
         tsY <- dplyr::pull(input_data, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
