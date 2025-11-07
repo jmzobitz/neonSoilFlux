@@ -84,7 +84,7 @@ depth_interpolate <- function(input_measurements,
 
                                    var_depth <- .x$zOffset
                                    var_mean <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
-                                   var_uncert <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "ExpUncert$"))) # expanded measurement uncertainty at 95% confidence / 2 so 1 SD
+                                   var_uncert <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "StdErMean$"))) # standard error bar
                                    var_qf <- dplyr::pull(.x, var = which(stringr::str_detect(col_names, "MeanQF$")))
                                   out_vals <- fit_function(
                                      input_depth = var_depth,

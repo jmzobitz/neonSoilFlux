@@ -148,9 +148,9 @@ compute_neon_flux <- function(input_site_env,
         .x$soilTempMean,
         .y$staPresMean,
         .x$soilCO2concentrationMean,
-        .x$soilTempExpUncert,
-        .y$staPresExpUncert,
-        .x$soilCO2concentrationExpUncert,
+        .x$soilTempStdErMean,
+        .y$staPresStdErMean,
+        .x$soilCO2concentrationStdErMean,
         .x$zOffset
       )
 
@@ -159,9 +159,9 @@ compute_neon_flux <- function(input_site_env,
         temperature = .x$soilTempMean,
         soil_water = .x$VSWCMean,
         pressure = .y$staPresMean,
-        temperature_err = .x$soilTempExpUncert,
-        soil_water_err = .x$VSWCExpUncert,
-        pressure_err = .y$staPresExpUncert,
+        temperature_err = .x$soilTempStdErMean,
+        soil_water_err = .x$VSWCStdErMean,
+        pressure_err = .y$staPresStdErMean,
         zOffset = .x$zOffset,
         porVol2To20 = .x$porVol2To20
       )
@@ -183,7 +183,7 @@ compute_neon_flux <- function(input_site_env,
                                         dplyr::ungroup()) ),
       surface_diffusivity = purrr::map(.x = .data[["flux_intro"]], .f = ~ (.x |>
         dplyr::slice_max(order_by = zOffset) |>
-        dplyr::select(zOffset, diffusivity, diffusExpUncert,diffus_method)
+        dplyr::select(zOffset, diffusivity, diffusStdErMean,diffus_method)
       ))
     ) |>
     dplyr::select(tidyselect::all_of(c("horizontalPosition","startDateTime","flux_compute", "surface_diffusivity")))

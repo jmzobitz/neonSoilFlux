@@ -35,10 +35,10 @@ compute_surface_flux_layer <- function(input_data) {
   zOffset <- input_data_rev |> dplyr::pull(.data[["zOffset"]])
 
   diffus <- input_data_rev |> dplyr::pull(.data[["diffusivity"]])
-  diffus_err <- input_data_rev |> dplyr::pull(.data[["diffusExpUncert"]])
+  diffus_err <- input_data_rev |> dplyr::pull(.data[["diffusStdErMean"]])
 
   co2 <- input_data_rev |> dplyr::pull(.data[["co2_umol"]])
-  co2_err <- input_data_rev |> dplyr::pull(.data[["co2ExpUncert"]])
+  co2_err <- input_data_rev |> dplyr::pull(.data[["co2StdErMean"]])
 
 
 

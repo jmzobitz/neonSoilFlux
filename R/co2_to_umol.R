@@ -56,6 +56,6 @@ co2_to_umol <- function(temperature, pressure, co2, temperature_err, pressure_er
 
   out_tibble <- tibble::tibble(zOffset = zOffset,
                                co2_umol = co2_convert,
-                               co2ExpUncert = calc_err)
+                               co2StdErMean = calc_err)
   return(out_tibble)
 }

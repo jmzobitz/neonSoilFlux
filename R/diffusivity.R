@@ -104,9 +104,9 @@ diffusivity <- function(temperature, soil_water, pressure, temperature_err, soil
   calc_err_marshall <- quadrature_error(measurement_pd_marshall, errs)
   calc_err_mq <- quadrature_error(measurement_pd_mq, errs)
 
-  out_tibble_marshall <- tibble::tibble(zOffset, diffusivity = diffusivity_marshall, diffusExpUncert = calc_err_marshall,diffus_method="Marshall")
+  out_tibble_marshall <- tibble::tibble(zOffset, diffusivity = diffusivity_marshall, diffusStdErMean = calc_err_marshall,diffus_method="Marshall")
 
-  out_tibble_mq <- tibble::tibble(zOffset, diffusivity = diffusivity_mq, diffusExpUncert = calc_err_mq,diffus_method="Millington-Quirk")
+  out_tibble_mq <- tibble::tibble(zOffset, diffusivity = diffusivity_mq, diffusStdErMean = calc_err_mq,diffus_method="Millington-Quirk")
 
   return(rbind(out_tibble_marshall,out_tibble_mq))
 }
