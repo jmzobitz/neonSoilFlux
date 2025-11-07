@@ -37,7 +37,7 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
   .data = NULL  # Appease R CMD Check
 
   # The default value if we have nothing
-  out_value <- tibble::tibble(zOffset = interp_depth, value = NA, StdErMean = NA)
+  out_value <- tibble::tibble(zOffset = interp_depth, value = NA, ExpUncert = NA)
 
   # do a quick NA filtering on the measurement
   test_data <- tibble::tibble(
@@ -88,7 +88,7 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
        tibble::as_tibble() |>
       dplyr::rename(zOffset = .data[["x"]],
                value = .data[["y"]]) |>
-       dplyr::mutate(StdErMean = predict_err)
+       dplyr::mutate(ExpUncert = predict_err)
 
 
 
@@ -112,11 +112,11 @@ fit_function <- function(input_depth,input_value,input_value_err,input_value_qf,
         tibble::as_tibble() |>
         dplyr::rename(zOffset = .data[["x"]],
                value = .data[["y"]]) |>
-        dplyr::mutate(StdErMean = predict_err)
+        dplyr::mutate(ExpUncert = predict_err)
 
       if(measurement_special & any(out_value$value < 0)) {
         out_value$value = NA
-        out_value$StdErMean = NA
+        out_value$ExpUncert = NA
       }
     }
 
