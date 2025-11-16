@@ -25,10 +25,8 @@ This file takes a saved data file from acquire:
 6) Saves the data
 }
 \examples{
-\donttest{
  out_flux <- compute_neon_flux(input_site_env = sjer_env_data_2022_06,
  input_site_megapit = sjer_megapit_data_2022_06)
- }
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}

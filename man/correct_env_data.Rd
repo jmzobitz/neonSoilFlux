@@ -19,9 +19,7 @@ This file takes data frame from acquire_neon_data and:
 3) Merges air pressure data into this data frame
 }
 \examples{
-\donttest{
 corrected_data <- correct_env_data(sjer_env_data_2022_06)
-}
 }
 \author{
 John Zobitz \email{zobitz@augsburg.edu}
