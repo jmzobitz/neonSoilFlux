@@ -1,7 +1,7 @@
 Package: neonSoilFlux
 Type: Package
 Title: Compute Soil Carbon Fluxes for the National Ecological Observatory Network Sites
-Version: 2.0.0
+Version: 1.0.0
 Authors@R: c(
     person("John", "Zobitz", email = "zobitz@augsburg.edu", role = c("aut","cre"),comment = c(ORCID = "0000-0002-1830-143X") ),
     person("Edward", "Ayres", email = "eayres@battelleecology.org", role = c("aut"),comment = c(ORCID = "0000-0003-1846-1473") ),
@@ -18,9 +18,9 @@ BugReports: https://github.com/jmzobitz/neonSoilFlux/issues
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.1
 Depends: 
-    R (>= 4.1.0)
+    R (>= 2.10)
 Imports: 
     dplyr,
     ggplot2,
@@ -34,6 +34,5 @@ Imports:
     tidyselect
 Suggests: 
     knitr,
-    rmarkdown,
-    bookdown
+    rmarkdown
 VignetteBuilder: knitr

@@ -4,6 +4,6 @@
 .Ruserdata
 ^archive-files/$
 ^data/$
-archive-files/
-revdep/
+
+
 inst/doc
