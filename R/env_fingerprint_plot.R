@@ -19,13 +19,14 @@
 #     original creation
 #     2024-04-08: update to get namespaces correct
 #     2024-05-07: colorscheme updates
+#     2025-11-17: update to name of surface diffusivity column
 
 env_fingerprint_plot <- function(input_fluxes) {
 
   .data = NULL  # Appease R CMD Check
 
   prep_env <- input_fluxes |>
-    dplyr::select(-.data[["flux_compute"]], -.data[["diffusivity"]]) |>
+    dplyr::select(-.data[["flux_compute"]], -.data[["surface_diffusivity"]]) |>
     dplyr::mutate(
       week_day = lubridate::wday(.data[["startDateTime"]]),
       decimal_hour = lubridate::hour(.data[["startDateTime"]]) + lubridate::minute(.data[["startDateTime"]]) / 60,
