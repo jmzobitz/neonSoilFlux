@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-^archive-files/$
-^data/$
+archive-files
+revdep
+data
 
 
 inst/doc
