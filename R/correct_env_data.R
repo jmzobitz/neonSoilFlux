@@ -88,21 +88,21 @@ correct_env_data <- function(input_data) {
     dplyr::filter(.data[["measurement"]] =="soilCO2concentration") |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     tidyr::unnest(cols=c("data")) |>
-    select(-.data[["measurement"]])
+    dplyr::select(-.data[["measurement"]])
 
   # Now we want to join this all up
   VSWC_measurement <- site_interp |>
     dplyr::filter(.data[["measurement"]] =="VSWC") |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     tidyr::unnest(cols=c("data")) |>
-    select(-.data[["measurement"]])
+    dplyr::select(-.data[["measurement"]])
 
   # Now we want to join this all up
   soilTemp_measurement <- site_interp |>
     dplyr::filter(.data[["measurement"]] =="soilTemp") |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     tidyr::unnest(cols=c("data")) |>
-    select(-.data[["measurement"]])
+    dplyr::select(-.data[["measurement"]])
 
   env_data_all <- co2_measurement |>
     inner_join(VSWC_measurement,by=c("horizontalPosition","startDateTime","zOffset")) |>
@@ -116,7 +116,7 @@ correct_env_data <- function(input_data) {
     dplyr::filter(.data[["measurement"]] =="staPres") |>
     dplyr::select(-.data[["monthly_mean"]]) |>
     tidyr::unnest(cols=c("data")) |>
-    select(-.data[["measurement"]]) |>
+    dplyr::select(-.data[["measurement"]]) |>
     dplyr::group_by(.data[["startDateTime"]],.data[["horizontalPosition"]]) |>
     tidyr::nest() |>
     dplyr::rename(press_data = .data[["data"]]) |>
