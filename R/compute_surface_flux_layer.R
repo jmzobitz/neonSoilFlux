@@ -101,7 +101,7 @@ compute_surface_flux_layer <- function(input_data) {
   results <- vector(mode = "list",length=(nrow(flux_data_pre_revised)))
 
   # Take all possible combinations of levels
-  index_combination <- combn(1:nrow(flux_data_pre_revised),2,simplify=FALSE)
+  index_combination <- utils::combn(1:nrow(flux_data_pre_revised),2,simplify=FALSE)
   # Remember that the top layer is the surface, so for the diffusivity we always use the computed measurements at the lower layer
   for(i in seq_along(results)) {
 
