@@ -19,6 +19,11 @@ A list containing stacked swc data
 \description{
 Apply correct calibration data functions for SWC data - see https://data.neonscience.org/data-products/DP1.00094.001
 }
+\examples{
+\donttest{
+out_swc <- reprocess_vswc("SJER","2022-06")
+}
+}
 \author{
 John Zobitz \email{zobitz@augsburg.edu},
 }

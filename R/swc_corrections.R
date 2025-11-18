@@ -15,6 +15,6 @@
 #' @keywords datasets
 #' @name swc_corrections
 #' @format A data frame with 2161 rows and 6 variables
-#' @source <hhttps://data.neonscience.org/data-products/DP1.00094.001>
+#' @source <https://data.neonscience.org/data-products/DP1.00094.001>
 
 "swc_corrections"
