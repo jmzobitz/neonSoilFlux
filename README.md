@@ -54,3 +54,6 @@ GNU Affero General Public License Version 3, 19 November 2007
 ## Disclaimer
 Information and documents contained within this repository are available as-is. Codes or documents, or their use, may not be supported or maintained under any program or service and may not be compatible with data currently available from the NEON Data Portal.
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/jmzobitz/neonSoilFlux/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmzobitz/neonSoilFlux/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
