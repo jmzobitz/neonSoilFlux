@@ -13,9 +13,6 @@ reprocess_vswc(site_name, download_date)
 }
 \value{
 A data frame of startDateTime, horizontalPosition, and the associated QF flag.
-\donttest{
-out_swc <- reprocess_vswc("SJER","2022-06")
-}
 
 A list containing stacked swc data
 }

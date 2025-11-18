@@ -105,8 +105,8 @@ correct_env_data <- function(input_data) {
     dplyr::select(-.data[["measurement"]])
 
   env_data_all <- co2_measurement |>
-    inner_join(VSWC_measurement,by=c("horizontalPosition","startDateTime","zOffset")) |>
-    inner_join(soilTemp_measurement,by=c("horizontalPosition","startDateTime","zOffset")) |>
+    dplyr::inner_join(VSWC_measurement,by=c("horizontalPosition","startDateTime","zOffset")) |>
+    dplyr::inner_join(soilTemp_measurement,by=c("horizontalPosition","startDateTime","zOffset")) |>
     dplyr::group_by(.data[["startDateTime"]],.data[["horizontalPosition"]]) |>
     tidyr::nest() |>
     dplyr::rename(env_data = .data[["data"]])

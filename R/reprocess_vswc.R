@@ -10,6 +10,7 @@
 
 #' @return A data frame of startDateTime, horizontalPosition, and the associated QF flag.
 
+#' @examples
 #' \donttest{
 #' out_swc <- reprocess_vswc("SJER","2022-06")
 #' }
