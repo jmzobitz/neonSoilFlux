@@ -584,7 +584,7 @@ reprocess_vswc <- function(site_name,download_date) {
 
   # Assign out names:
   swc$SWS_30_minute_corr <- SWS_30_minute |>
-    select(-correctedVSWCMean,-correctedVSWCMaximum,-correctedVSWCMinimum,-correctedVSWCStdErMean,-correctedVSWCExpUncert,-correctedVSWCFinalQF)
+    dplyr::select(-correctedVSWCMean,-correctedVSWCMaximum,-correctedVSWCMinimum,-correctedVSWCStdErMean,-correctedVSWCExpUncert,-correctedVSWCFinalQF)
 
   return(swc)
 }
