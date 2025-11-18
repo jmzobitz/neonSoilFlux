@@ -62,7 +62,7 @@ depth_interpolate <- function(input_measurements,
     dplyr::select(-.data[["monthly_mean"]]) |>
     dplyr::mutate(data = purrr::map(.x = .data[["data"]], .f = ~ (.x |> dplyr::group_by(horizontalPosition, startDateTime) |> tidyr::nest()))) |>
     dplyr::rename(measurement_data = .data[["data"]]) |>
-    dplyr::mutate(measurement_data = map(.x=measurement_data,.f=~(.x |>
+    dplyr::mutate(measurement_data = purrr::map(.x=measurement_data,.f=~(.x |>
                                                                     dplyr::mutate(n_vals = purrr::map_dbl(data,nrow),
                                                                                   n_good = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(0 )) |> sum() ))),
                                                                                   n_mean = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(1 )) |> sum() )))
@@ -76,7 +76,7 @@ depth_interpolate <- function(input_measurements,
   # We will be doing a doubly nesting map - yikes!
 
   env_data_interp <- input_env_values |>
-    unnest(cols=c(measurement_data)) |>
+    tidyr::unnest(cols=c(measurement_data)) |>
     dplyr::mutate(results = purrr::map2(.x=data,.y=interp_data,
                                  .f=function(.x,.y) {
                                    interpolate_depth <- .y$zOffset
@@ -110,7 +110,7 @@ depth_interpolate <- function(input_measurements,
 
   ### UGH, this is a deeply nested list
   env_interpolated_data <- env_data_interp |>
-    mutate(results = purrr::pmap(.l=list(results,qf_val,measurement),.f=function(x,y,z) {
+    dplyr::mutate(results = purrr::pmap(.l=list(results,qf_val,measurement),.f=function(x,y,z) {
       x |> dplyr::mutate(MeanQF=y) |>
       dplyr::rename_with(~ ifelse(. == "zOffset", ., paste0(z, .)))
 
