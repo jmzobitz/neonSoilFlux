@@ -86,7 +86,7 @@ acquire_neon_data <- function(site_name,
 
   # Remove original swc and overwrite it with the corrected ones
   site_swc2 <- site_swc |>
-    purrr::list_assign(SWS_30_minute = zap())
+    purrr::list_assign(SWS_30_minute = rlang::zap())
 
 
   names(site_swc2)[names(site_swc2) == "SWS_30_minute_corr"] <- "SWS_30_minute"
