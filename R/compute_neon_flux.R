@@ -59,7 +59,7 @@ compute_neon_flux <- function(input_site_env,
 
   # Adjust the ExpUncert to 1 SD from 2 -- note from Ed on 10/17
   input_site_env <- input_site_env |>
-    mutate(data=map(data,.f=~mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
+    dplyr::mutate(data=purrr::map(data,.f=~dplyr::mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
 
 
   ################
