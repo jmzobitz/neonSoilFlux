@@ -32,7 +32,7 @@ flux_fingerprint_plot <- function(input_fluxes,input_diffus_method = "Marshall")
                   fluxMeanQF = dplyr::if_else(.data[["fluxMeanQF"]],2,0),
    ) |>
     dplyr::select(.data[["startDateTime"]],.data[["horizontalPosition"]],.data[["diffus_method"]],.data[["method"]],.data[["fluxMeanQF"]]) |>
-    dplyr::filter(diffus_method == input_diffus_method) |>
+    dplyr::filter(.data[["diffus_method"]] == input_diffus_method) |>
     dplyr::mutate(
       week_day = lubridate::wday(.data[["startDateTime"]]),
       decimal_hour = lubridate::hour(.data[["startDateTime"]]) + lubridate::minute(.data[["startDateTime"]]) / 60,
