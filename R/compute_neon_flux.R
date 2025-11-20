@@ -111,7 +111,7 @@ compute_neon_flux <- function(input_site_env,
     dplyr::inner_join(rockVol,by="horizonID") |>
     dplyr::inner_join(porosSub2mm,by="horizonID") |>
     dplyr::mutate(porVol2To20 = porosSub2mm * (1 - rockVol),  # Define the porosity
-           horizonTopDepth = horizonTopDepth/100,
+           horizonTopDepth = .data[["horizonTopDepth"]]/100,
            horizonBottomDepth = .data[["horizonBottomDepth"]]/100)  # convert to m
 
 

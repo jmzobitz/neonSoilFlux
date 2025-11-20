@@ -132,7 +132,7 @@ depth_interpolate <- function(input_measurements,
     dplyr::inner_join(env_interpolated_data,by=c("measurement")) |>
     dplyr::select(-.data[["data.x"]]) |>
     dplyr::rename(data = .data[["data.y"]]) |>
-    rbind( dplyr::filter(input_measurements,!(measurement %in% measurement_name)))
+    rbind( dplyr::filter(input_measurements,!(.data[["measurement"]] %in% measurement_name)))
 
 
 
