@@ -94,14 +94,14 @@ compute_neon_flux <- function(input_site_env,
   #rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
   rockVol <- mgp.bgeo |>
     dplyr::mutate(rockVol = (.data[["coarseFrag2To5"]] + .data[["coarseFrag5To20"]]) / 1000 / 2.65) |>
-    dplyr::group_by(horizonID) |>
+    dplyr::group_by(.data[["horizonID"]]) |>
     dplyr::summarize(rockVol = mean(rockVol,na.rm=TRUE)) |>
     dplyr::ungroup()
 
   # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3. (done across each horizon)
   porosSub2mm <- mgp.bden |>
     dplyr::mutate(porosSub2mm = 1 - .data[["bulkDensExclCoarseFrag"]] / 2.65) |>
-    dplyr::group_by(horizonID) |>
+    dplyr::group_by(.data[["horizonID"]]) |>
     dplyr::summarize(porosSub2mm = mean(porosSub2mm,na.rm=TRUE)) |>
     dplyr::ungroup()
 
@@ -112,7 +112,7 @@ compute_neon_flux <- function(input_site_env,
     dplyr::inner_join(porosSub2mm,by="horizonID") |>
     dplyr::mutate(porVol2To20 = porosSub2mm * (1 - rockVol),  # Define the porosity
            horizonTopDepth = horizonTopDepth/100,
-           horizonBottomDepth = horizonBottomDepth/100)  # convert to m
+           horizonBottomDepth = .data[["horizonBottomDepth"]]/100)  # convert to m
 
 
 
@@ -120,8 +120,8 @@ compute_neon_flux <- function(input_site_env,
 
   # Tells us the depths at each site, adds in the porosity
   site_depths <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>
-    dplyr::group_by(horizontalPosition,verticalPosition) |>
-    dplyr::distinct(zOffset) |>
+    dplyr::group_by(.data[["horizontalPosition"]],.data[["verticalPosition"]]) |>
+    dplyr::distinct(.data[["zOffset"]]) |>
     dplyr::mutate(porVol2To20 = purrr::map_dbl(.x=.data[["zOffset"]],
                                                .f=~mgp[abs(.x) > mgp$horizonTopDepth & abs(.x) <= mgp$horizonBottomDepth,"porVol2To20"])
     ) |>

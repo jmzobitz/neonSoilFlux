@@ -62,7 +62,7 @@ depth_interpolate <- function(input_measurements,
     dplyr::select(-.data[["monthly_mean"]]) |>
     dplyr::mutate(data = purrr::map(.x = .data[["data"]], .f = ~ (.x |> dplyr::group_by(horizontalPosition, startDateTime) |> tidyr::nest()))) |>
     dplyr::rename(measurement_data = .data[["data"]]) |>
-    dplyr::mutate(measurement_data = purrr::map(.x=measurement_data,.f=~(.x |>
+    dplyr::mutate(measurement_data = purrr::map(.x=.data[["measurement_data"]],.f=~(.x |>
                                                                     dplyr::mutate(n_vals = purrr::map_dbl(data,nrow),
                                                                                   n_good = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(0 )) |> sum() ))),
                                                                                   n_mean = purrr::map_dbl(.x=data,.f=~( ((dplyr::pull(.x) ==(1 )) |> sum() )))
@@ -76,7 +76,7 @@ depth_interpolate <- function(input_measurements,
   # We will be doing a doubly nesting map - yikes!
 
   env_data_interp <- input_env_values |>
-    tidyr::unnest(cols=c(measurement_data)) |>
+    tidyr::unnest(cols=c("measurement_data")) |>
     dplyr::mutate(results = purrr::map2(.x=.data[["data"]],.y=.data[["interp_data"]],
                                  .f=function(.x,.y) {
                                    interpolate_depth <- .y$zOffset
@@ -116,7 +116,7 @@ depth_interpolate <- function(input_measurements,
 
       })) |>
     dplyr::select(-.data[["data"]],-.data[["interp_data"]],-.data[["qf_val"]]) |>
-    dplyr::group_by(measurement) |>
+    dplyr::group_by(.data[["measurement"]]) |>
     tidyr::nest() |>
     dplyr::mutate(data = purrr::map(.x=data,.f=~(.x |> tidyr::unnest(cols=c(.data[["results"]])) |>
                                                    dplyr::ungroup()
@@ -128,7 +128,7 @@ depth_interpolate <- function(input_measurements,
   ## Now start to join these all up to pitch out
 
   out_fitted <- input_measurements |>
-    dplyr::filter((measurement %in% measurement_name)) |>
+    dplyr::filter((.data[["measurement"]] %in% measurement_name)) |>
     dplyr::inner_join(env_interpolated_data,by=c("measurement")) |>
     dplyr::select(-.data[["data.x"]]) |>
     dplyr::rename(data = .data[["data.y"]]) |>
