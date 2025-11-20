@@ -77,7 +77,7 @@ depth_interpolate <- function(input_measurements,
 
   env_data_interp <- input_env_values |>
     tidyr::unnest(cols=c(measurement_data)) |>
-    dplyr::mutate(results = purrr::map2(.x=data,.y=interp_data,
+    dplyr::mutate(results = purrr::map2(.x=.data[["data"]],.y=.data[["interp_data"]],
                                  .f=function(.x,.y) {
                                    interpolate_depth <- .y$zOffset
                                    col_names <- names(.x)
@@ -110,7 +110,7 @@ depth_interpolate <- function(input_measurements,
 
   ### UGH, this is a deeply nested list
   env_interpolated_data <- env_data_interp |>
-    dplyr::mutate(results = purrr::pmap(.l=list(results,qf_val,measurement),.f=function(x,y,z) {
+    dplyr::mutate(results = purrr::pmap(.l=list(.data[["results"]],.data[["qf_val"]],.data[["measurement"]]),.f=function(x,y,z) {
       x |> dplyr::mutate(MeanQF=y) |>
       dplyr::rename_with(~ ifelse(. == "zOffset", ., paste0(z, .)))
 

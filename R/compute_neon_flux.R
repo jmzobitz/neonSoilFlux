@@ -59,7 +59,7 @@ compute_neon_flux <- function(input_site_env,
 
   # Adjust the ExpUncert to 1 SD from 2 -- note from Ed on 10/17
   input_site_env <- input_site_env |>
-    dplyr::mutate(data=purrr::map(data,.f=~dplyr::mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
+    dplyr::mutate(data=purrr::map(.data[["data"]],.f=~dplyr::mutate(.x,across(.cols=ends_with("ExpUncert"),.fns=~.x/2))))
 
 
   ################
@@ -70,8 +70,11 @@ compute_neon_flux <- function(input_site_env,
 
   ### Information about the horizons
   mgp.hzon <- input_site_megapit$mgp_perhorizon |>
-    dplyr::select(horizonID,horizonTopDepth,horizonBottomDepth) |>
-    dplyr::arrange(horizonTopDepth)
+    dplyr::select(.data[["horizonID"]],
+                  .data[["horizonTopDepth"]],
+                  .data[["horizonBottomDepth"]]
+                  ) |>
+    dplyr::arrange(.data[["horizonTopDepth"]])
 
   ###
   mgp.bgeo <- input_site_megapit$mgp_perbiogeosample
@@ -90,14 +93,14 @@ compute_neon_flux <- function(input_site_env,
   # Calculate 2-20 mm rock volume (cm3 cm-3). Assume 2.65 g cm-3 density for each horizon.
   #rockVol <- ((mgp$coarseFrag2To5 + mgp$coarseFrag5To20) / 1000) / 2.65
   rockVol <- mgp.bgeo |>
-    dplyr::mutate(rockVol = (coarseFrag2To5 + coarseFrag5To20) / 1000 / 2.65) |>
+    dplyr::mutate(rockVol = (.data[["coarseFrag2To5"]] + .data[["coarseFrag5To20"]]) / 1000 / 2.65) |>
     dplyr::group_by(horizonID) |>
     dplyr::summarize(rockVol = mean(rockVol,na.rm=TRUE)) |>
     dplyr::ungroup()
 
   # Calculate porosity of the <2 mm fraction (cm3 cm-3). Assume soil particle density of 2.65 g cm-3. (done across each horizon)
   porosSub2mm <- mgp.bden |>
-    dplyr::mutate(porosSub2mm = 1 - bulkDensExclCoarseFrag / 2.65) |>
+    dplyr::mutate(porosSub2mm = 1 - .data[["bulkDensExclCoarseFrag"]] / 2.65) |>
     dplyr::group_by(horizonID) |>
     dplyr::summarize(porosSub2mm = mean(porosSub2mm,na.rm=TRUE)) |>
     dplyr::ungroup()
@@ -122,7 +125,10 @@ compute_neon_flux <- function(input_site_env,
     dplyr::mutate(porVol2To20 = purrr::map_dbl(.x=.data[["zOffset"]],
                                                .f=~mgp[abs(.x) > mgp$horizonTopDepth & abs(.x) <= mgp$horizonBottomDepth,"porVol2To20"])
     ) |>
-    dplyr::select(horizontalPosition,verticalPosition,porVol2To20)
+    dplyr::select(.data[["horizontalPosition"]],
+                  .data[["verticalPosition"]],
+                  .data[["porVol2To20"]]
+                  )
 
   ### Now we can join things together
   input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]]  <- input_site_env[input_site_env$measurement == "soilCO2concentration",]$data[[1]] |>

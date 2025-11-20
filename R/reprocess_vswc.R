@@ -24,6 +24,9 @@
 
 reprocess_vswc <- function(site_name,download_date) {
 
+
+  .data = NULL  # Appease R CMD Check
+
   # See: https://data.neonscience.org/data-products/DP1.00094.001
   # Replace data with NA to prevent any carryover to next loop
   #swc <- NA

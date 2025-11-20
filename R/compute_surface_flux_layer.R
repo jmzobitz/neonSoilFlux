@@ -123,7 +123,13 @@ compute_surface_flux_layer <- function(input_data) {
 
 
   dplyr::bind_rows(results) |>
-    dplyr::select(flux,flux_err,gradient,gradient_err,method,r2) |>
+    dplyr::select(.data[["flux"]],
+                  .data[["flux_err"]],
+                  .data[["gradient"]],
+                  .data[["gradient_err"]],
+                  .data[["method"]],
+                  .data[["r2"]]
+                  ) |>
     rbind(flux_000)
 
 
