@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 # Introduction
-Welcome to the `neonSoilFlux` package! This vignette will guide you through the process of using this package to acquire and compute soil CO$_{2}$ fluxes at different sites in the National Ecological Observatory Network.
+Welcome to the `neonSoilFlux` package! This vignette will guide you through the process of using this package to acquire and compute soil CO~2~ fluxes at different sites in the National Ecological Observatory Network.
 
 You can think about this package working in two primary phases:
 
@@ -32,6 +32,13 @@ We split these two functions in order to optimize time and that both were fundam
 
 This package takes the guess work out of which data products to collect, hoping to reduce the workflow needed.  We rely very much on the `tidyverse` philosophy for computation and coding here.
 
+An overview of the package is also presented in [`neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes](https://doi.org/10.1111/2041-210x.70216).
+
+![Model diagram of the data workflow for the `neonSoilFlux` R package.  a) **Acquire:** Data are obtained for a given NEON location and horizontal sensor location, which includes soil water content, soil temperature, CO$_{2}$ concentration, and atmospheric pressure. All data are screened for quality assurance; if gap-filling of missing data occurs, it is flagged for the user. b) **Harmonize:** Any belowground data are then harmonized to the same depth as CO~2~ concentrations using linear regression. c) **Compute:** The flux across a given depth is computed via Fick's law, denoted with F~ijk~, where $i$, $j$, or $k$ are either 0 or 1 denoting the layers the flux is computed across ($i$ = closest to surface, $k$ = deepest). F~000~ represents a flux estimate where the gradient $dC/dz$ is the slope of a linear regression of CO~2~ with depth.](model-diagram.pdf){width=100%}
+
+
+
+
 ## Acquiring environmental data
 Load up the relevant libraries:
 ```{r, eval = FALSE}
@@ -39,18 +46,12 @@ library(tidyverse)
 library(neonSoilFlux)
 ```
 
-Let's say we want to acquire the NEON soil data at the `SJER` [site](https://www.neonscience.org/field-sites/sjer) during the month June in 2021:
+Let's say we want to acquire the NEON soil data at the `SJER` [site](https://www.neonscience.org/field-sites/sjer) during the month June in 2022:
 ```{r, eval=FALSE}
 out_env_data <- acquire_neon_data(site_name = 'SJER',
-                  download_date = '2021-06',
+                  download_date = '2022-06',
                   )
 ```
-
-The output `out_env_data` for `acquire_neon_data` is a list of lists:
-
-- The first element is `site_data`, a nested data frame containing measurements for the required flux gradient model during the given time period.
-- The second element is `site_megapit`, a nested frame containing specific information about soils at the site (for bulk density calculations, etc)
-
 
 Two required inputs are needed to run the function acquire_neon_data:
 
@@ -64,7 +65,7 @@ As the data are acquired various messages from the `loadByProduct` function from
 Outputs for `acquire_neon_data` are two nested data frames:
 
 - `site_data` This contains three variables: the measurement name (one of `soilCO2concentration`, `VSWC` (soil water content), `soilTemp` (soil temperature), and `staPres` (atmospheric pressure)), `monthly_mean` contains the mean value of the measurement at each horizontal and vertical depth.  We compute the monthly mean using a bootstapped technique.  `data` which contains the stacked variables acquired from neonUtilities - the horizontal and vertial positions, timestamp (in UTC), associated values, the QF flag (0 = pass, 1 = fail, [LINK](https://www.neonscience.org/data-samples/data-management/data-quality-program))
-- `site_megapit`: the nested data frame of the soil sampling data, found here (LINK).  This data table is essential what is reported back from acquiring the data product from NEON.
+- `site_megapit`: the nested data frame of the soil sampling data, found here [LINK](https://doi.org/10.48443/S6ND-Q840).  This data table is essential what is reported back from acquiring the data product from NEON.
 
 
 ### Data preparation
@@ -116,14 +117,40 @@ The resulting data frame `out_fluxes` has the following variables:
 
 - `startDateTime`: Time period of measurement (as POSIXct)
 - `horizontalPosition`: Sensor location where flux is computed
-- `flux_compute`: A nested tibble with variables (1) `flux`, `flux_err`, and `method` (one of 4 implemented)
-- `diffusivity`: Computation of surface diffusivity
+- `flux_compute`: A nested tibble with variables (1) `flux`, `flux_err`, and `method` (one of 4 implemented - see below).
+- `surface_diffusivity`: Computation of surface diffusivity (see below)
+- `soilCO2concentrationMeanQF`: QF flag for soil CO2 concentration across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 - `VSWCMeanQF`: QF flag for soil water content across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 - `soilTempMeanQF`: QF flag for soil temperature across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
-- `soilCO2concentrationMeanQF`: QF flag for soil CO2 concentration across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
+
 - `staPresMeanQF`: QF flag for atmospheric pressure across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 
 A QF measurement fails when there is a monthly mean could not be computed for a measurement. Note that this would cause **all** flux calculations to fail at that given horizontal position.
+
+The nested data frame `flux_compute` has the following structure:
+
+- `diffus_method`: The type of diffusivity used to compute fluxes. Currently implemented are "Marshall" or "Millington-Quirk"
+- `flux`: The calculated soil flux ($\mu$mol m^-2^ s^−1^)
+- `flux_err`: The calculated flux error (by quadrature)
+- `gradient`: The computed CO~2~ flux gradient ($\mu$mol m^-3^ m^{−1}^)
+- `gradient_error`: The computed CO~2~ flux gradient error (by quadrature)
+- `method`: Each site had three measurement layers, so we denote the flux as a three-digit subscript $F_{ijk}$ with indicator variables $i$, $j$, and $k$ indicate if a given layer was used (written in order of increasing depth), according to the following:
+
+  | -   F~000~ ("000") is a surface flux estimate using the intercept of the linear regression of $D_{a}$ with depth and the slope from the linear regression of CO~2~ with depth (which represents $\displaystyle \frac{dC}{dz}$ in Fick's Law)..
+  | -   F~110~ ("110") is a flux estimate across the two shallowest measurement layers.
+  | -   F~011~ ("011") is a flux estimate across the two deepest measurement layers.
+  | -   F~101~ ("101") is a flux estimate across the shallowest and deepest measurement layers.
+
+  | For F~110~, F~011~, and F~101~, the diffusivity used in Fick's Law is always at the deeper measurement layer. When used as a surface flux estimate we assume CO~2~ remains constant above this flux depth.
+
+- `r2`: The R^2^ value from the linear regression for F~000~.  Otherwise it is `NA`.
+
+The nested data frame `surface_diffusivity` has the following structure:
+
+- `zOffset`: The depth that diffusivity is computed at.
+- `diffusivity`: The calculated soil flux ($\mu$mol m^-2^ s^{−1}^)
+- `diffusExpUncert`: The calculated diffusivity uncertainty (by quadrature)
+- `diffus_method`: The type of diffusivity used to compute fluxes. Currently implemented are "Marshall" or "Millington-Quirk"
 
 ### Assessing Environmental QF flags
 You can see the distribution the QF flags for each environmental measurement with `env_fingerprint_plot`:
@@ -138,11 +165,23 @@ env_fingerprint_plot(out_fluxes)
 - "Fail" means that no measurement was available. This occurs if there is not sufficient data to compute the monthly mean.  When a measurement fails it usually will be for the entire month.
 
 ### Assessing flux QF flags
-Similarly, you can see the distribution of QF flags for each diffusivity and flux computation with `flux_fingerprint_plot`:
+Similarly, you can see the distribution of QF flags for each diffusivity and flux computation with `flux_fingerprint_plot`. Because there are two different diffusivity implemented ("Marshall" or "Millington-Quirk"), that option needs to be passed to `flux_fingerprint_plot`:
 
 ```{r, eval = FALSE}
-flux_fingerprint_plot(out_fluxes)
+# Fingerprint plot for Marshall method:
+flux_fingerprint_plot(
+  input_fluxes = out_fluxes,
+  input_diffus_method = "Marshall")
+
+# Fingerprint plot for Marshall method:
+flux_fingerprint_plot(
+  input_fluxes = out_fluxes,
+  input_diffus_method = "Millington-Quirk")
+
 ```
+
+(The default method is `"Marshall"`).
+
 
 #### Explanation of QF check values:
 - "Pass" means that for the given timepoint, the computed flux measurement was not NA or positive (the sign of the derived flux conformed to expectations). Monthly means could be used in the computation.
@@ -154,7 +193,7 @@ To plot the flux results:
 
 ```{r, eval=FALSE}
 out_fluxes |>
-  select(-diffusivity) |>
+  select(-surface_diffusivity) |>
   unnest(cols=c(flux_compute)) |>
   ggplot(aes(x=startDateTime,y=flux,color=method)) +
     geom_line() +
@@ -166,7 +205,7 @@ The diffusivity can be plotted similarly:
 ```{r, eval=FALSE}
 out_fluxes |>
   select(-flux_compute) |>
-  unnest(cols=c(diffusivity)) |>
+  unnest(cols=c(surface_diffusivity)) |>
   ggplot(aes(x=startDateTime,y=diffusivity,color=as.factor(zOffset))) +
   geom_line() +
   facet_wrap(~horizontalPosition,scales = "free_y")  
