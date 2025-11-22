@@ -1,5 +1,8 @@
 # neonSoilFlux 3.0.0
 
+* 11.30.2025 Updates to coincide with the release of `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, to be published in *Methods in Ecology and Evolution*. We addressed noted issues tracked on the `neonSoilFlux` github page. 
+
+
 # neonSoilFlux 2.0.0
 
 * 08.23.2025 Updates to package to improve internal efficiency and standardized naming of output fluxes based on the soil levels where the flux is computed.

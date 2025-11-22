@@ -26,16 +26,16 @@ A datatble of SWC corrections to remove step changes in soil water content measu
   \item CVALA1: calibration coefficient a
   \item CVALA2: calibration coefficient b
   \item CVALA3: calibration coefficient c
-  \item CVALR1: (?) unused calibration coefficient
-  \item CVALR2: (?) unused calibration coefficient
-  \item U_CVALA1: calibration coefficient for expanded uncertainty a
-  \item U_CVALA2: calibration coefficient for expanded uncertainty b
-  \item U_CVALA3: calibration coefficient for expanded uncertainty c
-  \item CVALO1: categorical variable, only value "n"
-  \item CVALS1: (?) start and ending date?
-  \item CVALS2: (?) start and ending date?
-  \item remarks: any comments about the site
-  \item CVALC1: (?) processing date
+  \item CVALR1: revision control
+  \item CVALR2: failed file
+  \item U_CVALA1: soil moisture combined uncertainty
+  \item U_CVALA2: soil moisture repeatability
+  \item U_CVALA3: soil moisture combined uncertainty (truth and trueness only)
+  \item CVALO1: coefficients manually overridden (Y/N)
+  \item CVALS1: start date for the soil specific calibration
+  \item CVALS2: end date for the soil specific calibration, NA if no end date is defined
+  \item remarks: any comments about the soil specific calibration information
+  \item CVALC1: information build date
 }
 }
 \keyword{datasets}

@@ -32,7 +32,7 @@ We split these two functions in order to optimize time and that both were fundam
 
 This package takes the guess work out of which data products to collect, hoping to reduce the workflow needed.  We rely very much on the `tidyverse` philosophy for computation and coding here.
 
-An overview of the package is also presented in [`neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes](https://doi.org/10.1111/2041-210x.70216).
+An overview of the package is also presented in `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, published in *Methods in Ecology and Evolution*.
 
 ![Model diagram of the data workflow for the `neonSoilFlux` R package.  a) **Acquire:** Data are obtained for a given NEON location and horizontal sensor location, which includes soil water content, soil temperature, CO$_{2}$ concentration, and atmospheric pressure. All data are screened for quality assurance; if gap-filling of missing data occurs, it is flagged for the user. b) **Harmonize:** Any belowground data are then harmonized to the same depth as CO~2~ concentrations using linear regression. c) **Compute:** The flux across a given depth is computed via Fick's law, denoted with F~ijk~, where $i$, $j$, or $k$ are either 0 or 1 denoting the layers the flux is computed across ($i$ = closest to surface, $k$ = deepest). F~000~ represents a flux estimate where the gradient $dC/dz$ is the slope of a linear regression of CO~2~ with depth.](model-diagram.pdf){width=100%}
 

@@ -20,7 +20,7 @@ To analyze fluxes once the package is installed requires a two step process:
 
 2. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
 ` out_env_data <- acquire_neon_data(site_name = 'SJER',
-                  download_date = '2021-06',
+                  download_date = '2022-06',
                   ) `
 
 3. Then process and compute fluxes.
@@ -46,6 +46,7 @@ The National Ecological Observatory Network is a program sponsored by the Nation
   * Courtney Leung (Northwestern University)
  - 2024: Refinement to include a gapfilling routine from Zoey Werbin at Boston University as well as additional calculations of the soil flux via different approaches in Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July): 78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
  - 05.2024 Renaming of pacakge to neonSoilFlux from NEONSoils and associated updates to prepare for CRAN submission.
+ - 11.2025 Update to improve efficiency and to coincide with publications of `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, published in *Methods in Ecology and Evolution*
 
 
 ## License
