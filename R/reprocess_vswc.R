@@ -22,7 +22,7 @@
 
 
 
-reprocess_vswc <- function(site_name,download_date) {
+reprocess_vswc <- function(site_name,download_date,token=NULL) {
 
 
   .data = NULL  # Appease R CMD Check
@@ -35,8 +35,11 @@ reprocess_vswc <- function(site_name,download_date) {
   #neonBoulded60Cal <- NA
   #neonCal <- NA
 
+  # Check for a NEON API token and warn if missing
+  token_local <- get_neon_api_token(token)
+
   # download the data
-  swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001", site=site_name, startdate=download_date, enddate=download_date, package="expanded", timeIndex="30", check.size=F, nCores=3,include.provisional = TRUE)
+  swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001", site=site_name, startdate=download_date, enddate=download_date, package="expanded", timeIndex="30", check.size=F, nCores=3,include.provisional = TRUE,token = token_local)
 
 
   #list2env(swc, .GlobalEnv)

@@ -7,6 +7,7 @@
 #' Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
+#' @param token NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
 #' @param provisional Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
 
@@ -25,6 +26,7 @@
 
 acquire_neon_data <- function(site_name,
                               download_date,
+                              token = NULL,
                               time_frequency = "30_minute",
                               provisional = FALSE) {
 
@@ -32,13 +34,14 @@ acquire_neon_data <- function(site_name,
   # changelog and author contributions / copyrights
   #   John Zobitz (2021-07-22)
   #     original creation
-  #     update to fix auto download (2021-07-25)
+  #     2021-07-25: update to fix auto download
   #     2022-06-10: update to correct flags on swc
   #     2024-04-08: update to get namespaces correct
   #     2024-04-10: update to get the swc depths corrected
   #     2024-04-23: update to allow provisional data
   #     2024-05-23: update to prepare for CRAN submission
   #     2024-11-20: update for SWC correction
+  #     2026-05-31: update to include API key
 
   .data = NULL  # Appease R CMD Check
 
@@ -53,11 +56,15 @@ acquire_neon_data <- function(site_name,
   # Extract out the download time
   download_time <- stringr::str_extract(time_frequency,pattern="^[:digit:]+(?=_)")
 
+  # Check for a NEON API token and warn if missing
+  token_local <- get_neon_api_token(token)
+
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
                                                package="expanded",
                                                check.size = FALSE,
+                                               token = token_local,
                                                include.provisional = provisional)
 
 
@@ -68,6 +75,7 @@ acquire_neon_data <- function(site_name,
                                             timeIndex = download_time,
                                             package="expanded",
                                             check.size = FALSE,
+                                            token = token_local,
                                             include.provisional = provisional)
 
 
@@ -80,6 +88,7 @@ acquire_neon_data <- function(site_name,
   #                                          timeIndex = download_time,
   #                                          package="expanded",
   #                                          check.size = FALSE,
+  #                                          token = token_local,
   #                                          include.provisional = provisional)
   # Then correct the swc
   site_swc <- reprocess_vswc(site_name,download_date)
@@ -105,6 +114,7 @@ acquire_neon_data <- function(site_name,
                                              timeIndex = download_time,
                                              package="expanded",
                                              check.size = FALSE,
+                                             token = token_local,
                                              include.provisional = provisional)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
@@ -113,6 +123,7 @@ acquire_neon_data <- function(site_name,
                                            enddate=download_date,
                                            timeIndex = download_time,
                                            package="expanded",
+                                           token = token_local,
                                            include.provisional = provisional,
                                            check.size = FALSE)
 
