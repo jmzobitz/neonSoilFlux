@@ -1,10 +1,8 @@
 #' Check to see if a NEON api token is installed
 #' @description This function check in a NEON API token exists in your \code{.Renviron} file so it can be called securely without being stored in your code.
-#' @param key The API token provided to you from the Census formated in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}
-#' @param install if TRUE, will install the key in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
-#' @param overwrite If this is set to TRUE, it will overwrite an existing NEON_API_TOKEN that you already have in your \code{.Renviron} file.
+#' @param token The API token provided to you from the Census formated in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}
 #' @seealso [neon_api_token()]
-#' @importFrom stringr str_wrap
+
 
 #' @export
 
