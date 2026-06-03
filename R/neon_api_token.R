@@ -6,7 +6,6 @@
 #' @param install if TRUE, will install the token in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
 #' @param overwrite If this is set to TRUE, it will overwrite an existing NEON_TOKEN that you already have in your \code{.Renviron} file.
 #' @seealso [get_neon_api_token()]
-#' @importFrom utils write.table read.table
 #' @examples
 #'
 #' \dontrun{
@@ -46,9 +45,9 @@ neon_api_token <- function(token, overwrite = FALSE, install = FALSE){
     else{
       if(isTRUE(overwrite)){
         message("Your original .Renviron will be backed up and stored in your R HOME directory if needed.")
-        oldenv=read.table(renv, stringsAsFactors = FALSE)
+        oldenv=utils::read.table(renv, stringsAsFactors = FALSE)
         newenv <- oldenv[-grep("NEON_API_TOKEN", oldenv),]
-        write.table(newenv, renv, quote = FALSE, sep = "\n",
+        utils::write.table(newenv, renv, quote = FALSE, sep = "\n",
                     col.names = FALSE, row.names = FALSE)
       }
       else{

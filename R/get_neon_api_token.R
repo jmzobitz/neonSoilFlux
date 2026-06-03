@@ -4,7 +4,6 @@
 #' @param install if TRUE, will install the key in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
 #' @param overwrite If this is set to TRUE, it will overwrite an existing NEON_API_TOKEN that you already have in your \code{.Renviron} file.
 #' @seealso [neon_api_token()]
-#' @importFrom utils write.table read.table
 #' @importFrom stringr str_wrap
 
 #' @export

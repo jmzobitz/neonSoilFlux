@@ -4,7 +4,7 @@
 \alias{reprocess_vswc}
 \title{Internal helper function to reprocess SWC data from calibration data}
 \usage{
-reprocess_vswc(site_name, download_date)
+reprocess_vswc(site_name, download_date, token = NULL)
 }
 \arguments{
 \item{site_name}{Required. NEON code for a particular site (a string)}

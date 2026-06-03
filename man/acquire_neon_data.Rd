@@ -7,6 +7,7 @@
 acquire_neon_data(
   site_name,
   download_date,
+  token = NULL,
   time_frequency = "30_minute",
   provisional = FALSE
 )
@@ -15,6 +16,8 @@ acquire_neon_data(
 \item{site_name}{Required. NEON code for a particular site (a string)}
 
 \item{download_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only}
+
+\item{token}{NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.}
 
 \item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
 

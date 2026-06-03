@@ -18,7 +18,7 @@ compute_monthly_mean(
 \item{position_columns}{Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
 }
 \value{
-A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
+A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation, along with other
 }
 \description{
 Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
