@@ -1,33 +1,56 @@
 # neonSoilFlux
-neonSoilFlux is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method. 
-
-An online applet for visualization at select NEON sites is found [here](https://jmzobitz.shinyapps.io/NEON-soil-fluxes/)
+`neonSoilFlux` is a repository code to acquire, tidy, and compute soil respiration fluxes at NEON sites using the flux-gradient method. 
 
 ## Installation 
 Installation in R through:
 
-- CRAN: `install.packages(neonSoilFlux)`
+- CRAN: `install.packages("neonSoilFlux")`
 - Github using the devtools package:
 
-`devtools::install_github("jmzobitz/neonSoilFlux", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"),force=TRUE)`
+```r
+devtools::install_github("jmzobitz/neonSoilFlux", 
+                          build = TRUE, 
+                          build_opts = c("--no-resave-data", "--no-manual"),
+                          force=TRUE
+                          )
+```
 
 If you encounter problems with code in this repository, feel free to post an [issue](https://github.com/jmzobitz/neonSoilFlux/issues).
 
 ## Usage
 To analyze fluxes once the package is installed requires a two step process:
 
-1. Load up the tidyverse and lubridate libraries (`library(tidyverse)` and `library(lubridate)`.  We are heavily making use of `dplyr` and `purrr`, so this should get you covered.
+1. Get an API token from NEON. Instructions on how to do that are here: [https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup](https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup)
 
-2. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.
-` out_env_data <- acquire_neon_data(site_name = 'SJER',
+2. Set your API token in your local R environment:
+
+```r
+neonSoilFlux::neon_api_token("YOUR_TOKEN_HERE", install = TRUE)
+```
+
+Then your token will be saved automatically when downloading data from NEON.
+
+3. First acquire the NEON data, following conventions of `loadByProduct` function in the `neonUtilities` package.  We will use the data located at the [San Joaquin Experimental Range terrestrial site](https://www.neonscience.org/field-sites/sjer) and compute fluxes from June 2022.  You can also consult [NEON's map of all sites](https://www.neonscience.org/field-site-map-and-info) to explore data from a terrestrial site of your choosing.
+
+```r
+library(tidyverse)  # Make sure dplyr, purrr, and lubridate are installed
+library(neonUtilities)  # 
+
+out_env_data <- acquire_neon_data(site_name = 'SJER',
                   download_date = '2022-06',
                   ) `
+```
 
-3. Then process and compute fluxes.
-` out_fluxes <- compute_neon_flux(input_site_env = out_env_data$site_data,
+What will be returned is a nested list containing `site_data` (monthly variables needed to compute fluxes) and `site_megapit` (soil properties)
+
+3. Next process and compute fluxes at this site:
+
+```r 
+
+out_fluxes <- compute_neon_flux(input_site_env = out_env_data$site_data,
                   input_site_megapit = out_env_data$site_megapit
                   ) `
-
+```
 
 You now have a data frame of computed fluxes.
 
@@ -47,6 +70,7 @@ The National Ecological Observatory Network is a program sponsored by the Nation
  - 2024: Refinement to include a gapfilling routine from Zoey Werbin at Boston University as well as additional calculations of the soil flux via different approaches in Maier, M., and H. Schack-Kirchner. 2014. “Using the Gradient Method to Determine Soil Gas Flux: A Review.” Agricultural and Forest Meteorology 192–193 (July): 78–95. https://doi.org/10.1016/j.agrformet.2014.03.006.
  - 05.2024 Renaming of pacakge to neonSoilFlux from NEONSoils and associated updates to prepare for CRAN submission.
  - 11.2025 Update to improve efficiency and to coincide with publications of `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, published in *Methods in Ecology and Evolution*
+ - 06.2026 Update (V4.0.0) to include NEON API token support.
 
 
 ## License
