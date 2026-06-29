@@ -1,5 +1,7 @@
 # Run down of code used to install and test package
 
+# source('data-raw/flux_process.R')  ## update datasets.  Make sure we don't need to update documentation
+
 urlchecker::url_check()
 
 devtools::build()

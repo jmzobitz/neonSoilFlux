@@ -5,11 +5,11 @@
 #' \itemize{
 #' \item startDateTime: Time period of measurement (as POSIXct)
 #' \item horizontalPosition: Sensor location where flux is computed
-#' \item flux_compute: A nested tibble with variables (1) flux, flux_err, and method (one of 4 implemented)
-#' \item diffusivity: Computation of surface diffusivity
+#' \item flux_compute: A nested tibble with variables: flux, flux_err, gradient, gradient_err, method (one of 4 implemented), and r2 of the linear fit for method 000
+#' \item surface_diffusivity: Computation of surface diffusivity. A nexted tibble with variables: zOffset, diffusivity, diffusivityExpUncert, diffus_method
+#' \item soilCO2concentrationMeanQF: QF flag for soil CO2 concentration across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 #' \item VSWCMeanQF: QF flag for soil water content across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 #' \item soilTempMeanQF: QF flag for soil temperature across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
-#' \item soilCO2concentrationMeanQF: QF flag for soil CO2 concentration across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 #' \item staPresMeanQF: QF flag for atmospheric pressure across all vertical depths at the given horizontal position: 0 = no issues, 1 = monthly mean used in measurement, 2 = QF fail
 #' }
 #'
