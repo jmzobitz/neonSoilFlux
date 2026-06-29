@@ -10,13 +10,17 @@
 #' @param time_horizon Required. How many unique days do we need each month?
 #' @param position_columns Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.
 
-#' @return A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
+#' @return A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation, along with other
 
 
 #' @keywords Currently none
 
 #' @examples
-#' \donttest{
+#' \dontrun{
+#' # Test to see if you have a NEON API token installed in your local environment.
+#' # If you don't have one, an error message will report a website for access.
+#' neon_token <- get_neon_api_token()
+#'
 #' # Download the NEON data directly - here this would be soil moisture
 #' NEON_moist_30m_orig <- neonUtilities::loadByProduct(
 #'   dpID = "DP1.00094.001",
@@ -26,7 +30,8 @@
 #'   timeIndex = "30",
 #'   package = "expanded",
 #'   check.size = FALSE,
-#'   include.provisional = TRUE
+#'   include.provisional = TRUE,
+#'   token = neon_token
 #' )
 #'
 #'
@@ -85,9 +90,9 @@ compute_monthly_mean <- function(NEON_data,
         dplyr::slice_max(.data[["n"]]) |>
         dplyr::pull(zOffset) # Take the max tally of the different depths (if there are any)
 
+        n_days <- length(unique(input_data$day))  # number of days we are computing the mean
 
-
-      if (length(unique(input_data$day)) >= time_horizon) {
+      if (n_days >= time_horizon) {
         col_names <- names(input_data)
 
         tsY <- dplyr::pull(input_data, var = which(stringr::str_detect(col_names, "[^StdEr]Mean$"))) # 30-min means
@@ -120,9 +125,9 @@ compute_monthly_mean <- function(NEON_data,
         simple_sd <- stats::sd(tsY, na.rm = T)
 
 
-        out_tibble <- tibble::tibble(comp_mean, comp_sd, simple_mean, simple_sd, zOffset)
+        out_tibble <- tibble::tibble(comp_mean, comp_sd, simple_mean, simple_sd, zOffset, n_days)
       } else {
-        out_tibble <- tibble::tibble(comp_mean = NA, comp_sd = NA, simple_mean = NA, simple_sd = NA, zOffset)
+        out_tibble <- tibble::tibble(comp_mean = NA, comp_sd = NA, simple_mean = NA, simple_sd = NA, zOffset,n_days)
       }
 
       return(out_tibble)

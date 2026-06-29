@@ -20,7 +20,13 @@ A revised list of corrected soil water content and depths.
 Given the expanded SWC data, return a corrected version based on the values below
 }
 \examples{
-\donttest{
+\dontrun{
+# Test to see if you have a NEON API token installed in your local environment.
+# If you don't have one, an error message will report a website for access.
+neon_token <- get_neon_api_token()
+
+# If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+
 # Download the soil water content data:
 site_swc <- neonUtilities::loadByProduct(
 dpID="DP1.00094.001",
@@ -30,7 +36,8 @@ enddate="2020-05",
 timeIndex = "30",
 package="expanded",
 check.size = FALSE,
-include.provisional = TRUE
+include.provisional = TRUE,
+token = neon_token
 )
 
 # Then correct the swc:

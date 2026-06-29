@@ -1,0 +1,87 @@
+meta <- list(
+  Encoding = "UTF-8"
+)
+
+# ---- Primary Citation (The Package/Article) ----
+
+citHeader("To cite neonSoilFlux in publications, please use:")
+
+bibentry(
+  bibtype = "Article",
+  key = "neonSoilFlux_article",
+  title = "{neonSoilFlux}: An R package for continuous sensor-based estimation of soil {.co2} fluxes",
+  author = c(
+    person("John", "Zobitz", role = "aut"),
+    person("Edward", "Ayres", role = "aut"),
+    person("Zoey", "Werbin", role = "aut"),
+    person("Ridwan", "Abdi", role = "aut"),
+    person("Natalie", "Ashburner-Wright", role = "aut"),
+    person("Lillian", "Brown", role = "aut"),
+    person("Ryan", "Frink-Sobierajski", role = "aut"),
+    person("Lajntxiag", "Lee", role = "aut"),
+    person("Dijonë", "Mehmeti", role = "aut"),
+    person("Christina", "Tran", role = "aut"),
+    person("Ly", "Xiong", role = "aut"),
+    person("Naupaka", "Zimmerman", role = "aut")
+  ),
+  journal = "Methods in Ecology and Evolution",
+  year = "2026",
+  doi = "10.1111/2041-210X.70216",
+  textVersion = paste0(
+    "Zobitz, J., Ayres, E., Werbin, Z., Abdi, R., Ashburner-Wright, N., ",
+    "Brown, L., Frink-Sobierajski, R., Lee, L., Mehmeti, D., Tran, C., ",
+    "Xiong, L., & Zimmerman, N. (2026). neonSoilFlux: An R package for ",
+    "continuous sensor-based estimation of soil CO2 fluxes. Methods in ",
+    "Ecology and Evolution. https://doi.org/10.1111/2041-210X.70216"
+  )
+)
+
+# ---- Secondary Citations (NEON Data Products) ----
+
+citFooter(
+  paste(
+    "This package relies on data products from the National Ecological",
+    "Observatory Network (NEON). When appropriate, please also cite",
+    "the specific NEON data products used in your analysis.",
+    "Replace RELEASE-XXXX with the specific NEON data release used,",
+    "which can be identified at:",
+    "https://data.neonscience.org/data-products/explore\n\n",
+    "Data product citations:"
+  )
+)
+
+bibentry(
+  bibtype = "Misc",
+  key = "NEON_DP1_00095_001",
+  author = person(given = "NEON (National Ecological Observatory Network)", role = "aut"),
+  year = "2026",
+  title = "Soil {.co2} concentration (DP1.00095.001), RELEASE-2026",
+  doi = "10.48443/1yrz-jm64"
+)
+
+bibentry(
+  bibtype = "Misc",
+  key = "NEON_DP1_00094_001",
+  author = person(given = "NEON (National Ecological Observatory Network)", role = "aut"),
+  year = "2026",
+  title = "Soil water content and water salinity (DP1.00094.001), RELEASE-2026",
+  doi = "10.48443/h349-2y77"
+)
+
+bibentry(
+  bibtype = "Misc",
+  key = "NEON_DP1_00041_001",
+  author = person(given = "NEON (National Ecological Observatory Network)", role = "aut"),
+  year = "2026",
+  title = "Soil temperature (DP1.00041.001), RELEASE-2026",
+  doi = "10.48443/zwvk-ph71"
+)
+
+bibentry(
+  bibtype = "Misc",
+  key = "NEON_DP1_00096_001",
+  author = person(given = "NEON (National Ecological Observatory Network)", role = "aut"),
+  year = "2026",
+  title = "Soil physical and chemical properties, Megapit (DP1.00096.001), RELEASE-2026",
+  doi = "10.48443/8g8n-e297"
+)

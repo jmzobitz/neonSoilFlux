@@ -32,7 +32,8 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    rlang
+    rlang,
+    utils
 Suggests: 
     knitr,
     rmarkdown

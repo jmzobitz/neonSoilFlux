@@ -1,8 +1,10 @@
 # Run down of code used to install and test package
 
+urlchecker::url_check()
+
 devtools::build()
 
-devtools::install()
+devtools::install(build_vignettes = TRUE)
 
 devtools::document()
 
@@ -13,5 +15,8 @@ devtools::check(remote = TRUE, manual = TRUE)
 
 devtools::check_win_devel()
 
-# urlchecker::url_check()
+# If that fails, you can try:
+# devtools::check(cran = TRUE)
+
+
 

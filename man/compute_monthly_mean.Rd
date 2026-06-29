@@ -18,13 +18,17 @@ compute_monthly_mean(
 \item{position_columns}{Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.}
 }
 \value{
-A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
+A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation, along with other
 }
 \description{
 Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
 }
 \examples{
-\donttest{
+\dontrun{
+# Test to see if you have a NEON API token installed in your local environment.
+# If you don't have one, an error message will report a website for access.
+neon_token <- get_neon_api_token()
+
 # Download the NEON data directly - here this would be soil moisture
 NEON_moist_30m_orig <- neonUtilities::loadByProduct(
   dpID = "DP1.00094.001",
@@ -34,7 +38,8 @@ NEON_moist_30m_orig <- neonUtilities::loadByProduct(
   timeIndex = "30",
   package = "expanded",
   check.size = FALSE,
-  include.provisional = TRUE
+  include.provisional = TRUE,
+  token = neon_token
 )
 
 

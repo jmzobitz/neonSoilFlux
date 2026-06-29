@@ -20,7 +20,15 @@ This file takes data frame from acquire_neon_data and:
 }
 \examples{
 \donttest{
-# Note: you may need to first aqcuire the NEON data using acquire_neon_data
+# This example uses an existing dataset from SJER in 2022-06
+# bundled with the package, from this code:
+# out_env_data <- acquire_neon_data(
+# site_name = 'SJER',
+# download_date = '2022-06'
+# )
+# sjer_env_data_2022_06 <- out_env_data$site_data
+# sjer_megapit_data_2022_06 <- out_env_data$site_megapit
+
 # Now correct existing environmental data:
 corrected_data <- correct_env_data(sjer_env_data_2022_06)
 }

@@ -7,11 +7,18 @@
 #' Apply correct calibration data functions for SWC data - see https://data.neonscience.org/data-products/DP1.00094.001
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
+#' @param token NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
 
 #' @return A data frame of startDateTime, horizontalPosition, and the associated QF flag.
 
 #' @examples
-#' \donttest{
+#' \dontrun{
+#' # Test to see if you have a NEON API token installed in your local environment.
+#' # If you don't have one, an error message will report a website for access.
+#' get_neon_api_token()
+#'
+#' # If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+#'
 #' out_swc <- reprocess_vswc("SJER","2022-06")
 #' }
 
@@ -22,7 +29,7 @@
 
 
 
-reprocess_vswc <- function(site_name,download_date) {
+reprocess_vswc <- function(site_name,download_date,token=NULL) {
 
 
   .data = NULL  # Appease R CMD Check
@@ -35,8 +42,11 @@ reprocess_vswc <- function(site_name,download_date) {
   #neonBoulded60Cal <- NA
   #neonCal <- NA
 
+  # Check for a NEON API token and warn if missing
+  token_local <- get_neon_api_token(token)
+
   # download the data
-  swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001", site=site_name, startdate=download_date, enddate=download_date, package="expanded", timeIndex="30", check.size=F, nCores=3,include.provisional = TRUE)
+  swc <- neonUtilities::loadByProduct(dpID="DP1.00094.001", site=site_name, startdate=download_date, enddate=download_date, package="expanded", timeIndex="30", check.size=F, nCores=3,include.provisional = TRUE,token = token_local)
 
 
   #list2env(swc, .GlobalEnv)

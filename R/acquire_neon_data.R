@@ -7,13 +7,22 @@
 #' Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
-#' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
-#' @param provisional Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
+#' @param token NEON API token. Required to download data. Defaults to NULL. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
+#' @param time_frequency Required. Defaults to 30 minutes. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data?
+#' @param provisional Required. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}). Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}.
+#' @param depth_chop Required. Defaults to NULL (all levels) Determine if you want to only take measurement levels that are closest to the surface. This will filter all measurement levels above the integer depth provided.  The provided number must be greater than 4 (top 4 levels).
 
 #'
 #' @examples
-#' \donttest{
-#' out_env_data <- acquire_neon_data("SJER","2022-06")
+#' \dontrun{
+#'
+#' # Test to see if you have a NEON API token installed in your local environment.
+#' # If you don't have one, an error message will report a website for access.
+#' get_neon_api_token()
+#'
+#' # If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+#'
+#' out_env_data <- acquire_neon_data(site_name = 'SJER',download_date = '2022-06')
 #' }
 
 
@@ -25,22 +34,35 @@
 
 acquire_neon_data <- function(site_name,
                               download_date,
+                              token = NULL,
                               time_frequency = "30_minute",
-                              provisional = FALSE) {
+                              provisional = FALSE,
+                              depth_chop = NULL) {
 
 
   # changelog and author contributions / copyrights
   #   John Zobitz (2021-07-22)
   #     original creation
-  #     update to fix auto download (2021-07-25)
+  #     2021-07-25: update to fix auto download
   #     2022-06-10: update to correct flags on swc
   #     2024-04-08: update to get namespaces correct
   #     2024-04-10: update to get the swc depths corrected
   #     2024-04-23: update to allow provisional data
   #     2024-05-23: update to prepare for CRAN submission
   #     2024-11-20: update for SWC correction
+  #     2026-05-31: update to include API key
 
   .data = NULL  # Appease R CMD Check
+
+  # Validate depth_chop
+  if (!is.null(depth_chop) && depth_chop < 4) {
+    stop(
+      "`depth_chop` must be at least 4 - otherwise you are only averaging across the top layers (not recommended). ",
+      "Values less than 4 are not allowed.",
+      call. = FALSE
+    )
+  }
+
 
   # Define the columns that we are plucking from each dataset:
   column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
@@ -53,11 +75,15 @@ acquire_neon_data <- function(site_name,
   # Extract out the download time
   download_time <- stringr::str_extract(time_frequency,pattern="^[:digit:]+(?=_)")
 
+  # Check for a NEON API token and warn if missing
+  token_local <- get_neon_api_token(token)
+
 
   site_megapit <- neonUtilities::loadByProduct(dpID="DP1.00096.001",
                                                site=site_name,
                                                package="expanded",
                                                check.size = FALSE,
+                                               token = token_local,
                                                include.provisional = provisional)
 
 
@@ -68,6 +94,7 @@ acquire_neon_data <- function(site_name,
                                             timeIndex = download_time,
                                             package="expanded",
                                             check.size = FALSE,
+                                            token = token_local,
                                             include.provisional = provisional)
 
 
@@ -80,6 +107,7 @@ acquire_neon_data <- function(site_name,
   #                                          timeIndex = download_time,
   #                                          package="expanded",
   #                                          check.size = FALSE,
+  #                                          token = token_local,
   #                                          include.provisional = provisional)
   # Then correct the swc
   site_swc <- reprocess_vswc(site_name,download_date)
@@ -105,6 +133,7 @@ acquire_neon_data <- function(site_name,
                                              timeIndex = download_time,
                                              package="expanded",
                                              check.size = FALSE,
+                                             token = token_local,
                                              include.provisional = provisional)
 
   site_co2 <- neonUtilities::loadByProduct(dpID="DP1.00095.001",
@@ -113,6 +142,7 @@ acquire_neon_data <- function(site_name,
                                            enddate=download_date,
                                            timeIndex = download_time,
                                            package="expanded",
+                                           token = token_local,
                                            include.provisional = provisional,
                                            check.size = FALSE)
 
@@ -191,6 +221,24 @@ acquire_neon_data <- function(site_name,
     # Apply monthly means - we adjust the monthly mean here to allow for a looser threshold.
     pressure_monthly_mean <- compute_monthly_mean(pressure,time_horizon = 10)
 
+    if (!is.null(depth_chop)) {
+      # Filter on depth_chop
+      depths <- co2$verticalPosition |>
+        unique() |>
+        sort() |>
+        utils::head(depth_chop)
+
+      co2 <- co2 |>
+        dplyr::filter(.data[["verticalPosition"]] %in% depths)
+
+      swc <- swc |>
+        dplyr::filter(.data[["verticalPosition"]] %in% depths)
+
+      temperature <- temperature |>
+        dplyr::filter(.data[["verticalPosition"]] %in% depths)
+    }
+
+
 
     # Put everything in a nested data frame
     site_data <- tibble::tibble(
@@ -198,6 +246,9 @@ acquire_neon_data <- function(site_name,
       data = list(co2,swc,temperature,pressure),
       monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean)) |>
       dplyr::mutate(data = purrr::map(.x=.data[["data"]],.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(.data[["startDateTime"]],tzone="UTC"))))) # Make sure the time zone stamp is in universal time
+
+
+
 
     return(list(site_data=site_data,site_megapit=site_megapit))
 
