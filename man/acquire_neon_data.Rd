@@ -9,7 +9,8 @@ acquire_neon_data(
   download_date,
   token = NULL,
   time_frequency = "30_minute",
-  provisional = FALSE
+  provisional = FALSE,
+  depth_chop = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ acquire_neon_data(
 \item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
 
 \item{provisional}{Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).}
+
+\item{depth_chop}{Required. Determine if you want to only take measurement levels that are closest to the surface. This will filter all measurement levels}
 }
 \value{
 A list containing stacked environmental data (`site_data`) and soil properties (`site_megapit`).

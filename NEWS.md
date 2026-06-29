@@ -1,3 +1,8 @@
+# neonSoilFlux 4.0.0
+
+* 06.30.2026 Updates to coincide with the release of `neonUtilities` v4.0, which now requires API tokens. We addressed noted issues tracked on the `neonSoilFlux` github page. 
+
+
 # neonSoilFlux 3.0.0
 
 * 11.30.2025 Updates to coincide with the release of `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, to be published in *Methods in Ecology and Evolution*. We addressed noted issues tracked on the `neonSoilFlux` github page. 

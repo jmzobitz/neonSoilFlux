@@ -10,6 +10,7 @@
 #' @param token NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
 #' @param time_frequency Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.
 #' @param provisional Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).
+#' @param depth_chop Required. Determine if you want to only take measurement levels that are closest to the surface. This will filter all measurement levels
 
 #'
 #' @examples
@@ -28,7 +29,8 @@ acquire_neon_data <- function(site_name,
                               download_date,
                               token = NULL,
                               time_frequency = "30_minute",
-                              provisional = FALSE) {
+                              provisional = FALSE,
+                              depth_chop = NULL) {
 
 
   # changelog and author contributions / copyrights
@@ -44,6 +46,16 @@ acquire_neon_data <- function(site_name,
   #     2026-05-31: update to include API key
 
   .data = NULL  # Appease R CMD Check
+
+  # Validate depth_chop
+  if (!is.null(depth_chop) && depth_chop < 4) {
+    stop(
+      "`depth_chop` must be at least 4 - otherwise you are only averaging across the top layers (not recommended). ",
+      "Values less than 4 are not allowed.",
+      call. = FALSE
+    )
+  }
+
 
   # Define the columns that we are plucking from each dataset:
   column_selectors = c("Mean","Minimum","Maximum","ExpUncert","StdErMean")
@@ -202,6 +214,24 @@ acquire_neon_data <- function(site_name,
     # Apply monthly means - we adjust the monthly mean here to allow for a looser threshold.
     pressure_monthly_mean <- compute_monthly_mean(pressure,time_horizon = 10)
 
+    if (!is.null(depth_chop)) {
+      # Filter on depth_chop
+      depths <- co2$verticalPosition |>
+        unique() |>
+        sort() |>
+        utils::head(depth_chop)
+
+      co2 <- co2 |>
+        dplyr::filter(verticalPosition %in% depths)
+
+      swc <- swc |>
+        dplyr::filter(verticalPosition %in% depths)
+
+      temperature <- temperature |>
+        dplyr::filter(verticalPosition %in% depths)
+    }
+
+
 
     # Put everything in a nested data frame
     site_data <- tibble::tibble(
@@ -209,6 +239,9 @@ acquire_neon_data <- function(site_name,
       data = list(co2,swc,temperature,pressure),
       monthly_mean = list(co2_monthly_mean,swc_monthly_mean,temperature_monthly_mean,pressure_monthly_mean)) |>
       dplyr::mutate(data = purrr::map(.x=.data[["data"]],.f=~(.x |> dplyr::mutate(startDateTime = lubridate::force_tz(.data[["startDateTime"]],tzone="UTC"))))) # Make sure the time zone stamp is in universal time
+
+
+
 
     return(list(site_data=site_data,site_megapit=site_megapit))
 

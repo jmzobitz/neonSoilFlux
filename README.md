@@ -20,7 +20,7 @@ If you encounter problems with code in this repository, feel free to post an [is
 ## Usage
 To analyze fluxes once the package is installed requires a two step process:
 
-1. Get an API token from NEON. Instructions on how to do that are here: [https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup](https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup)
+1. Get an API token from NEON. Instructions on how to do that are here: [https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup](https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup).
 
 2. Set your API token in your local R environment:
 
@@ -34,11 +34,12 @@ Then your token will be saved automatically when downloading data from NEON.
 
 ```r
 library(tidyverse)  # Make sure dplyr, purrr, and lubridate are installed
-library(neonUtilities)  # 
+library(neonUtilities)  # Used for acquiring NEON data
+library(neonSoilFlux)
 
 out_env_data <- acquire_neon_data(site_name = 'SJER',
-                  download_date = '2022-06',
-                  ) `
+                  download_date = '2022-06'
+                  )
 ```
 
 What will be returned is a nested list containing `site_data` (monthly variables needed to compute fluxes) and `site_megapit` (soil properties)
@@ -49,7 +50,7 @@ What will be returned is a nested list containing `site_data` (monthly variables
 
 out_fluxes <- compute_neon_flux(input_site_env = out_env_data$site_data,
                   input_site_megapit = out_env_data$site_megapit
-                  ) `
+                  )
 ```
 
 You now have a data frame of computed fluxes.

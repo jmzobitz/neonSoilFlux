@@ -7,6 +7,7 @@
 #' Apply correct calibration data functions for SWC data - see https://data.neonscience.org/data-products/DP1.00094.001
 #' @param site_name Required. NEON code for a particular site (a string)
 #' @param download_date Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only
+#' @param token NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
 
 #' @return A data frame of startDateTime, horizontalPosition, and the associated QF flag.
 
