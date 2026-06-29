@@ -1,6 +1,6 @@
 # neonSoilFlux 4.0.0
 
-* 06.30.2026 Updates to coincide with the release of `neonUtilities` v4.0, which now requires API tokens. We addressed noted issues tracked on the `neonSoilFlux` github page. 
+* 06.29.2026 Updates to coincide with the release of `neonUtilities` v4.0, which now requires API tokens. We addressed noted issues tracked on the `neonSoilFlux` github page. 
 
 
 # neonSoilFlux 3.0.0
