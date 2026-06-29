@@ -10,6 +10,8 @@ reprocess_vswc(site_name, download_date, token = NULL)
 \item{site_name}{Required. NEON code for a particular site (a string)}
 
 \item{download_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only}
+
+\item{token}{NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.}
 }
 \value{
 A data frame of startDateTime, horizontalPosition, and the associated QF flag.
@@ -20,7 +22,13 @@ A list containing stacked swc data
 Apply correct calibration data functions for SWC data - see https://data.neonscience.org/data-products/DP1.00094.001
 }
 \examples{
-\donttest{
+\dontrun{
+# Test to see if you have a NEON API token installed in your local environment.
+# If you don't have one, an error message will report a website for access.
+get_neon_api_token()
+
+# If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+
 out_swc <- reprocess_vswc("SJER","2022-06")
 }
 }

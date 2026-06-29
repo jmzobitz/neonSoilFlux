@@ -2,13 +2,15 @@
 #' @description This function checks if a NEON API token exists in your \code{.Renviron} file so it can be called securely without being stored in your code.
 #' @param token The API token provided to you from the NEON formatted in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}
 #' @seealso [neon_api_token()]
+#' @examples
+#' get_neon_api_token()
 
 
 #' @export
 
 
 # Check to see if a NEON API token is installed
-get_neon_api_token <- function(token) {
+get_neon_api_token <- function(token = NULL) {
 
 
   # changelog and author contributions / copyrights

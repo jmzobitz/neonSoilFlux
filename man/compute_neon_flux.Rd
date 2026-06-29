@@ -26,12 +26,26 @@ This file takes a saved data file from acquire:
 }
 \examples{
 \donttest{
- # First acquire the NEON data at a given NEON site
-out_env_data <- acquire_neon_data("SJER","2020-05")
+# Test to see if you have a NEON API token installed in your local environment.
+# If you don't have one, an error message will report a website for access.
+get_neon_api_token()
+
+# If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+# Downloading data is through the function neonSoilFlux::acquire_neon_data().
+# This example uses an existing dataset from SJER in 2022-06
+# bundled with the package, from this code:
+# out_env_data <- acquire_neon_data(
+# site_name = 'SJER',
+# download_date = '2022-06'
+# )
+# sjer_env_data_2022_06 <- out_env_data$site_data
+# sjer_megapit_data_2022_06 <- out_env_data$site_megapit
 
 # Then process and compute the fluxes:
- out_flux <- compute_neon_flux(input_site_env = sjer_env_data_2022_06,
- input_site_megapit = sjer_megapit_data_2022_06)
+ out_flux <- compute_neon_flux(
+ input_site_env = sjer_env_data_2022_06,
+ input_site_megapit = sjer_megapit_data_2022_06
+ )
 }
 }
 \author{

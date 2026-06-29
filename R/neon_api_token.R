@@ -9,7 +9,7 @@
 #' @examples
 #'
 #' \dontrun{
-#' neon_api_token("111111abc", install = TRUE)
+#' neon_api_token("YOUR_TOKEN_HERE", install = TRUE)
 #' # First time, reload your environment so you can use the key without restarting R.
 #' readRenviron("~/.Renviron")
 #' # You can check it with:

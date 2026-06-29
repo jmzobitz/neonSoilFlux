@@ -18,13 +18,13 @@ acquire_neon_data(
 
 \item{download_date}{Required. Date where we end getting NEON data. Format: YYYY-MM (can't specify day).  So "2020-05" means it will grab data for the entire 5th month of 2020. (a string). Downloads data for a given month only}
 
-\item{token}{NEON API token. Required to download data. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.}
+\item{token}{NEON API token. Required to download data. Defaults to NULL. The function [neon_api_token()] will install it locally to your R environment. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.}
 
-\item{time_frequency}{Required. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data? Defaults to 30 minutes.}
+\item{time_frequency}{Required. Defaults to 30 minutes. Will you be using 30 minute ("30_minute") or 1 minute ("1_minute") recorded data?}
 
-\item{provisional}{Required. Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}).}
+\item{provisional}{Required. Defaults to FALSE (similar to include.provisional in \link[neonUtilities]{loadByProduct}). Should you use provisional data when downloading? Defaults to FALSE. See \href{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}{NEON Data Releases}.}
 
-\item{depth_chop}{Required. Determine if you want to only take measurement levels that are closest to the surface. This will filter all measurement levels}
+\item{depth_chop}{Required. Defaults to NULL (all levels) Determine if you want to only take measurement levels that are closest to the surface. This will filter all measurement levels above the integer depth provided.  The provided number must be greater than 4 (top 4 levels).}
 }
 \value{
 A list containing stacked environmental data (`site_data`) and soil properties (`site_megapit`).
@@ -33,8 +33,15 @@ A list containing stacked environmental data (`site_data`) and soil properties (
 Given a site code and dates, apply the neonUtilities package to download the data from NEON API
 }
 \examples{
-\donttest{
-out_env_data <- acquire_neon_data("SJER","2022-06")
+\dontrun{
+
+# Test to see if you have a NEON API token installed in your local environment.
+# If you don't have one, an error message will report a website for access.
+get_neon_api_token()
+
+# If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+
+out_env_data <- acquire_neon_data(site_name = 'SJER',download_date = '2022-06')
 }
 }
 \author{

@@ -2,7 +2,7 @@
 
 devtools::build()
 
-devtools::install()
+devtools::install(build_vignettes = TRUE)
 
 devtools::document()
 

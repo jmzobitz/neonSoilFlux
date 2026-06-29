@@ -12,7 +12,13 @@
 #' @return A data frame of startDateTime, horizontalPosition, and the associated QF flag.
 
 #' @examples
-#' \donttest{
+#' \dontrun{
+#' # Test to see if you have a NEON API token installed in your local environment.
+#' # If you don't have one, an error message will report a website for access.
+#' get_neon_api_token()
+#'
+#' # If no token exists, then see documentation for neonSoilFlux::neon_api_token()
+#'
 #' out_swc <- reprocess_vswc("SJER","2022-06")
 #' }
 

@@ -4,13 +4,16 @@
 \alias{get_neon_api_token}
 \title{Check to see if a NEON api token is installed}
 \usage{
-get_neon_api_token(token)
+get_neon_api_token(token = NULL)
 }
 \arguments{
 \item{token}{The API token provided to you from the NEON formatted in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}}
 }
 \description{
 This function checks if a NEON API token exists in your \code{.Renviron} file so it can be called securely without being stored in your code.
+}
+\examples{
+get_neon_api_token()
 }
 \seealso{
 [neon_api_token()]

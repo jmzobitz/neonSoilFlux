@@ -1,8 +1,8 @@
 ---
-title: "Introducing the neonSoilFlux package"
+title: "Using the neonSoilFlux package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{using-neonSoilFlux}
+  %\VignetteIndexEntry{Using the neonSoilFlux package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -32,7 +32,7 @@ We split these two functions in order to optimize time and that both were fundam
 
 This package takes the guess work out of which data products to collect, hoping to reduce the workflow needed.  We rely very much on the `tidyverse` philosophy for computation and coding here.
 
-An overview of the package is also presented in `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, published in [*Methods in Ecology and Evolution*](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210x.70216).
+An overview of the package is also presented in `neonSoilFlux`: An R Package for Continuous Sensor-Based Estimation of Soil CO~2~ Fluxes, published in [*Methods in Ecology and Evolution*](https://doi.org/10.1111/2041-210X.70216).
 
 ![Model diagram of the data workflow for the `neonSoilFlux` R package.  a) **Acquire:** Data are obtained for a given NEON location and horizontal sensor location, which includes soil water content, soil temperature, CO$_{2}$ concentration, and atmospheric pressure. All data are screened for quality assurance; if gap-filling of missing data occurs, it is flagged for the user. b) **Harmonize:** Any belowground data are then harmonized to the same depth as CO~2~ concentrations using linear regression. c) **Compute:** The flux across a given depth is computed via Fick's law, denoted with F~ijk~, where $i$, $j$, or $k$ are either 0 or 1 denoting the layers the flux is computed across ($i$ = closest to surface, $k$ = deepest). F~000~ represents a flux estimate where the gradient $dC/dz$ is the slope of a linear regression of CO~2~ with depth.](model-diagram.pdf){width=100%}
 
@@ -47,11 +47,12 @@ neonSoilFlux::neon_api_token("YOUR_TOKEN_HERE", install = TRUE)
 ```
 
 
-## Acquiring environmental data
+## Acquiring NEON environmental data
 Load up the relevant libraries:
 ```{r, eval = FALSE}
 library(tidyverse)
 library(neonSoilFlux)
+library(neonUtilities)
 ```
 
 Let's say we want to acquire the NEON soil data at the `SJER` [site](https://www.neonscience.org/field-sites/sjer) during the month June in 2022:
@@ -67,10 +68,11 @@ Two required inputs are needed to run the function acquire_neon_data:
 
 - NEON site name (a four digit code standard by NEON)
 - Download date, a string in the YYYY-MM format
-- Optional arguments include `time_frequency`, which is 30 minutes (the default) or the 1 minute data (currently untested) and if we download [provisional NEON data](https://www.neonscience.org/data-samples/data-management/data-revisions-releases).
+- Additional optional arguments are also 
+- Optional arguments are detailed in the section titled "Advanced Options"
 
 
-As the data are acquired various messages from the `loadByProduct` function from the `neonUtilities` package are shown - this is normal.  Products are acquired from each spatial location (`horizontalPosition`) or vertical depth (`verticalPosition`) at a NEON site
+As the data are acquired various messages from the `loadByProduct` function from the `neonUtilities` package are shown - this is normal.  Products are acquired from each spatial location (`horizontalPosition`) or vertical depth (`verticalPosition`) at a NEON site.
 
 Outputs for `acquire_neon_data` are two nested data frames:
 
@@ -83,23 +85,15 @@ For each data product, the `acquire_neon_data` function also performs two additi
 
 - The soil water content data product requires some additional calibration to correct both the soil sensor depth and calibration in the function `swc_correct`.  Information about regarding this correction is found here: [LINK](https://data.neonscience.org/data-products/DP1.00094.001). Once updated sensors are installed in the future we will depreciate this function.
 - The actual measurement depth (in meters) is extracted for each position.
-- The monthly mean for each measurement at each depth is computed, described below.
+- The monthly mean for each measurement at each depth is computed, described in the section titled "Computing the monthly mean".
 
+### Advanced options
+The function `acquire_neon_data` has additional input options that may be useful for your work:
 
-#### Computing the monthly mean
-
-The monthly mean is utilized when a given measurement fails final QF checks. This function is provided by [code](https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r) from [Zoey Werbin](https://github.com/zoey-rw).  At each replicate location (`horizontalPosition`) and soil depth, and a monthly mean is computed when there are at least 15 days of measurements.
-
-Assume you have a vector of measurements $\vec{y}$, standard errors $\vec{\sigma}$, and expanded uncertainty $\vec{\epsilon}$ (all of length $M$) that passes the QF checks in a given month. By definition, the expanded uncertainty $\vec{\epsilon}$ includes a [95% confidence interval](https://www.neonscience.org/data-samples/data-management/data-quality-program), so $\vec{\sigma}_{i}\leq\vec{\epsilon}_{i}$. Additionally, we define the bias $\vec{b}=\sqrt{\left(\vec{\epsilon}\right)^{2}-\left(\vec{\sigma}\right)^{2}}$ to be the quadrature difference between the expanded uncertainty and the standard error.
-
-
-We generate a bootstrap sample of the mean $\overline{y}$ and standard error $\overline{s}$ the following ways. For our cases we set the number of bootstrap samples $N$ to be 5000. Individual entries for $\overline{y}_{i}$ and $\overline{s}_{i}$ are determined by the following:
-
-1. Randomly sample from the uncertainty and bias independently: $\vec{\sigma}_{j}$ and the bias $\vec{b}_{k}$ (not necessarily the same sample)
-2. Generate $N$ random samples from a normal distribution with mean $\vec{y}$ and standard deviation $\vec{\sigma}_{j}$. Since $M<N$, `R` will recycle the vector $\vec{y}$ so that this sample is of length $M$. We will call the sample of $\vec{y}$ as $\vec{x}$.
-3. With these $N$ random samples, $\overline{y}_{i}=\overline{\vec{x}}+\vec{b}_{k}$ and $s_{i}$ is the sample standard deviation of $\vec{x}$. We expect that $s_{i} \approx \vec{\sigma}_{j}$.
-
-Once that is complete, the reported monthly mean and standard deviation is $\overline{\overline{y}}$ and $\overline{s}$.
+- `token`: The string of the NEON API token. The default is `NULL`, but you can supply a API token directly. Acquiring a NEON token is at [https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup](https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup).
+- `time_frequency` Will you be using 30 minute (`"30_minute"`) or 1 minute (`"1_minute"`) recorded data? The currently set default is 30 minutes.  1 minute data is implemented, but has not been sufficiently tested (and it also requires a lot of in-computer memory).
+- `provisional`: Should you use provisional data when downloading? This option is useful if you are accessing data that is not part of the most current [NEON data release](https://www.neonscience.org/data-samples/data-management/data-revisions-releases) (i.e. the current year). Defaults to FALSE.
+- `depth_chop`: This is useful if you want to only compute fluxes with measurement levels to a certain depth. There are typically 8 measurement levels below ground.  Currently set to `NULL` (all levels).  The provided integer must be greater than 4 (top 4 levels).
 
 ### Visualizing outputs
 With the resulting output from `acquire_neon_data`, you can then unnest the different data frames to make plots. The following code plots the timeseries of volumetric soil water content across all spatial locatios at SJER:
@@ -120,7 +114,25 @@ VSWC_data |>
 ```
 
 
-## Computing fluxes
+
+### Computing the monthly mean
+
+The monthly mean is utilized when a given measurement fails final QF checks. This function is provided by [code](https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r) from [Zoey Werbin](https://github.com/zoey-rw).  At each replicate location (`horizontalPosition`) and soil depth, and a monthly mean is computed when there are at least 15 days of measurements.
+
+Assume you have a vector of measurements $\vec{y}$, standard errors $\vec{\sigma}$, and expanded uncertainty $\vec{\epsilon}$ (all of length $M$) that passes the QF checks in a given month. By definition, the expanded uncertainty $\vec{\epsilon}$ includes a [95% confidence interval](https://www.neonscience.org/data-samples/data-management/data-quality-program), so $\vec{\sigma}_{i}\leq\vec{\epsilon}_{i}$. Additionally, we define the bias $\vec{b}=\sqrt{\left(\vec{\epsilon}\right)^{2}-\left(\vec{\sigma}\right)^{2}}$ to be the quadrature difference between the expanded uncertainty and the standard error.
+
+
+We generate a bootstrap sample of the mean $\overline{y}$ and standard error $\overline{s}$ the following ways. For our cases we set the number of bootstrap samples $N$ to be 5000. Individual entries for $\overline{y}_{i}$ and $\overline{s}_{i}$ are determined by the following:
+
+1. Randomly sample from the uncertainty and bias independently: $\vec{\sigma}_{j}$ and the bias $\vec{b}_{k}$ (not necessarily the same sample)
+2. Generate $N$ random samples from a normal distribution with mean $\vec{y}$ and standard deviation $\vec{\sigma}_{j}$. Since $M<N$, `R` will recycle the vector $\vec{y}$ so that this sample is of length $M$. We will call the sample of $\vec{y}$ as $\vec{x}$.
+3. With these $N$ random samples, $\overline{y}_{i}=\overline{\vec{x}}+\vec{b}_{k}$ and $s_{i}$ is the sample standard deviation of $\vec{x}$. We expect that $s_{i} \approx \vec{\sigma}_{j}$.
+
+Once that is complete, the reported monthly mean and standard deviation is $\overline{\overline{y}}$ and $\overline{s}$.
+
+
+
+## Computing soil CO2 fluxes
 Once we have `out_env_data` from `acquire_neon_flux`, we then compute the fluxes at this site:
 ```{r, eval=FALSE}
 out_fluxes <- compute_neon_flux(
@@ -184,7 +196,7 @@ The resulting plot has rows corresponding to the replicate plots (`horizontalPos
 - "Fail" means that no measurement was available. This occurs if there is not sufficient data to compute the monthly mean.  When a measurement fails it usually will be for the entire month.
 
 ### Assessing flux QF flags
-Similarly, you can see the distribution of QF flags for each diffusivity and flux computation with `flux_fingerprint_plot`. Because there are two different diffusivity implemented ("Marshall" or "Millington-Quirk"), that option needs to be passed to `flux_fingerprint_plot`:
+Similarly, you can see the distribution of QF flags for each diffusivity and flux computation with `flux_fingerprint_plot`. Because there are two different diffusivities implemented ("Marshall" or "Millington-Quirk"), that option needs to be passed to `flux_fingerprint_plot`:
 
 ```{r, eval = FALSE}
 # Fingerprint plot for Marshall method:
