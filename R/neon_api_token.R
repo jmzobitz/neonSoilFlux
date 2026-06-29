@@ -1,7 +1,7 @@
 #' Install a NEON API token in Your \code{.Renviron} File for repeated Use
 #' @description This function will add your NEON API token to your \code{.Renviron} file so it can be called securely without being stored in your code. After you have installed your key, it can be called any time by typing \code{Sys.getenv("NEON_TOKEN")} and can be used in package functions by simply typing NEON_TOKEN If you do not have an \code{.Renviron} file, the function will create on for you.
 #' If you already have an \code{.Renviron} file, the function will append the key to your existing file, while making a backup of your original file for disaster recovery purposes.
-#' This function was adapted from \code{census_api_key()} in the \code{tidycensus} library. \url{https://cran.r-project.org/web/packages/tidycensus/index.html}.
+#' This function was adapted from \code{census_api_key()} in the \code{tidycensus} library. \url{https://CRAN.R-project.org/package=tidycensus}.
 #' @param token The API token provided to you from the NEON formatted in quotes. A token can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}.
 #' @param install if TRUE, will install the token in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
 #' @param overwrite If this is set to TRUE, it will overwrite an existing NEON_TOKEN that you already have in your \code{.Renviron} file.
