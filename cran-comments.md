@@ -1,3 +1,10 @@
+## Re-Submission 26-06-30
+This resubmission fixes the get_neon_api_token() example to handle the absence of a NEON_TOKEN environment variable.
+
+### R CMD check results
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
 ## Submission 26-06-29
 Updates to include API support for accessing datasets and other lifecycle improvements.
 

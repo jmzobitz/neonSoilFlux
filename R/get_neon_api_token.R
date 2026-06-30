@@ -1,9 +1,15 @@
 #' Check to see if a NEON api token is installed
 #' @description This function checks if a NEON API token exists in your \code{.Renviron} file so it can be called securely without being stored in your code.
-#' @param token The API token provided to you from the NEON formatted in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}
+#' @param token The API token provided to you from the NEON formatted in quotes. A key can be acquired at \url{https://www.neonscience.org/resources/learning-hub/tutorials/api-token-setup}. If an input string is specified then the function will return it as output.
 #' @seealso [neon_api_token()]
 #' @examples
-#' get_neon_api_token()
+#' # Supply a token directly - what will be returned is the input.
+#' get_neon_api_token("example_token")
+#'
+#' # Or retrieve NEON stored in the environment
+#' if (nzchar(Sys.getenv("NEON_TOKEN"))) {
+#'   get_neon_api_token()
+#' }
 
 
 #' @export
