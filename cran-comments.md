@@ -1,4 +1,12 @@
 ## Re-Submission 26-06-30
+This resubmission that fixes the donttest error in compute_neon_flux to handle the absence of a NEON_TOKEN environment variable. All remaining donttrun examples need a valid API key to run.
+
+### R CMD check results
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+
+## Re-Submission 26-06-30
 This resubmission fixes the get_neon_api_token() example to handle the absence of a NEON_TOKEN environment variable.
 
 ### R CMD check results

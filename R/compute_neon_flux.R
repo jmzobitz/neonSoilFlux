@@ -19,10 +19,16 @@
 #'
 #' @examples
 #' \donttest{
-#' # Test to see if you have a NEON API token installed in your local environment.
-#' # If you don't have one, an error message will report a website for access.
-#' get_neon_api_token()
+#' # Test to see if you have a NEON API token installed
+#' # in your local environment.
+#' # Supply a token directly - what will be returned is the
+#' # input.
+#' # get_neon_api_token("example_token")
 #'
+#' # Or retrieve NEON stored in the environment
+#' # if (nzchar(Sys.getenv("NEON_TOKEN"))) {
+#' #  get_neon_api_token()
+#' # }
 #' # If no token exists, then see documentation for neonSoilFlux::neon_api_token()
 #' # Downloading data is through the function neonSoilFlux::acquire_neon_data().
 #' # This example uses an existing dataset from SJER in 2022-06

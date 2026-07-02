@@ -12,6 +12,8 @@ devtools::document()
 
 devtools::check(remote = TRUE, manual = TRUE)
 
+devtools::check(run_dont_test = TRUE)
+
 #revdepcheck::revdep_reset()
 #revdepcheck::revdep_check(num_workers = 4)
 
