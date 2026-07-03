@@ -1,3 +1,6 @@
+# neonSoilFlux 4.0.1
+* 07.02.26 Patch update to fix `donttest` checks on CRAN. This was a documentation fix.
+
 # neonSoilFlux 4.0.0
 
 * 06.29.2026 Updates to coincide with the release of `neonUtilities` v4.0, which now requires API tokens. We addressed noted issues tracked on the `neonSoilFlux` github page. 
