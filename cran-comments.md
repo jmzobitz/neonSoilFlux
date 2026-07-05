@@ -1,4 +1,11 @@
-## Re-Submission 26-07-32
+## Re-Submission 26-07-02
+This resubmission that increments the version number from 4.0.0 to 4.0.1 to remove the warning from additional CRAN checks
+
+### R CMD check results
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+## Re-Submission 26-07-02
 This resubmission that fixes the donttest error in compute_neon_flux to handle the absence of a NEON_TOKEN environment variable (valid API key). Other examples that require this environment variable are enclosed in a donttrun.
 
 ### R CMD check results

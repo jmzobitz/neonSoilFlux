@@ -10,6 +10,8 @@ devtools::install(build_vignettes = TRUE)
 
 devtools::document()
 
+devtools::check_win_devel()
+
 devtools::check(remote = TRUE, manual = TRUE)
 
 devtools::check(run_dont_test = TRUE)
@@ -17,7 +19,7 @@ devtools::check(run_dont_test = TRUE)
 #revdepcheck::revdep_reset()
 #revdepcheck::revdep_check(num_workers = 4)
 
-devtools::check_win_devel()
+#devtools::check_win_devel()
 
 # If that fails, you can try:
 # devtools::check(cran = TRUE)
