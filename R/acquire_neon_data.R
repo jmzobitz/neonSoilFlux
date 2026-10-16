@@ -51,7 +51,12 @@ acquire_neon_data <- function(site_name,
   #     2024-05-23: update to prepare for CRAN submission
   #     2024-11-20: update for SWC correction
   #     2026-05-31: update to include API key
-
+  
+  #Check if neonUtilities is currently loaded via library()
+  if (!("package:neonUtilities" %in% search())) {
+    stop("The 'neonUtilities' package has not been loaded. Please run library(neonUtilities) before executing this function.")
+  }
+  
   .data = NULL  # Appease R CMD Check
 
   # Validate depth_chop
